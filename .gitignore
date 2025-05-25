@@ -5,3 +5,6 @@ src/gen/
 __pycache__/
 .DS_STORE
 config.yaml
+tools/docker/step_ca/secrets/
+tools/docker/step_ca/certs/
+tools/docker/step_ca/step-ca.json

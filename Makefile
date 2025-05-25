@@ -14,7 +14,7 @@ run-prod:
 
 ## Discord
 discord-bot:
-	python src/interfaces/discord/bot.py
+	python src/ekaine/interfaces/discord/bot.py
 
 ## EDDN
 eddn-listener:
@@ -89,7 +89,7 @@ build: build_app
 ## Docker (Dev Only)
 
 pg-shell: # "Lightweight" PG shell for convenience
-	poetry run pgcli "postgresql://ekaine:ekaine_pw@localhost::${PG_PORT:-5432}/ekaine"
+	poetry run pgcli "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine"
 
 nuke-db:
 	docker stop ekaine_db

@@ -30,6 +30,21 @@ services:
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ./grafana/dashboards:/var/lib/grafana/dashboards
 
+  step-ca:
+    image: smallstep/step-ca:latest
+    container_name: step-ca
+    ports:
+      - "9000:9000"  # CA API
+    environment:
+      - DOCKER_STEPCA_INIT_NAME=ekaine-ca
+      - DOCKER_STEPCA_INIT_DNS_NAMES=localhost,db.ekaine.space
+      - DOCKER_STEPCA_INIT_PASSWORD_FILE=/home/step/secrets/password.txt
+    volumes:
+      - ./step_ca/secrets:/home/step/secrets:ro
+      - ./step_ca/certs:/home/step/certs
+      - ./step_ca/entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: /entrypoint.sh
+
   setup:
     container_name: ekaine_setup
     image: remiscarlet/ekaine
