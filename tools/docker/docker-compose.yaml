@@ -9,40 +9,39 @@ services:
       POSTGRES_PASSWORD: ekaine_pw
       POSTGRES_DB: ekaine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "ekaine"]
+      test: ["CMD-SHELL", "pg_isready", "-U", "ekaine", "-d", "ekaine"]
       interval: 10s
       timeout: 10s
       retries: 15
     ports: ["${PG_PORT:-5432}:5432"]
-    volumes: [pg-data:/home/postgres/pgdata]
-
-  grafana:
-    container_name: ekaine_grafana
-    image: grafana/grafana-enterprise
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports: [3000:3000]
+    networks: [ekaine_net]
     volumes:
-      - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - pg-data:/home/postgres/pgdata
+      - ./ekaine_ca/certs:/etc/postgresql/ssl:ro
+      - ./timescaledb/scripts/020_fix-perms.sh:/docker-entrypoint-initdb.d/020_fix-perms.sh
+      - ./timescaledb/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./timescaledb/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./timescaledb/conf/pg_ident.conf:/etc/postgresql/pg_ident.conf
+    command:
+      - bash
+      - -c
+      - exec postgres -c config_file=/etc/postgresql/postgresql.conf
 
-  step-ca:
-    image: smallstep/step-ca:latest
-    container_name: step-ca
-    ports:
-      - "9000:9000"  # CA API
+  smallstep-ca:
+    image: remiscarlet/ekaine_ca
+    container_name: ekaine_ca
+    ports: ["${SMALLSTEP_PORT:-9000}:9000"] # CA API
     environment:
       - DOCKER_STEPCA_INIT_NAME=ekaine-ca
-      - DOCKER_STEPCA_INIT_DNS_NAMES=localhost,db.ekaine.space
+      - DOCKER_STEPCA_INIT_DNS_NAMES=localhost,ca.ekaine.space
       - DOCKER_STEPCA_INIT_PASSWORD_FILE=/home/step/secrets/password.txt
     volumes:
-      - ./step_ca/secrets:/home/step/secrets:ro
-      - ./step_ca/certs:/home/step/certs
-      - ./step_ca/entrypoint.sh:/entrypoint.sh:ro
+      - ./ekaine_ca/config:/home/step/config
+      - ./ekaine_ca/secrets:/home/step/secrets:ro
+      - ./ekaine_ca/certs:/home/step/certs
+      - ./ekaine_ca/db:/home/step/db
+      - ./ekaine_ca/entrypoint.sh:/entrypoint.sh:ro
+    networks: [ekaine_net]
     entrypoint: /entrypoint.sh
 
   setup:
@@ -52,7 +51,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
+      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine?sslmode=disable # Talks locally through docker network
+    networks: [ekaine_net]
     entrypoint: ["bash", "-c", "pwd && ls -al && make setup-container && make hydrate-db"]
     restart: "no"
     volumes:
@@ -69,11 +69,12 @@ services:
       postgres:
         condition: service_healthy
       setup:
-       condition: service_completed_successfully
+        condition: service_completed_successfully
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     environment:
-      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
+      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine?sslmode=disable # Talks locally through docker network
     ports: [8000:8000]
+    networks: [ekaine_net]
     volumes:
       - ../../tools/:/app/tools
       - ../../src/:/app/src
@@ -81,4 +82,10 @@ services:
 
 volumes:
   pg-data:
-  grafana-data:
+
+networks:
+  ekaine_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.66.0.0/16

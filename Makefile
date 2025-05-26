@@ -1,5 +1,8 @@
 .PHONY: install setup download-spansh import-spansh run-pipeline lint lint-fix type check lint-fix-check download-eddn-models gen-eddn-models models
 
+CURRENT_UID=$(shell id -u)
+CURRENT_GID=$(shell id -g)
+
 ## Setup
 
 install:
@@ -84,7 +87,30 @@ build_app:
 		--tag='remiscarlet/ekaine' \
 		.
 
-build: build_app
+.PHONY: build_nginx
+build_nginx:
+	   docker build -f tools/docker/ekaine-nginx-proxy/Dockerfile \
+			   --no-cache \
+			   --build-arg HOST_UID=${CURRENT_UID} \
+			   --build-arg HOST_GID=${CURRENT_GID} \
+			   --tag='remiscarlet/ekaine-nginx-proxy' \
+			   .
+
+
+.PHONY: build_smallstep_ca
+build_smallstep_ca:
+	mkdir -p tools/docker/ekaine_ca/certs
+	mkdir -p tools/docker/ekaine_ca/config
+	mkdir -p tools/docker/ekaine_ca/db
+	mkdir -p tools/docker/ekaine_ca/secrets
+	docker build -f tools/docker/ekaine_ca/Dockerfile \
+			--no-cache \
+			--build-arg HOST_UID=${CURRENT_UID} \
+			--build-arg HOST_GID=${CURRENT_GID} \
+			--tag='remiscarlet/ekaine_ca' \
+			.
+
+build: build_app build_smallstep_ca build_nginx
 
 ## Docker (Dev Only)
 
@@ -96,6 +122,8 @@ nuke-db:
 	docker rm ekaine_db
 
 up:
+	mkdir -p tools/docker/step_ca/secrets
+	mkdir -p tools/docker/step_ca/certs
 	docker compose -f tools/docker/docker-compose.yaml up --build -d
 
 down:

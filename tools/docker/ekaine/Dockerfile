@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
     jq \
+    postgresql \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
