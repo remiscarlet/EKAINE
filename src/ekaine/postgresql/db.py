@@ -43,6 +43,12 @@ from gen.eddn_models import commodity_v3_0, journal_v1_0
 
 logger = get_logger(__name__)
 
+"""
+Ideally we can split these models out into their own files but doing so
+introduces circular dependencies on the imports because we each model name in the Mapped[T] typing
+(as well as occasionally in the join conditions)
+"""
+
 
 class BodiesDB(BaseModelWithId):
     unique_columns = ("system_id", "name", "body_id")
