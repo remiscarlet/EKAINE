@@ -94,7 +94,7 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
     except ValueError:
         logger.warning(
             "Encountered a faction we didn't know its FactionPresence about! "
-            f"System Controlling Faction Id '{system.controlling_faction_id}', System id: '{system.id}'"
+            f"Station Controlling Faction id '{station_faction.id}', System id: '{system.id}'"
         )
         return
 

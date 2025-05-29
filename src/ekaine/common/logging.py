@@ -30,9 +30,19 @@ LOGGING_CONFIG = {
         },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
+            "level": "TRACE",
             "formatter": "standard",
             "filename": str(LOG_DIR / "app.log"),
+            "mode": "a",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 5,
+            "encoding": "utf-8",
+        },
+        "warning-file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "WARNING",
+            "formatter": "standard",
+            "filename": str(LOG_DIR / "app-warnings.log"),
             "mode": "a",
             "maxBytes": 10 * 1024 * 1024,  # 10 MB
             "backupCount": 5,
@@ -41,7 +51,7 @@ LOGGING_CONFIG = {
     },
     "root": {
         "level": DEFAULT_LOG_LEVEL,
-        "handlers": ["console", "file"],
+        "handlers": ["console", "file", "warning-file"],
     },
 }
 
@@ -74,15 +84,10 @@ def configure_logger(level: int) -> None:
     root = logging.getLogger()
     root.setLevel(level)
 
-    for h in root.handlers:
-        h.setLevel(level)
-
     for name, logger in logging.root.manager.loggerDict.items():
         if not isinstance(logger, logging.Logger):
             continue
         logger.setLevel(level)
-        for h in logger.handlers:
-            h.setLevel(level)
 
     for name in [
         "sqlalchemy",
