@@ -1,4 +1,11 @@
 ---
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "10"
+
+
 services:
   postgres:
     container_name: ekaine_db
@@ -26,6 +33,7 @@ services:
       - bash
       - -c
       - exec postgres -c config_file=/etc/postgresql/postgresql.conf
+    logging: *default-logging
 
   smallstep-ca:
     image: remiscarlet/ekaine_ca
@@ -43,6 +51,7 @@ services:
       - ./ekaine_ca/entrypoint.sh:/entrypoint.sh:ro
     networks: [ekaine_net]
     entrypoint: /entrypoint.sh
+    logging: *default-logging
 
   setup:
     container_name: ekaine_setup
@@ -59,6 +68,7 @@ services:
       - ../../tools/:/app/tools
       - ../../src/:/app/src
       - ../../Makefile:/app/Makefile
+    logging: *default-logging
 
   app:
     container_name: ekaine_app
@@ -79,6 +89,7 @@ services:
       - ../../tools/:/app/tools
       - ../../src/:/app/src
       - ../../Makefile:/app/Makefile
+    logging: *default-logging
 
 volumes:
   pg-data:
