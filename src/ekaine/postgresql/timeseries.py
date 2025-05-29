@@ -73,7 +73,7 @@ class SignalsTimeseries(BaseModel):
     ) -> list[dict[str, Any]]:
         dicts = []
         for signal in model.message.signals:
-            if "Warzone_PointRace" in signal.SignalName:
+            if "Warzone_PointRace" in signal.SignalName or "Warzone_Powerplay" in signal.SignalName:
                 # Ignore for now - spammy
                 continue
             signal_name = get_symbol_by_eddn_name(signal.SignalName) or signal.SignalName

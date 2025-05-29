@@ -1,7 +1,9 @@
 import re
+import traceback
 from typing import Any, Type
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ekaine.common.logging import get_logger
@@ -43,10 +45,15 @@ def upsert_all[T: BaseModel](
         )
     )
 
-    results = session.scalars(stmt.returning(model), execution_options={"populate_existing": True})
-    session.commit()
+    try:
+        results = session.scalars(stmt.returning(model), execution_options={"populate_existing": True})
+        session.commit()
+        return list(iter(results.all()))
+    except SQLAlchemyError:
+        session.rollback()
+        logger.error(f"Transaction failed: {traceback.format_exc()}")
 
-    return list(iter(results.all()))
+    return []
 
 
 dollar_string_to_db_val_re = re.compile(r"\$\w+_(?P<val>.*)")

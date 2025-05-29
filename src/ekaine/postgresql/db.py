@@ -461,6 +461,13 @@ class MarketCommoditiesDB(BaseModelWithId):
                 )
                 continue
 
+            demand_bracket = (
+                commodity.demandBracket.value if commodity.demandBracket != commodity_v3_0.LevelType.field_ else -1
+            )
+            supply_bracket = (
+                commodity.stockBracket.value if commodity.stockBracket != commodity_v3_0.LevelType.field_ else -1
+            )
+
             dicts.append(
                 {
                     "station_id": station_id,
@@ -470,8 +477,8 @@ class MarketCommoditiesDB(BaseModelWithId):
                     "supply": commodity.stock,
                     "demand": commodity.demand,
                     "updated_at": eddn_model.message.timestamp,
-                    "demand_bracket": commodity.demandBracket.value,
-                    "supply_bracket": commodity.stockBracket.value,
+                    "demand_bracket": demand_bracket,
+                    "supply_bracket": supply_bracket,
                 }
             )
         return dicts
