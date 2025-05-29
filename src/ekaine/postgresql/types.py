@@ -3,7 +3,36 @@ from typing import Any
 
 from pydantic import BaseModel
 
-# TODO: Should these all be core models?
+
+# From: sql/views/derived_resolved_stations_view_v1.sql
+class ResolvedStationResult(BaseModel):
+    id: int
+    id64: int | None
+    id_spansh: int | None
+    id_edsm: int | None
+    name: str
+    owner_id: int
+    owner_type: str
+    allegiance: str | None
+    controlling_faction: str | None
+    controlling_faction_state: str | None
+    distance_to_arrival: float
+    economies: dict[str, float] | None
+    government: str | None
+    small_landing_pads: int
+    medium_landing_pads: int
+    large_landing_pads: int
+    primary_economy: str | None
+    services: list[str]
+    type: str
+    prohibited_commodities: list[str]
+    carrier_name: str | None
+    latitude: float | None
+    longitude: float | None
+    spansh_updated_at: datetime | None
+    edsm_updated_at: datetime | None
+    eddn_updated_at: datetime | None
+    system_id: int
 
 
 # From: sql/functions/api_get_hotspots_in_system_v1.sql

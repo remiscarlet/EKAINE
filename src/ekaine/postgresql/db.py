@@ -13,6 +13,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    SmallInteger,
     Text,
     UniqueConstraint,
     and_,
@@ -432,6 +433,9 @@ class MarketCommoditiesDB(BaseModelWithId):
     demand: Mapped[Optional[int]] = mapped_column(Integer)
     updated_at: Mapped[Optional[DateTime]] = mapped_column(DateTime)
 
+    demand_bracket: Mapped[Optional[int]] = mapped_column(SmallInteger)
+    supply_bracket: Mapped[Optional[int]] = mapped_column(SmallInteger)
+
     @staticmethod
     def to_dict_from_spansh(
         spansh_commodity: CommoditySpansh, station_id: int, commodity_sym: str, market_updated_at: datetime | None
@@ -466,6 +470,8 @@ class MarketCommoditiesDB(BaseModelWithId):
                     "supply": commodity.stock,
                     "demand": commodity.demand,
                     "updated_at": eddn_model.message.timestamp,
+                    "demand_bracket": commodity.demandBracket.value,
+                    "supply_bracket": commodity.stockBracket.value,
                 }
             )
         return dicts

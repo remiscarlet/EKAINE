@@ -7,11 +7,12 @@ from ekaine.common.logging import get_logger
 from ekaine.common.timer import Timer
 from ekaine.common.utils import dur_to_interval_str
 from ekaine.postgresql import SessionLocal
-from ekaine.postgresql.db import FactionsDB, StationsDB, SystemsDB
+from ekaine.postgresql.db import FactionPresencesDB, FactionsDB, SystemsDB
 from ekaine.postgresql.types import (
     HotspotResult,
     MiningAcquisitionResult,
     MiningReinforcementResult,
+    ResolvedStationResult,
     SystemResult,
     TopCommodityResult,
 )
@@ -173,12 +174,31 @@ class StationsAdapter:
     def __init__(self) -> None:
         self.session = SessionLocal()
 
-    def get_station(self, station_name: str) -> StationsDB:
-        query = select(StationsDB).where(StationsDB.name == station_name)
-        db_station = self.session.scalars(query).first()
-        if not db_station:
-            raise ValueError(f"Station '{station_name}' not found")
-        return db_station
+    def get_station(self, station_name: str, system_id: int) -> ResolvedStationResult:
+        stmt = text(
+            """select *
+                 from derived.resolved_stations_view
+                where name = :station_name
+                  and system_id = :system_id
+            """
+        )
+
+        result = self.session.execute(
+            stmt,
+            {
+                "station_name": station_name,
+                "system_id": system_id,
+            },
+        )
+
+        rows: Sequence[RowMapping] = result.mappings().all()
+
+        if len(rows) == 0:
+            raise ValueError(f"Could not find station with name '{station_name}' and system id '{system_id}'")
+        elif len(rows) > 1:
+            raise ValueError(f"Somehow got multiple stations with name '{station_name}' and system id '{system_id}'")
+
+        return ResolvedStationResult(**rows[0])
 
 
 class FactionsAdapter:
@@ -187,7 +207,21 @@ class FactionsAdapter:
 
     def get_faction(self, faction_name: str) -> FactionsDB:
         query = select(FactionsDB).where(FactionsDB.name == faction_name)
-        db_station = self.session.scalars(query).first()
-        if not db_station:
+        db_faction = self.session.scalars(query).first()
+        if not db_faction:
             raise ValueError(f"Faction '{faction_name}' not found")
-        return db_station
+        return db_faction
+
+
+class FactionPresencesAdapter:
+    def __init__(self) -> None:
+        self.session = SessionLocal()
+
+    def get_faction_presence(self, faction_id: int, system_id: int) -> FactionPresencesDB:
+        query = select(FactionPresencesDB).where(
+            FactionPresencesDB.faction_id == faction_id, FactionPresencesDB.system_id == system_id
+        )
+        db_presence = self.session.scalars(query).first()
+        if not db_presence:
+            raise ValueError(f"Faction Presence for faction '{faction_id}' in system '{system_id}' not found")
+        return db_presence

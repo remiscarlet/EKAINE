@@ -48,7 +48,7 @@ def get_module_from_schema(schema: str) -> ModuleType:
 # upsert for the station/system that needs to go through before we can upsert the market commodities themselves,
 # which have a FK on the stations table, ie station needs to be upserted first.
 processor_mapping: dict[type[Any], Callable[[Session, Any], None]] = {
-    commodity_v3_0.Model: processors.commodities_v3_0.process_model,
+    commodity_v3_0.Model: processors.commodity_v3_0.process_model,
     # approachsettlement_v1_0.Model: self.process_approachsettlement_v1_0,
     journal_v1_0.Model: processors.journal_v1_0.process_model,
     fsssignaldiscovered_v1_0.Model: processors.fsssignaldiscovered_v1_0.process_model,

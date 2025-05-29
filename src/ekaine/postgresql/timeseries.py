@@ -19,7 +19,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from ekaine.common.game_constants import get_symbol_by_eddn_name
 from ekaine.common.logging import get_logger
 from ekaine.postgresql import BaseModel
-from gen.eddn_models import fsssignaldiscovered_v1_0, journal_v1_0
+from ekaine.postgresql.db import FactionPresencesDB
+from gen.eddn_models import commodity_v3_0, fsssignaldiscovered_v1_0, journal_v1_0
 
 logger = get_logger(__name__)
 
@@ -333,3 +334,78 @@ class SystemsTimeseries(BaseModel):
 
     def __repr__(self) -> str:
         return f"<SystemsTimeseries(id={self.id}, name={self.name})>"
+
+
+class MarketCommodityFactionStateTimeseries(BaseModel):
+    # This models timeseries information about market commodity prices,
+    # their relative price to galactic average, and the state of the station's controlling faction
+    # This hopes to gather empiral data on the effects of Faction states, particularly the combination of multiple
+    # active states, to commodity prices.
+
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "market_commodity_faction_state"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "timescaledb"},
+    )
+
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
+
+    system_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    system_controlling_faction_id: Mapped[int] = mapped_column("sy_cf_id", Integer, nullable=False)
+    system_controlling_faction_state: Mapped[str] = mapped_column("sy_cf_state", Text, nullable=False)
+    system_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
+        "sy_cf_active_states", ARRAY(Text), nullable=True
+    )
+
+    station_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    station_controlling_faction_id: Mapped[int] = mapped_column("st_cf_id", Integer, nullable=False)
+    station_controlling_faction_state: Mapped[str] = mapped_column("st_cf_state", Text, nullable=False)
+    station_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
+        "st_cf_active_states", ARRAY(Text), nullable=True
+    )
+
+    commodity_sym: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Multiplifer versus galactic average
+    sell_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
+    buy_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
+
+    @staticmethod
+    def to_dicts_from_eddn(
+        eddn_model: commodity_v3_0.Model,
+        system_id: int,
+        station_id: int,
+        system_controlling_faction: FactionPresencesDB,
+        station_controlling_faction: FactionPresencesDB,
+    ) -> list[dict[str, Any]]:
+        dicts = []
+        for commodity in eddn_model.message.commodities:
+            commodity_sym = get_symbol_by_eddn_name(commodity.name)
+            if commodity_sym is None:
+                logger.warning(
+                    f"Encountered a commodity in an EDDN Commodity model we didn't know about! Got: '{commodity.name}'"
+                )
+                continue
+
+            buy_price_multiplier = commodity.buyPrice / commodity.meanPrice if commodity.meanPrice else -1
+            sell_price_multiplier = commodity.sellPrice / commodity.meanPrice if commodity.meanPrice else -1
+
+            dicts.append(
+                {
+                    "timestamp": eddn_model.message.timestamp,
+                    "system_id": system_id,
+                    "system_controlling_faction_id": system_controlling_faction.id,
+                    "system_controlling_faction_state": system_controlling_faction.state,
+                    "system_controlling_faction_active_states": system_controlling_faction.active_states,
+                    "station_id": station_id,
+                    "station_controlling_faction_id": station_controlling_faction.id,
+                    "station_controlling_faction_state": station_controlling_faction.state,
+                    "station_controlling_faction_active_states": station_controlling_faction.active_states,
+                    "commodity_sym": commodity_sym,
+                    "buy_price_multiplier": buy_price_multiplier,
+                    "sell_price_multiplier": sell_price_multiplier,
+                }
+            )
+        return dicts

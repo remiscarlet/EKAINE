@@ -1,5 +1,5 @@
 from . import (
-    commodities_v3_0,
+    commodity_v3_0,
     fssbodysignals_v1_0,
     fsssignaldiscovered_v1_0,
     journal_v1_0,
@@ -7,7 +7,7 @@ from . import (
 
 __all__ = [
     "journal_v1_0",
-    "commodities_v3_0",
+    "commodity_v3_0",
     "fssbodysignals_v1_0",
     "fsssignaldiscovered_v1_0",
 ]

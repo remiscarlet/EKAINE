@@ -110,7 +110,7 @@ build_smallstep_ca:
 			--tag='remiscarlet/ekaine_ca' \
 			.
 
-build: build_app build_smallstep_ca build_nginx
+build: build_app build_smallstep_ca
 
 ## Docker (Dev Only)
 
