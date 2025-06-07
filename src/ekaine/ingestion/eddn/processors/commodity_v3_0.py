@@ -8,7 +8,7 @@ from ekaine.postgresql.adapter import (
     SystemsAdapter,
 )
 from ekaine.postgresql.db import MarketCommoditiesDB
-from ekaine.postgresql.timeseries import MarketCommodityFactionStateTimeseries
+from ekaine.postgresql.timeseries import RawMarketCommodityFactionStateTimeseries
 from ekaine.postgresql.utils import upsert_all
 from gen.eddn_models import commodity_v3_0
 
@@ -53,11 +53,11 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         "[Market Commodities DB Updated] " f"{msg.systemName} - {station_name} - {len(msg.commodities)} Commodities"
     )
 
-    # MarketCommodityFactionStateTimeseries
+    # RawMarketCommodityFactionStateTimeseries
 
     if system.controlling_faction_id is None:
         logger.warning(
-            "Tried saving a MarketCommodityFactionStateTimeseries for a system with no controlling faction! "
+            "Tried saving a RawMarketCommodityFactionStateTimeseries for a system with no controlling faction! "
             f"System: '{system_name}'"
         )
         return
@@ -75,7 +75,7 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
 
     if station.controlling_faction is None:
         logger.warning(
-            "Tried saving a MarketCommodityFactionStateTimeseries for a station with no controlling faction! "
+            "Tried saving a RawMarketCommodityFactionStateTimeseries for a station with no controlling faction! "
             f"Station: '{station}'"
         )
         return
@@ -98,7 +98,7 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         )
         return
 
-    commodity_faction_state_dicts = MarketCommodityFactionStateTimeseries.to_dicts_from_eddn(
+    commodity_faction_state_dicts = RawMarketCommodityFactionStateTimeseries.to_dicts_from_eddn(
         model,
         system.id,
         station.id,
@@ -106,6 +106,6 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         station_controlling_faction,
     )
 
-    upsert_all(session, MarketCommodityFactionStateTimeseries, commodity_faction_state_dicts)
+    upsert_all(session, RawMarketCommodityFactionStateTimeseries, commodity_faction_state_dicts)
 
     logger.info("[Market Commodity Faction State Timeseries Updated] " f"{msg.systemName} - {station_name}")

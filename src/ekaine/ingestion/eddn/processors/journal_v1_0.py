@@ -8,9 +8,9 @@ from ekaine.common.logging import get_logger
 from ekaine.postgresql.adapter import FactionsAdapter, SystemsAdapter
 from ekaine.postgresql.db import FactionPresencesDB, SystemsDB
 from ekaine.postgresql.timeseries import (
-    FactionPresencesTimeseries,
-    PowerConflictProgressTimeseries,
-    SystemsTimeseries,
+    RawFactionPresencesTimeseries,
+    RawPowerConflictProgressTimeseries,
+    RawSystemsTimeseries,
 )
 from ekaine.postgresql.utils import upsert_all
 from gen.eddn_models import journal_v1_0
@@ -55,8 +55,8 @@ def process_system_entities(
         raise RuntimeError("Upserted a system but got no object back!")
     system = systems[0]
 
-    system_dict = SystemsTimeseries.to_dict_from_eddn(model, system.id, controlling_faction_id)
-    upsert_all(session, SystemsTimeseries, [system_dict])
+    system_dict = RawSystemsTimeseries.to_dict_from_eddn(model, system.id, controlling_faction_id)
+    upsert_all(session, RawSystemsTimeseries, [system_dict])
 
 
 def process_faction_entities(
@@ -64,10 +64,10 @@ def process_faction_entities(
 ) -> None:
     """Process Factions related entries from the journal-v1.0 EDDN event"""
     faction_presence_dicts = FactionPresencesDB.to_dicts_from_eddn(model, system.id, faction_id_mapping)
-    faction_presence_ts_dicts = FactionPresencesTimeseries.to_dicts_from_eddn(model, system.id, faction_id_mapping)
+    faction_presence_ts_dicts = RawFactionPresencesTimeseries.to_dicts_from_eddn(model, system.id, faction_id_mapping)
     try:
         upsert_all(session, FactionPresencesDB, faction_presence_dicts)
-        upsert_all(session, FactionPresencesTimeseries, faction_presence_ts_dicts)
+        upsert_all(session, RawFactionPresencesTimeseries, faction_presence_ts_dicts)
     except Exception:
         logger.warning(traceback.format_exc())
         logger.warning(pformat(faction_presence_dicts))
@@ -88,11 +88,11 @@ def process_faction_entities(
 
 def process_powerplay_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
     """Process Powerplay related entries from the journal-v1.0 EDDN event"""
-    power_conflict_progress_dicts = PowerConflictProgressTimeseries.to_dicts_from_eddn(model, system.id)
+    power_conflict_progress_dicts = RawPowerConflictProgressTimeseries.to_dicts_from_eddn(model, system.id)
 
     if power_conflict_progress_dicts:
         try:
-            upsert_all(session, PowerConflictProgressTimeseries, power_conflict_progress_dicts)
+            upsert_all(session, RawPowerConflictProgressTimeseries, power_conflict_progress_dicts)
         except Exception:
             logger.warning(traceback.format_exc())
             logger.warning(pformat(power_conflict_progress_dicts))
@@ -110,11 +110,11 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
 
     Updates:
     - SystemsDB
-    - SystemsTimeseries
+    - RawSystemsTimeseries
     - FactionPresencesDB
-    - FactionPresencesTimeseries
+    - RawFactionPresencesTimeseries
     - SignalsTimeseries
-    - PowerConflictProgressTimeseries
+    - RawPowerConflictProgressTimeseries
 
     TODO: Split based on event type:
     - Docked
@@ -304,7 +304,7 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         return
 
     event_name = model.message.event.value
-    logger.trace(f"Processing event {event_name}")
+    logger.trace(f"Processing event {event_name} in {system_name}")
 
     faction_id_mapping = model_to_faction_name_to_id_mapping(model)
     # Handle SystemsDB updates

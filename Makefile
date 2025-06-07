@@ -10,6 +10,8 @@ install:
 
 setup: install install-models up alembic-upgrade
 setup-container: install-models alembic-upgrade
+	mkdir -p app_logs
+	mkdir -p setup_logs
 
 # Also need to create config.yaml and optionally .env PG_PORT override file
 run-prod:
@@ -151,8 +153,6 @@ alembic-revision:
 download-eddn-models:
 	mkdir -p data
 	git clone https://github.com/EDCD/EDDN.git -b live data/eddn/ 2>/dev/null || true
-	ls -al .
-	ls -al data
 	git -C data/eddn pull
 
 gen-eddn-models:
@@ -175,4 +175,6 @@ clean-models:
 	rm -rf src/gen/eddn_models
 	rm -rf data/eddn
 	rm -rf data/eddn_schemas_patched
+
 # make nuke-db; make up-db; sleep 1; make alembic-upgrade; make alembic-revision; make alembic-upgrade;
+# openssl pkey -in in.key -out out.key.pem

@@ -24,18 +24,12 @@ from gen.eddn_models import commodity_v3_0, fsssignaldiscovered_v1_0, journal_v1
 
 logger = get_logger(__name__)
 
+#
+# Signals Timeseries
+#
 
-class SignalsTimeseries(BaseModel):
-    # This models the EDDN fsssignaldiscovered-v1.0's Signals object shape
-    #   (gen.eddn_models.fsssignaldiscovered_v1_0.Signal)
-    # Note: EDDN mandates the 'time_remaining' field MUST NOT be present (Can be PII)
-    unique_columns = ("id", "timestamp")
-    __tablename__ = "signals"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        {"schema": "timescaledb"},
-    )
 
+class SignalsTimeseriesMixin:
     id: Mapped[int] = mapped_column(Integer, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
@@ -66,6 +60,26 @@ class SignalsTimeseries(BaseModel):
         "opposing_power",
         "threat_level",
     ]
+
+    def __repr__(self) -> str:
+        non_none_fields = []
+        for field in self.fields:
+            val = getattr(self, field)
+            if val is not None:
+                if isinstance(val, str):
+                    val = f'"{val}"'
+                non_none_fields.append(f"{field}={val}")
+
+        return f"<{type(self).__name__}({', '.join(non_none_fields)})>"
+
+
+class RawSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "signals"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "raw_timescaledb"},
+    )
 
     @staticmethod
     def to_dicts_from_fsssignaldiscovered_v1_0(
@@ -121,27 +135,23 @@ class SignalsTimeseries(BaseModel):
             )
         return dicts
 
-    def __repr__(self) -> str:
-        non_none_fields = []
-        for field in self.fields:
-            val = getattr(self, field)
-            if val is not None:
-                if isinstance(val, str):
-                    val = f'"{val}"'
-                non_none_fields.append(f"{field}={val}")
 
-        return f"<SignalsTimeseries({', '.join(non_none_fields)})>"
-
-
-class FactionPresencesTimeseries(BaseModel):
-    # This models timeseries-interesting fields from the core.faction_presences table
+class ProcessedSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
+    # This models the EDDN fsssignaldiscovered-v1.0's Signals object shape
+    #   (gen.eddn_models.fsssignaldiscovered_v1_0.Signal)
+    # Note: EDDN mandates the 'time_remaining' field MUST NOT be present (Can be PII)
     unique_columns = ("id", "timestamp")
-    __tablename__ = "faction_presences"
+    __tablename__ = "signals"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
         {"schema": "timescaledb"},
     )
 
+
+# Faction Presences Timeseries
+
+
+class FactionPresencesTimeseriesMixin:
     id: Mapped[int] = mapped_column(Integer, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
@@ -158,6 +168,19 @@ class FactionPresencesTimeseries(BaseModel):
 
     updated_at: Mapped[datetime] = mapped_column(DateTime)
     is_backfilled: Mapped[bool] = mapped_column(Boolean)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}(id={self.id}, system_id={self.system_id}, faction_id={self.faction_id})>"
+
+
+class RawFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesMixin):
+    # This models timeseries-interesting fields from the core.faction_presences table
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "faction_presences"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "raw_timescaledb"},
+    )
 
     @staticmethod
     def to_dicts_from_eddn(
@@ -195,19 +218,21 @@ class FactionPresencesTimeseries(BaseModel):
 
         return dicts
 
-    def __repr__(self) -> str:
-        return f"<FactionPresencesTimeseries(id={self.id}, system_id={self.system_id}, faction_id={self.faction_id})>"
 
-
-class PowerConflictProgressTimeseries(BaseModel):
-    # This models the core.systems table's power_conflict_progress as its own hypertable for querying ergonomics
+class ProcessedFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesMixin):
+    # This models timeseries-interesting fields from the core.faction_presences table
     unique_columns = ("id", "timestamp")
-    __tablename__ = "power_conflict_progress"
+    __tablename__ = "faction_presences"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
         {"schema": "timescaledb"},
     )
 
+
+# Power Conflict Progress Timeseries
+
+
+class PowerConflictProgressTimeseriesMixin:
     id: Mapped[int] = mapped_column(Integer, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
@@ -218,6 +243,19 @@ class PowerConflictProgressTimeseries(BaseModel):
 
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_backfilled: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}(id={self.id}, power={self.power_name}, system_id={self.system_id})>"
+
+
+class RawPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressTimeseriesMixin):
+    # This models the core.systems table's power_conflict_progress as its own hypertable for querying ergonomics
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "power_conflict_progress"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "raw_timescaledb"},
+    )
 
     @staticmethod
     def to_dicts_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> list[dict[str, Any]]:
@@ -256,19 +294,21 @@ class PowerConflictProgressTimeseries(BaseModel):
 
         return dicts
 
-    def __repr__(self) -> str:
-        return f"<PowerConflictProgressTimeseries(id={self.id}, power={self.power_name}, system_id={self.system_id})>"
 
-
-class SystemsTimeseries(BaseModel):
-    # This models timeseries-interesting fields from the core.systems table
+class ProcessedPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressTimeseriesMixin):
+    # This models the core.systems table's power_conflict_progress as its own hypertable for querying ergonomics
     unique_columns = ("id", "timestamp")
-    __tablename__ = "systems"
+    __tablename__ = "power_conflict_progress"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
         {"schema": "timescaledb"},
     )
 
+
+# Systems Timeseries
+
+
+class SystemsTimeseriesMixin:
     id: Mapped[int] = mapped_column(Integer, autoincrement=True)
     system_id: Mapped[int] = mapped_column(Integer, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
@@ -293,6 +333,19 @@ class SystemsTimeseries(BaseModel):
 
     updated_at: Mapped[datetime] = mapped_column(DateTime)
     is_backfilled: Mapped[bool] = mapped_column(Boolean)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}(id={self.id}, name={self.name})>"
+
+
+class RawSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
+    # This models timeseries-interesting fields from the core.systems table
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "systems"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "raw_timescaledb"},
+    )
 
     @staticmethod
     def to_dict_from_eddn(
@@ -332,11 +385,46 @@ class SystemsTimeseries(BaseModel):
 
         return {k: v for k, v in d.items() if v is not None}
 
-    def __repr__(self) -> str:
-        return f"<SystemsTimeseries(id={self.id}, name={self.name})>"
+
+class ProcessedSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
+    # This models timeseries-interesting fields from the core.systems table
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "systems"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "timescaledb"},
+    )
 
 
-class MarketCommodityFactionStateTimeseries(BaseModel):
+# Systems Timeseries
+
+
+class MarketCommodityFactionStateTimeseriesMixin:
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
+
+    system_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    system_controlling_faction_id: Mapped[int] = mapped_column("sy_cf_id", Integer, nullable=False, index=True)
+    system_controlling_faction_state: Mapped[str] = mapped_column("sy_cf_state", Text, nullable=False, index=True)
+    system_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
+        "sy_cf_active_states", ARRAY(Text), nullable=True
+    )
+
+    station_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    station_controlling_faction_id: Mapped[int] = mapped_column("st_cf_id", Integer, nullable=False, index=True)
+    station_controlling_faction_state: Mapped[str] = mapped_column("st_cf_state", Text, nullable=False, index=True)
+    station_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
+        "st_cf_active_states", ARRAY(Text), nullable=True
+    )
+
+    commodity_sym: Mapped[str] = mapped_column(Text, nullable=False, index=True)
+
+    # Multiplifer versus galactic average
+    sell_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
+    buy_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
+
+
+class RawMarketCommodityFactionStateTimeseries(BaseModel, MarketCommodityFactionStateTimeseriesMixin):
     # This models timeseries information about market commodity prices,
     # their relative price to galactic average, and the state of the station's controlling faction
     # This hopes to gather empiral data on the effects of Faction states, particularly the combination of multiple
@@ -346,31 +434,8 @@ class MarketCommodityFactionStateTimeseries(BaseModel):
     __tablename__ = "market_commodity_faction_state"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
-        {"schema": "timescaledb"},
+        {"schema": "raw_timescaledb"},
     )
-
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
-
-    system_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    system_controlling_faction_id: Mapped[int] = mapped_column("sy_cf_id", Integer, nullable=False)
-    system_controlling_faction_state: Mapped[str] = mapped_column("sy_cf_state", Text, nullable=False)
-    system_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
-        "sy_cf_active_states", ARRAY(Text), nullable=True
-    )
-
-    station_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    station_controlling_faction_id: Mapped[int] = mapped_column("st_cf_id", Integer, nullable=False)
-    station_controlling_faction_state: Mapped[str] = mapped_column("st_cf_state", Text, nullable=False)
-    station_controlling_faction_active_states: Mapped[Optional[str]] = mapped_column(
-        "st_cf_active_states", ARRAY(Text), nullable=True
-    )
-
-    commodity_sym: Mapped[str] = mapped_column(Text, nullable=False)
-
-    # Multiplifer versus galactic average
-    sell_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
-    buy_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
 
     @staticmethod
     def to_dicts_from_eddn(
@@ -409,3 +474,17 @@ class MarketCommodityFactionStateTimeseries(BaseModel):
                 }
             )
         return dicts
+
+
+class ProcessedMarketCommodityFactionStateTimeseries(BaseModel, MarketCommodityFactionStateTimeseriesMixin):
+    # This models timeseries information about market commodity prices,
+    # their relative price to galactic average, and the state of the station's controlling faction
+    # This hopes to gather empiral data on the effects of Faction states, particularly the combination of multiple
+    # active states, to commodity prices.
+
+    unique_columns = ("id", "timestamp")
+    __tablename__ = "market_commodity_faction_state"
+    __table_args__ = (
+        PrimaryKeyConstraint("id", "timestamp"),
+        {"schema": "timescaledb"},
+    )

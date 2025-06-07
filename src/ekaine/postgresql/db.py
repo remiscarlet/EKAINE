@@ -851,10 +851,10 @@ class SystemsDB(BaseModelWithId):
             ),
             "security": get_symbol_by_eddn_name(cast(str, security)) if security is not None else None,
             "controlling_power": getattr(msg, "ControllingPower", None),
-            # "power_conflict_progress": [
-            #     SystemsDB.power_conflict_progress_to_dict_from_spansh(participant)
-            #     for participant in getattr(msg, "power_conflict_progress or []
-            # ],
+            "power_conflict_progress": [
+                SystemsDB.power_conflict_progress_to_dict_from_spansh(participant)
+                for participant in getattr(msg, "power_conflict_progress", None) or []
+            ],
             "power_state": getattr(msg, "PowerplayState", None),
             "power_state_control_progress": getattr(msg, "PowerplayStateControlProgress", None),
             "power_state_reinforcement": getattr(msg, "PowerplayStateReinforcement", None),

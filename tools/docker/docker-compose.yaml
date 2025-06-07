@@ -68,6 +68,7 @@ services:
       - ../../tools/:/app/tools
       - ../../src/:/app/src
       - ../../Makefile:/app/Makefile
+      - ../../setup_logs:/app/logs
     logging: *default-logging
 
   app:
@@ -89,6 +90,7 @@ services:
       - ../../tools/:/app/tools
       - ../../src/:/app/src
       - ../../Makefile:/app/Makefile
+      - ../../app_logs:/app/logs
     logging: *default-logging
 
 volumes:
