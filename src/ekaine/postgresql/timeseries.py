@@ -8,10 +8,12 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Float,
+    Index,
     Integer,
     PrimaryKeyConstraint,
     SmallInteger,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB, TEXT
 from sqlalchemy.orm import Mapped, mapped_column
@@ -179,6 +181,7 @@ class RawFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesMixin):
     __tablename__ = "faction_presences"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
+        Index("ix_raw_tsdb_faction_presences_s_f_id_ts", "system_id", "faction_id", "timestamp"),
         {"schema": "raw_timescaledb"},
     )
 
@@ -225,6 +228,7 @@ class ProcessedFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesM
     __tablename__ = "faction_presences"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
+        UniqueConstraint("system_id", "faction_id", "timestamp", name="_tsdb_faction_presences_s_f_id_ts_uc"),
         {"schema": "timescaledb"},
     )
 
@@ -254,6 +258,7 @@ class RawPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressTimeser
     __tablename__ = "power_conflict_progress"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
+        Index("ix_raw_tsdb_power_conflict_progress_s_id_p_name_ts", "system_id", "power_name", "timestamp"),
         {"schema": "raw_timescaledb"},
     )
 
@@ -301,6 +306,9 @@ class ProcessedPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressT
     __tablename__ = "power_conflict_progress"
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
+        UniqueConstraint(
+            "system_id", "power_name", "timestamp", name="_tsdb_power_conflict_progress_s_id_p_name_ts_uc"
+        ),
         {"schema": "timescaledb"},
     )
 
