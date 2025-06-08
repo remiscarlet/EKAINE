@@ -75,6 +75,7 @@ class SignalsTimeseriesMixin:
         return f"<{type(self).__name__}({', '.join(non_none_fields)})>"
 
 
+# No Processed variant at the moment
 class RawSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
     unique_columns = ("id", "timestamp")
     __tablename__ = "signals"
@@ -136,18 +137,6 @@ class RawSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
                 }
             )
         return dicts
-
-
-class ProcessedSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
-    # This models the EDDN fsssignaldiscovered-v1.0's Signals object shape
-    #   (gen.eddn_models.fsssignaldiscovered_v1_0.Signal)
-    # Note: EDDN mandates the 'time_remaining' field MUST NOT be present (Can be PII)
-    unique_columns = ("id", "timestamp")
-    __tablename__ = "signals"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        {"schema": "timescaledb"},
-    )
 
 
 # Faction Presences Timeseries
@@ -346,6 +335,7 @@ class SystemsTimeseriesMixin:
         return f"<{type(self).__name__}(id={self.id}, name={self.name})>"
 
 
+# No Processed variant at the moment
 class RawSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
     # This models timeseries-interesting fields from the core.systems table
     unique_columns = ("id", "timestamp")
@@ -394,16 +384,6 @@ class RawSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
         return {k: v for k, v in d.items() if v is not None}
 
 
-class ProcessedSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
-    # This models timeseries-interesting fields from the core.systems table
-    unique_columns = ("id", "timestamp")
-    __tablename__ = "systems"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        {"schema": "timescaledb"},
-    )
-
-
 # Systems Timeseries
 
 
@@ -432,6 +412,7 @@ class MarketCommodityFactionStateTimeseriesMixin:
     buy_price_multiplier: Mapped[str] = mapped_column(Float, nullable=False)
 
 
+# No Processed variant at the moment
 class RawMarketCommodityFactionStateTimeseries(BaseModel, MarketCommodityFactionStateTimeseriesMixin):
     # This models timeseries information about market commodity prices,
     # their relative price to galactic average, and the state of the station's controlling faction
@@ -482,17 +463,3 @@ class RawMarketCommodityFactionStateTimeseries(BaseModel, MarketCommodityFaction
                 }
             )
         return dicts
-
-
-class ProcessedMarketCommodityFactionStateTimeseries(BaseModel, MarketCommodityFactionStateTimeseriesMixin):
-    # This models timeseries information about market commodity prices,
-    # their relative price to galactic average, and the state of the station's controlling faction
-    # This hopes to gather empiral data on the effects of Faction states, particularly the combination of multiple
-    # active states, to commodity prices.
-
-    unique_columns = ("id", "timestamp")
-    __tablename__ = "market_commodity_faction_state"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        {"schema": "timescaledb"},
-    )
