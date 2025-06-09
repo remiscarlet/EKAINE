@@ -62,7 +62,7 @@ with constants as (
     join lateral (
         select *
           from raw_timescaledb.power_conflict_progress pcp
-         where pcp.system_id = mscp.system_id
+         where pcp.system_id = mscp.system_id and pcp.power_name = mscp.power_name
          order by timestamp desc
          limit 1
     ) latest_row on true
