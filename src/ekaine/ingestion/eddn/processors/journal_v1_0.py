@@ -188,8 +188,37 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
     - RawFactionPresencesTimeseries
     - SignalsTimeseries
     - RawPowerConflictProgressTimeseries
+    """
+    event_name = model.message.event.value
+    logger.trace(f"Processing event {event_name} in {model.message.StarSystem}")
 
-    TODO: Split based on event type:
+    # Handle FactionPresences updates
+    if event_name in ["FSDJump", "Location"]:
+        process_faction_entities(session, model)
+
+    # Handle SystemsDB updates
+    faction_id_mapping = model_to_faction_name_to_id_mapping(model)
+    system = process_system_entities(session, model, faction_id_mapping)
+
+    if system is None:
+        logger.error(f"Could not upsert system! '{model.message.StarSystem}'")
+        return
+
+    if event_name in ["Scan", "Location"]:
+        process_body_entities(session, model, system)
+
+    if event_name in ["FSDJump", "Location"]:
+        process_faction_presence_entities(session, model, system, faction_id_mapping)
+
+    if event_name in ["Docked", "Location"]:
+        # Order matters - must come after FactionPresences
+        process_station_entities(session, model, system)
+
+    if event_name in ["FSDJump"]:
+        process_powerplay_entities(session, model, system)
+
+
+"""
     - Docked
         'Body': 'Col 285 Sector RK-N c7-15 A 6',
         'BodyType': 'Planet',
@@ -290,6 +319,84 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         'WasDiscovered': True,
         'WasMapped': False,
         'event': 'Scan', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:52:11Z'}}
+    Message(
+        timestamp=datetime.datetime(2025, 6, 10, 7, 47, 12, tzinfo=TzInfo(UTC)),
+        event=<Event.Scan: 'Scan'>, horizons=True, odyssey=True,
+        StarSystem='Blu Aec NW-A c27-11',
+        StarPos=[7674.78125, -2.59375, 12932.8125],
+        SystemAddress=3120394411242,
+        Factions=None,
+        AscendingNode=-107.497578,
+        Atmosphere='helium atmosphere',
+        AtmosphereComposition=[{'Name': 'Helium', 'Percent': 86.773819},
+            {'Name': 'Hydrogen', 'Percent': 8.186209}, {'Name': 'Nitrogen', 'Percent': 2.866912}],
+        AtmosphereType='Helium',
+        AxialTilt=-0.166192,
+        BodyID=65,
+        BodyName='Blu Aec NW-A c27-11 6',
+        Composition={'Ice': 0.654312, 'Metal': 0.097244, 'Rock': 0.201581},
+        DistanceFromArrivalLS=4029.519929,
+        Eccentricity=0.000281,
+        Landable=False,
+        MassEM=14.891384,
+        MeanAnomaly=90.438053,
+        OrbitalInclination=0.328763,
+        OrbitalPeriod=825363802.909851,
+        Parents=[{'Star': 0}],
+        Periapsis=272.068599,
+        PlanetClass='Icy body',
+        Radius=17632382.0,
+        ReserveLevel='PristineResources',
+        Rings=[
+            {'InnerRad': 29300000.0, 'MassMT': 12501000000.0, 'Name': 'Blu Aec NW-A c27-11 6 A Ring',
+             'OuterRad': 35610000.0, 'RingClass': 'eRingClass_Rocky'},
+            {'InnerRad': 35710000.0, 'MassMT': 185190000000.0, 'Name': 'Blu Aec NW-A c27-11 6 B Ring',
+             'OuterRad': 85649000.0, 'RingClass': 'eRingClass_Icy'}],
+        RotationPeriod=73887.364778,
+        ScanType='Detailed',
+        SemiMajorAxis=1208016991615.2954,
+        SurfaceGravity=19.090726,
+        SurfacePressure=195433.140625,
+        SurfaceTemperature=67.860588,
+        TerraformState='',
+        TidalLock=False,
+        Volcanism='water geysers volcanism',
+        WasDiscovered=False,
+        WasMapped=False)
+
+    Message(
+        timestamp=datetime.datetime(2025, 6, 10, 7, 47, 5, tzinfo=TzInfo(UTC)),
+        event=<Event.Scan: 'Scan'>,
+        horizons=True,
+        odyssey=True,
+        StarSystem='Eta Corvi',
+        StarPos=[36.71875, 43.03125, 18.78125],
+        SystemAddress=2381316098411,
+        Factions=None,
+        AbsoluteMagnitude=6.306061,
+        Age_MY=1664,
+        AscendingNode=-71.248025,
+        AxialTilt=0.0,
+        BodyID=4,
+        BodyName='Eta Corvi C',
+        DistanceFromArrivalLS=6239.961907,
+        Eccentricity=0.008687,
+        Luminosity='Vab',
+        MeanAnomaly=180.137658,
+        OrbitalInclination=-22.55414,
+        OrbitalPeriod=727324604.988098,
+        Parents=[{'Null': 0}],
+        Periapsis=247.23819,
+        Radius=522919712.0,
+        RotationPeriod=288500.489116,
+        ScanType='AutoScan',
+        SemiMajorAxis=1488530218601.2268,
+        StarType='K',
+        StellarMass=0.691406,
+        Subclass=3,
+        SurfaceTemperature=4744.0,
+        WasDiscovered=True,
+        WasMapped=False)
     - Location
         'Body': 'HIP 77263 ABC 2 a',
         'BodyID': 28,
@@ -366,35 +473,4 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         'SystemSecurity': '$GAlAXY_MAP_INFO_state_anarchy;',
         'event': 'CarrierJump', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:52:11Z'}}
     - CodexEntry
-    """
-    event_name = model.message.event.value
-    logger.trace(f"Processing event {event_name} in {model.message.StarSystem}")
-
-    # Handle FactionPresences updates
-    if event_name in ["FSDJump", "Location"]:
-        process_faction_entities(session, model)
-
-    # Handle SystemsDB updates
-    faction_id_mapping = model_to_faction_name_to_id_mapping(model)
-    system = process_system_entities(session, model, faction_id_mapping)
-
-    if system is None:
-        logger.error(f"Could not upsert system! '{model.message.StarSystem}'")
-        return
-
-    # Handle BodiesDB updates
-    if event_name in ["Scan", "Location"]:
-        process_body_entities(session, model, system)
-
-    # Handle FactionPresences updates
-    if event_name in ["FSDJump", "Location"]:
-        process_faction_presence_entities(session, model, system, faction_id_mapping)
-
-    # Handle StationsDB updates
-    if event_name in ["Docked", "Location"]:
-        # Order matters - must come after FactionPresences
-        process_station_entities(session, model, system)
-
-    # Handle Powerplay updates
-    if event_name in ["FSDJump"]:
-        process_powerplay_entities(session, model, system)
+"""

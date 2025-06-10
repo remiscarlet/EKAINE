@@ -168,66 +168,115 @@ class BodiesDB(BaseModelWithId):
         }
 
     @staticmethod
-    def to_dict_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> dict[str, Any] | None:
-        msg = eddn_model.message
-        body_name = getattr(msg, "Body", None)
-        if body_name is None:
-            body_name = getattr(msg, "BodyName", None)
-        if body_name is None:
-            # Journal entry with no body name - no body present.
-            return None
-
+    def to_materials_from_journal_entry(journal_entry: journal_v1_0.Message) -> dict[str, float]:
         materials = {}
-        for mat in getattr(msg, "Materials", []):
+        for mat in getattr(journal_entry, "Materials", []):
             name = mat.get("Name")
             if name is None:
                 raise ValueError(f"Could not parse material name out of body! '{pformat(mat)}'")
             percent = mat.get("Percent")
             if percent is None:
                 raise ValueError(f"Could not parse material percent out of body! '{pformat(mat)}'")
-            materials[name] = percent
+            materials[name] = cast(float, percent)
+
+        return materials
+
+    @staticmethod
+    def to_type_from_journal_entry(
+        journal_entry: journal_v1_0.Message, body_name: str, luminosity: str | None, sub_type: str | None
+    ) -> str | None:
+        type = getattr(journal_entry, "BodyType", None)
+        if type is None:
+            if body_name.endswith("Ring"):
+                raise ValueError(f"Tried processing a Ring as a Body: '{body_name}'")
+            elif "Belt Cluster" in body_name:
+                type = "Belt Cluster"
+            elif luminosity is not None:
+                type = "Star"
+            elif sub_type is not None:
+                type = "Planet"
+        return type
+
+    @staticmethod
+    def to_spectral_class_from_journal_entry(journal_entry: journal_v1_0.Message) -> str | None:
+        star_type = getattr(journal_entry, "StarType", None)
+        subclass = getattr(journal_entry, "Subclass", None)
+
+        if star_type is None:
+            return None
+        if subclass is None:
+            logger.warning(f"Got a Star body with a star_type but no subclass! '{pformat(journal_entry)}'")
+            return None
+
+        return f"{star_type}{subclass}"
+
+    @staticmethod
+    def to_dict_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> dict[str, Any] | None:
+        journal_entry = eddn_model.message
+        body_name = getattr(journal_entry, "Body", None)
+        if body_name is None:
+            body_name = getattr(journal_entry, "BodyName", None)
+        if body_name is None:
+            # Journal entry with no body name - no body present.
+            return None
+
+        distance_to_arrival: float | None = getattr(journal_entry, "DistanceFromArrivalLS", None)
+        is_main_star = (distance_to_arrival == 0) if distance_to_arrival is not None else None
+        luminosity = getattr(journal_entry, "Luminosity", None)
+        reserve_level = getattr(journal_entry, "ReserveLevel", None)
+        radius = getattr(journal_entry, "Radius", None)
+        sub_type = getattr(journal_entry, "PlanetClass", None)
+
+        spectral_class = BodiesDB.to_spectral_class_from_journal_entry(journal_entry)
+        materials = BodiesDB.to_materials_from_journal_entry(journal_entry)
+        type = BodiesDB.to_type_from_journal_entry(journal_entry, body_name, luminosity, sub_type)
+
+        if type is None:
+            logger.info(pformat(journal_entry))
 
         d = {
             "system_id": system_id,
-            "body_id": getattr(msg, "BodyID", None),
+            "body_id": getattr(journal_entry, "BodyID", None),
             "name": body_name,
-            # "absolute_magnitude": getattr(msg, "BodyID", None),
-            # "age": spansh_body.age,
-            "arg_of_periapsis": getattr(msg, "Periapsis", None),
-            "ascending_node": getattr(msg, "AscendingNode", None),
-            "atmosphere_composition": getattr(msg, "AtmosphericComposition", None),
-            "atmosphere_type": getattr(msg, "AtmosphereType", None),
-            "axial_tilt": getattr(msg, "AxialTilt", None),
-            "distance_to_arrival": getattr(msg, "DistanceFromArrivalLS", None),
-            "earth_masses": getattr(msg, "MassEM", None),
-            "gravity": getattr(msg, "SurfaceGravity", None),
-            "is_landable": getattr(msg, "Landable", None),
-            "luminosity": getattr(msg, "Luminosity", None),
-            # "main_star": spansh_body.main_star,
+            "absolute_magnitude": getattr(journal_entry, "AbsoluteMagnitude", None),
+            "age": getattr(journal_entry, "Age_MY", None),
+            "arg_of_periapsis": getattr(journal_entry, "Periapsis", None),
+            "ascending_node": getattr(journal_entry, "AscendingNode", None),
+            "atmosphere_composition": getattr(journal_entry, "AtmosphericComposition", None),
+            "atmosphere_type": getattr(journal_entry, "AtmosphereType", None),
+            "axial_tilt": getattr(journal_entry, "AxialTilt", None),
+            "distance_to_arrival": getattr(journal_entry, "DistanceFromArrivalLS", None),
+            "earth_masses": getattr(journal_entry, "MassEM", None),
+            "gravity": getattr(journal_entry, "SurfaceGravity", None),
+            "is_landable": getattr(journal_entry, "Landable", None),
+            "luminosity": getattr(journal_entry, "Luminosity", None),
+            "main_star": is_main_star,
             "materials": materials if materials else None,
-            "mean_anomaly": getattr(msg, "MeanAnomaly", None),
-            "orbital_eccentricity": getattr(msg, "Eccentricity", None),
-            "orbital_inclination": getattr(msg, "OrbitalInclination", None),
-            "orbital_period": getattr(msg, "OrbitalPeriod", None),
-            "parents": getattr(msg, "Parents", None),
-            "radius": getattr(msg, "Radius", None),
-            # "reserve_level": getattr(msg, "Luminosity", None),
-            "rotational_period": getattr(msg, "RotationPeriod", None),
-            # "rotational_period_tidally_locked": getattr(msg, "Luminosity", None),
-            "semi_major_axis": getattr(msg, "SemiMajorAxis", None),
-            # "solar_masses": getattr(msg, "Luminosity", None),
-            # "solar_radius": getattr(msg, "Luminosity", None),
-            "solid_composition": getattr(msg, "Composition", None),
-            # "spectral_class": spansh_body.spectral_class,
-            # "sub_type": spansh_body.sub_type,
-            "surface_pressure": getattr(msg, "SurfacePressure", None),
-            "surface_temperature": getattr(msg, "SurfaceTemperature", None),
-            "terraforming_state": getattr(msg, "TerraformState", None),
-            "type": getattr(msg, "BodyType", None),
-            "volcanism_type": getattr(msg, "Volcanism", None),
-            "mean_anomaly_updated_at": None if getattr(msg, "MeanAnomaly", None) is None else msg.timestamp,
+            "mean_anomaly": getattr(journal_entry, "MeanAnomaly", None),
+            "orbital_eccentricity": getattr(journal_entry, "Eccentricity", None),
+            "orbital_inclination": getattr(journal_entry, "OrbitalInclination", None),
+            "orbital_period": getattr(journal_entry, "OrbitalPeriod", None),
+            "parents": getattr(journal_entry, "Parents", None),
+            "radius": radius if type != "Star" else None,
+            "reserve_level": get_symbol_by_eddn_name(reserve_level) if reserve_level is not None else None,
+            "rotational_period": getattr(journal_entry, "RotationPeriod", None),
+            "rotational_period_tidally_locked": getattr(journal_entry, "TidalLock", None),
+            "semi_major_axis": getattr(journal_entry, "SemiMajorAxis", None),
+            "solar_masses": getattr(journal_entry, "StellarMass", None),
+            "solar_radius": radius if type == "Star" else None,
+            "solid_composition": getattr(journal_entry, "Composition", None),
+            "spectral_class": spectral_class,
+            "sub_type": sub_type,
+            "surface_pressure": getattr(journal_entry, "SurfacePressure", None),
+            "surface_temperature": getattr(journal_entry, "SurfaceTemperature", None),
+            "terraforming_state": getattr(journal_entry, "TerraformState", None),
+            "type": type,
+            "volcanism_type": getattr(journal_entry, "Volcanism", None),
+            "mean_anomaly_updated_at": (
+                None if getattr(journal_entry, "MeanAnomaly", None) is None else journal_entry.timestamp
+            ),
             "distance_to_arrival_updated_at": (
-                None if getattr(msg, "DistanceFromArrivalLS", None) is None else msg.timestamp
+                None if getattr(journal_entry, "DistanceFromArrivalLS", None) is None else journal_entry.timestamp
             ),
         }
 
@@ -468,6 +517,58 @@ class StationsDB(BaseModelWithId):
 
         return (owner_id, owner_type)
 
+    @staticmethod
+    def journal_entry_to_station_name(journal_entry: journal_v1_0.Message) -> str | None:
+        station_name = cast(str, getattr(journal_entry, "StationName", None))
+        if station_name is None:
+            return None  # Has no station information
+
+        station_name = cast(str, getattr(journal_entry, "StationName", None))
+        station_name = station_name.replace("$EXT_PANEL_ColonisationShip;", "")
+
+        return station_name
+
+    @staticmethod
+    def to_station_type_and_owner_id_type_from_journal_entry(
+        eddn_model: journal_v1_0.Model, system_id: int, body_name_to_db_fn: Callable[[str], "BodiesDB"]
+    ) -> Tuple[str, int, str] | None:
+        journal_entry = eddn_model.message
+
+        station_type = getattr(journal_entry, "StationType", None)
+        if station_type is None:
+            logger.warning(f"Got a Journal entry with a StationName but no StationType!\n{pformat(eddn_model)}")
+            return None  # Has no station type
+
+        sym = get_symbol_by_eddn_name(station_type)
+        if sym is None:
+            logger.warning(f"==> Skipping Station Type: {station_type}")
+            return None  # TODO: Remove after handling FleetCarrier, PlanetaryConstructionDepot, SpaceConstructionDepot
+        normalized_station_type = sym
+
+        try:
+            [owner_id, owner_type] = StationsDB.to_owner_id_and_type_from_eddn(
+                journal_entry, normalized_station_type, system_id, body_name_to_db_fn
+            )
+        except ValueError:
+            return None  # TODO: Remove
+
+        return (normalized_station_type, owner_id, owner_type)
+
+    @staticmethod
+    def to_economies_from_journal_entry(journal_entry: journal_v1_0.Message) -> dict[str, float] | None:
+        economies: dict[str, float] = {}
+        for econ in getattr(journal_entry, "StationEconomies", []):
+            econ_type = get_symbol_by_eddn_name(econ["Name"])
+            if econ_type is None:
+                logger.warning(f"Did not recognize economy type name! Got: '{pformat(econ)}'")
+                return None
+            try:
+                economies[econ_type] = float(econ["Proportion"]) * 100
+            except ValueError:
+                logger.warning(f"Could not convert economy proportion to a valid float! Got: '{pformat(econ)}'")
+                return None
+        return economies
+
     blocklisted_faction_names: list[str] = [
         "FleetCarrier",
         "Felicity Farseer",
@@ -521,7 +622,7 @@ class StationsDB(BaseModelWithId):
         # TODO: Black market, Carrier Name
         journal_entry = eddn_model.message
 
-        station_name = getattr(journal_entry, "StationName", None)
+        station_name = StationsDB.journal_entry_to_station_name(journal_entry)
         if station_name is None:
             return None  # Has no station information
 
@@ -536,45 +637,29 @@ class StationsDB(BaseModelWithId):
             logger.debug(f"Did not know about station '{station_name}' in system id {system_id}")
             existing_station = None
 
+        # Some Journal entries don't contain a Body field, which makes it impossible to determine
+        # which body a planetary station belongs to. In such a case, we must rely on the station already existing in
+        # the DB in order to map its correct owner_id (body_id)
+        #
+        # My hypothesis is that certain journal event enums contain Body while others don't,
+        # even for the same logical station (Eg, Docked vs Location). Thus "order matters" with the event ingestion
         if existing_station is not None:
-            # Some Journal entries don't contain a Body field, which makes it impossible to determine
-            # which body a planetary station belongs to. In such a case, we must rely on the station already existing in
-            # the DB in order to map its correct owner_id (body_id)
-            #
-            # My hypothesis is that certain journal event enums contain Body while others don't,
-            # even for the same logical station (Eg, Docked vs Location). Thus "order matters" with the event ingestion
             normalized_station_type = existing_station.type
             owner_id = existing_station.owner_id
             owner_type = existing_station.owner_type
         else:
-            station_type = getattr(journal_entry, "StationType", None)
-            if station_type is None:
-                logger.warning(f"Got a Journal entry with a StationName but no StationType!\n{pformat(eddn_model)}")
-                return None  # Has no station type
+            result = StationsDB.to_station_type_and_owner_id_type_from_journal_entry(
+                eddn_model, system_id, body_name_to_db_fn
+            )
 
-            sym = get_symbol_by_eddn_name(station_type)
-            if sym is None:
-                logger.warning(f"==> Skipping Station Type: {station_type}")
-                return None  # TODO: Remove
-            normalized_station_type = sym
+            if result is None:
+                return None
 
-            try:
-                [owner_id, owner_type] = StationsDB.to_owner_id_and_type_from_eddn(
-                    journal_entry, normalized_station_type, system_id, body_name_to_db_fn
-                )
-            except ValueError:
-                return None  # TODO: Remove
+            [normalized_station_type, owner_id, owner_type] = result
 
         primary_economy = getattr(journal_entry, "StationEconomy", None)
         government = getattr(journal_entry, "StationGovernment", None)
-        economies = {}
-        for econ in getattr(journal_entry, "StationEconomies", []):
-            econ_type = get_symbol_by_eddn_name(econ["Name"])
-            try:
-                economies[econ_type] = float(econ["Proportion"]) * 100
-            except ValueError:
-                logger.warning(f"Could not convert economy proportion to a valid float! Got: '{pformat(econ)}'")
-                return None
+        economies = StationsDB.to_economies_from_journal_entry(journal_entry)
 
         # Base Attributes
         d: dict[str, Any] = {
