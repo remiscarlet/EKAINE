@@ -7,10 +7,14 @@ GEN_DIR_NAME="eddn_models"
 
 copy_schemas $TMP_DIR $SCHEMA_DIR
 
-# Add additional fields to journal-v1.0's Faction object
 ORIG=journal-v1.0.json
 TMP=journal-v1.0.tmp.json
-mv ${TMP_DIR}${ORIG} ${TMP_DIR}${TMP}
+ORIG_PATH=${TMP_DIR}${ORIG}
+TMP_PATH=${TMP_DIR}${TMP}
+
+# Add additional fields to journal-v1.0's Faction object
+# Remove disallowed fields from journal-v1.0's Faction object
+# Remove disallowed fields from journal-v1.0's Message object
 jq '
   .properties.message.properties.Factions.items.properties += {
     "Allegiance": { "type": "string" },
@@ -24,9 +28,7 @@ jq '
       "items": {
         "type": "object",
         "required": ["State"],
-        "properties": {
-          "State": { "type": "string" }
-        }
+        "properties": { "State": { "type": "string" } }
       }
     },
     "RecoveringStates": {
@@ -34,9 +36,7 @@ jq '
       "items": {
         "type": "object",
         "required": ["State"],
-        "properties": {
-          "State": { "type": "string" }
-        }
+        "properties": { "State": { "type": "string" } }
       }
     },
     "PendingStates": {
@@ -44,13 +44,18 @@ jq '
       "items": {
         "type": "object",
         "required": ["State"],
-        "properties": {
-          "State": { "type": "string" }
-        }
+        "properties": { "State": { "type": "string" } }
       }
-    },
+    }
   }
-' ${TMP_DIR}${TMP} > ${TMP_DIR}${ORIG}
-rm ${TMP_DIR}${TMP}
+  | .properties.message.properties.Factions.items.properties
+    |= del(.HappiestSystem, .HomeSystem, .MyReputation, .SquadronFaction)
+  | .properties.message.properties
+    |= del(.ActiveFine, .CockpitBreach, .BoostUsed, .FuelLevel, .FuelUsed, .JumpDist,
+           .Latitude, .Longitude, .Wanted, .IsNewEntry, .NewTraitsDiscovered, .Traits, .VoucherAmount)
+' ${ORIG_PATH} > ${TMP_PATH}
+
+mv ${TMP_PATH} ${ORIG_PATH}
+echo $ORIG_PATH
 
 generate_models $TMP_DIR $GEN_DIR_NAME
