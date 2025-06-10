@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Optional, cast
@@ -16,7 +17,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB, TEXT
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 
 from ekaine.common.game_constants import get_symbol_by_eddn_name
 from ekaine.common.logging import get_logger
@@ -168,11 +169,21 @@ class RawFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesMixin):
     # This models timeseries-interesting fields from the core.faction_presences table
     unique_columns = ("id", "timestamp")
     __tablename__ = "faction_presences"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        Index("ix_raw_tsdb_faction_presences_s_f_id_ts", "system_id", "faction_id", "timestamp"),
-        {"schema": "raw_timescaledb"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls) -> tuple[Any, ...] | dict[str, Any]:
+        return (
+            PrimaryKeyConstraint(cls.id, cls.timestamp),
+            UniqueConstraint(cls.system_id, cls.faction_id, cls.timestamp, name="_tsdb_faction_presences_s_f_id_ts_uc"),
+            Index(
+                "ix_raw_tsdb_faction_presences_s_f_id_ts",
+                cls.system_id,
+                cls.faction_id,
+                cls.timestamp,
+            ),
+            {"schema": "raw_timescaledb"},
+        )
 
     @staticmethod
     def to_dicts_from_eddn(
@@ -215,12 +226,25 @@ class ProcessedFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesM
     # This models timeseries-interesting fields from the core.faction_presences table
     unique_columns = ("id", "timestamp")
     __tablename__ = "faction_presences"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        UniqueConstraint("system_id", "faction_id", "timestamp", name="_tsdb_faction_presences_s_f_id_ts_uc"),
-        Index("ix_tsdb_faction_presences_is_backfilled_ts", "is_backfilled", "timestamp"),
-        {"schema": "timescaledb"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            PrimaryKeyConstraint(cls.id, cls.timestamp),
+            UniqueConstraint(cls.system_id, cls.faction_id, cls.timestamp, name="_tsdb_faction_presences_s_f_id_ts_uc"),
+            Index(
+                "ix_tsdb_faction_presences_is_backfilled_ts",
+                cls.timestamp,
+                postgresql_where=cls.is_backfilled.is_(True),
+            ),
+            Index(
+                "ix_tsdb_faction_presences_not_backfilled_ts",
+                cls.timestamp,
+                postgresql_where=cls.is_backfilled.is_(False),
+            ),
+            {"schema": "timescaledb"},
+        )
 
 
 # Power Conflict Progress Timeseries
@@ -246,11 +270,27 @@ class RawPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressTimeser
     # This models the core.systems table's power_conflict_progress as its own hypertable for querying ergonomics
     unique_columns = ("id", "timestamp")
     __tablename__ = "power_conflict_progress"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        Index("ix_raw_tsdb_power_conflict_progress_s_id_p_name_ts", "system_id", "power_name", "timestamp"),
-        {"schema": "raw_timescaledb"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            PrimaryKeyConstraint(cls.id, cls.timestamp),
+            Index(
+                "ix_raw_tsdb_power_conflict_progress_s_id_p_name_ts",
+                cls.system_id,
+                cls.power_name,
+                cls.timestamp,
+                postgresql_where=cls.is_backfilled.is_(True),
+            ),
+            Index(
+                "ix_tsdb_power_conflict_progress_not_backfilled_ts",
+                cls.timestamp,
+                cls.power_name,
+                postgresql_where=cls.is_backfilled.is_(False),
+            ),
+            {"schema": "raw_timescaledb"},
+        )
 
     @staticmethod
     def to_dicts_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> list[dict[str, Any]]:
@@ -294,14 +334,27 @@ class ProcessedPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressT
     # This models the core.systems table's power_conflict_progress as its own hypertable for querying ergonomics
     unique_columns = ("id", "timestamp")
     __tablename__ = "power_conflict_progress"
-    __table_args__ = (
-        PrimaryKeyConstraint("id", "timestamp"),
-        UniqueConstraint(
-            "system_id", "power_name", "timestamp", name="_tsdb_power_conflict_progress_s_id_p_name_ts_uc"
-        ),
-        Index("ix_tsdb_power_conflict_progress_is_backfilled_ts", "is_backfilled", "timestamp"),
-        {"schema": "timescaledb"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            PrimaryKeyConstraint(cls.id, cls.timestamp),
+            UniqueConstraint(
+                cls.system_id, cls.power_name, cls.timestamp, name="_tsdb_power_conflict_progress_s_id_p_name_ts_uc"
+            ),
+            Index(
+                "ix_tsdb_power_conflict_progress_is_backfilled_ts",
+                cls.timestamp,
+                postgresql_where=cls.is_backfilled.is_(True),
+            ),
+            Index(
+                "ix_tsdb_power_conflict_progress_not_backfilled_ts",
+                cls.timestamp,
+                postgresql_where=cls.is_backfilled.is_(False),
+            ),
+            {"schema": "timescaledb"},
+        )
 
 
 # Systems Timeseries

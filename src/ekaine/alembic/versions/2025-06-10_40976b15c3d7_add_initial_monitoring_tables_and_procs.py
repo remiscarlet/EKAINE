@@ -26,20 +26,41 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     """Upgrade schema."""
     # Adding indexes on cols used by grafana dashboards
+
     op.create_index(
         op.f("ix_tsdb_power_conflict_progress_is_backfilled_ts"),
-        "hypertable_sizes",
-        ["is_backfilled", "timestamp"],
+        "power_conflict_progress",
+        ["timestamp"],
         unique=False,
         schema="timescaledb",
+        postgresql_where=sa.text("is_backfilled = TRUE"),
+    )
+
+    op.create_index(
+        op.f("ix_tsdb_power_conflict_progress_not_backfilled_ts"),
+        "power_conflict_progress",
+        ["timestamp"],
+        unique=False,
+        schema="timescaledb",
+        postgresql_where=sa.text("is_backfilled = FALSE"),
     )
 
     op.create_index(
         op.f("ix_tsdb_faction_presences_is_backfilled_ts"),
-        "hypertable_sizes",
-        ["is_backfilled", "timestamp"],
+        "faction_presences",
+        ["timestamp"],
         unique=False,
         schema="timescaledb",
+        postgresql_where=sa.text("is_backfilled = TRUE"),
+    )
+
+    op.create_index(
+        op.f("ix_tsdb_faction_presences_not_backfilled_ts"),
+        "faction_presences",
+        ["timestamp"],
+        unique=False,
+        schema="timescaledb",
+        postgresql_where=sa.text("is_backfilled = FALSE"),
     )
 
     # Monitoring
