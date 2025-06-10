@@ -537,7 +537,11 @@ class StationsDB(BaseModelWithId):
             station_faction_state = None
 
         if station_faction_name is not None and station_faction_name not in StationsDB.blocklisted_faction_names:
-            faction = faction_name_to_db_fn(station_faction_name)
+            try:
+                faction = faction_name_to_db_fn(station_faction_name)
+            except Exception:
+                logger.info(pformat(eddn_model))
+                return None
             d["allegiance"] = faction.allegiance
             d["controlling_faction"] = faction.name
             d["controlling_faction_state"] = station_faction_state
@@ -801,6 +805,26 @@ class FactionsDB(BaseModelWithId):
             "allegiance": spansh_faction.allegiance,
             "government": spansh_faction.government,
         }
+
+    @staticmethod
+    def to_dicts_from_eddn(eddn_model: journal_v1_0.Model) -> list[dict[str, Any]]:
+        factions = eddn_model.message.Factions or []
+
+        dicts: list[dict[str, Any]] = []
+        for faction in factions:
+            if faction.Name is None:
+                logger.warning(f"Found a Faction without a Name! {pformat(faction)}")
+                continue
+
+            dicts.append(
+                {
+                    "name": faction.Name,
+                    "allegiance": faction.Allegiance,
+                    "government": faction.Government,
+                }
+            )
+
+        return dicts
 
     def __repr__(self) -> str:
         return f"<FactionsDB(id={self.id}, name={self.name})>"

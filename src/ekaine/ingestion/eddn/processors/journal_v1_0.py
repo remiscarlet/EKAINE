@@ -9,9 +9,8 @@ from ekaine.postgresql.adapter import (
     BodiesAdapter,
     FactionsAdapter,
     StationsAdapter,
-    SystemsAdapter,
 )
-from ekaine.postgresql.db import FactionPresencesDB, StationsDB, SystemsDB
+from ekaine.postgresql.db import FactionPresencesDB, FactionsDB, StationsDB, SystemsDB
 from ekaine.postgresql.timeseries import (
     RawFactionPresencesTimeseries,
     RawPowerConflictProgressTimeseries,
@@ -44,8 +43,8 @@ def process_saa_signals_found(model: journal_v1_0.Model) -> None:
 
 
 def process_system_entities(
-    session: Session, model: journal_v1_0.Model, system: SystemsDB, faction_id_mapping: dict[str, int]
-) -> None:
+    session: Session, model: journal_v1_0.Model, faction_id_mapping: dict[str, int]
+) -> SystemsDB:
     """Process System related entries from the journal-v1.0 EDDN event"""
     controlling_faction_name = getattr(model.message, "SystemFaction", {}).get("Name")
     controlling_faction_id = (
@@ -54,14 +53,16 @@ def process_system_entities(
 
     system_dict = SystemsDB.to_dict_from_eddn(model, controlling_faction_id)
     systems = upsert_all(session, SystemsDB, [system_dict])
-    logger.info(f"[System DB Updated] {system.name}")
 
     if len(systems) == 0:
         raise RuntimeError("Upserted a system but got no object back!")
     system = systems[0]
+    logger.info(f"[System DB Updated] {system.name}")
 
     system_dict = RawSystemsTimeseries.to_dict_from_eddn(model, system.id, controlling_faction_id)
     upsert_all(session, RawSystemsTimeseries, [system_dict])
+
+    return system
 
 
 def process_station_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
@@ -90,10 +91,25 @@ def process_station_entities(session: Session, model: journal_v1_0.Model, system
     # upsert_all(session, RawSystemsTimeseries, [system_dict])
 
 
-def process_faction_entities(
+def process_faction_entities(session: Session, model: journal_v1_0.Model) -> None:
+    """Process Factions entries from the journal-v1.0 EDDN event"""
+    faction_dicts = FactionsDB.to_dicts_from_eddn(model)
+    try:
+        upsert_all(session, FactionsDB, faction_dicts)
+    except Exception:
+        logger.warning(traceback.format_exc())
+        logger.warning(pformat(faction_dicts))
+        logger.warning(pformat(model.message.Factions))
+        return
+
+    if faction_dicts:
+        logger.info(f"[Factions DB Updated] {model.message.StarSystem} - {len(faction_dicts)} factions")
+
+
+def process_faction_presence_entities(
     session: Session, model: journal_v1_0.Model, system: SystemsDB, faction_id_mapping: dict[str, int]
 ) -> None:
-    """Process Factions related entries from the journal-v1.0 EDDN event"""
+    """Process Faction Presences entries from the journal-v1.0 EDDN event"""
     faction_presence_dicts = FactionPresencesDB.to_dicts_from_eddn(model, system.id, faction_id_mapping)
     faction_presence_ts_dicts = RawFactionPresencesTimeseries.to_dicts_from_eddn(model, system.id, faction_id_mapping)
     try:
@@ -325,27 +341,25 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         'event': 'CarrierJump', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:52:11Z'}}
     - CodexEntry
     """
-    # if model.message.Factions is not None:
-    system_name = cast(str, model.message.StarSystem)
-    try:
-        system = SystemsAdapter().get_system(system_name)
-    except ValueError:
-        # We currently only track systems with population > 0, so plenty of systems won't be found.
-        logger.debug(f"Encountered system we didn't know about! '{system_name}'")
-        return
-
     event_name = model.message.event.value
-    logger.trace(f"Processing event {event_name} in {system_name}")
-
-    faction_id_mapping = model_to_faction_name_to_id_mapping(model)
-
-    # Handle SystemsDB updates
-    if event_name in ["FSDJump", "Location"]:
-        process_system_entities(session, model, system, faction_id_mapping)
 
     # Handle FactionPresences updates
     if event_name in ["FSDJump", "Location"]:
-        process_faction_entities(session, model, system, faction_id_mapping)
+        process_faction_entities(session, model)
+
+    # Handle SystemsDB updates
+    faction_id_mapping = model_to_faction_name_to_id_mapping(model)
+    system = process_system_entities(session, model, faction_id_mapping)
+
+    if system is None:
+        logger.error(f"Could not upsert system! '{model.message.StarSystem}'")
+        return
+
+    logger.trace(f"Processing event {event_name} in {system.name}")
+
+    # Handle FactionPresences updates
+    if event_name in ["FSDJump", "Location"]:
+        process_faction_presence_entities(session, model, system, faction_id_mapping)
 
     # Handle StationsDB updates
     if event_name in ["Docked", "Location"]:
