@@ -34,8 +34,8 @@ def upgrade() -> None:
         sa.Column("timestamp", sa.DateTime(), nullable=False),
         sa.Column("schema_name", sa.String(), nullable=False),
         sa.Column("table_name", sa.String(), nullable=False),
-        sa.Column("size", sa.Integer(), nullable=True),
-        sa.Column("row_estimate", sa.Integer(), nullable=True),
+        sa.Column("size", sa.BigInteger(), nullable=False),
+        sa.Column("row_estimate", sa.BigInteger(), nullable=False),
         sa.PrimaryKeyConstraint("id", "timestamp"),
         schema="monitoring",
     )

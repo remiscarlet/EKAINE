@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import (
+    BigInteger,
     DateTime,
     Integer,
     PrimaryKeyConstraint,
@@ -27,5 +28,5 @@ class HypertableSizeTimeseries(BaseModel):
     schema_name: Mapped[str] = mapped_column(String)
     table_name: Mapped[str] = mapped_column(String)
 
-    size: Mapped[Optional[int]] = mapped_column(Integer)
-    row_estimate: Mapped[Optional[int]] = mapped_column(Integer)
+    size: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=False)
+    row_estimate: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=False)
