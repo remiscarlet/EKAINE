@@ -1,0 +1,15 @@
+---
+# https://github.com/EDCD/EDDI/blob/d600d35230a2b5f8dacebdc61d6e231b812a486a/DataDefinitions/StationModel.cs#L51-L71
+Coriolis Starport: Coriolis
+Bernal Starport: Bernal
+Ocellus Starport: Ocellus
+Orbis Starport: Orbis
+Outpost: Outpost
+Planetary Outpost: CraterOutpost
+Planetary Port: CraterPort
+Planetary Settlement: SurfaceStation
+Planetary Engineer Base: CraterOutpost
+Unknown Planetary: SurfaceStation
+Asteroid base: AsteroidBase
+Mega ship: Megaship
+Odyssey Settlement: OnFootSettlement
