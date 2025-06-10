@@ -1,0 +1,7 @@
+---
+# https://github.com/EDCD/EDDI/blob/d600d35230a2b5f8dacebdc61d6e231b812a486a/DataDefinitions/ReserveLevel.cs
+Depleted: DepletedResources
+Low: LowResources
+Common: CommonResources
+Major: MajorResources
+Pristine: PristineResources
