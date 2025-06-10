@@ -218,6 +218,7 @@ class ProcessedFactionPresencesTimeseries(BaseModel, FactionPresencesTimeseriesM
     __table_args__ = (
         PrimaryKeyConstraint("id", "timestamp"),
         UniqueConstraint("system_id", "faction_id", "timestamp", name="_tsdb_faction_presences_s_f_id_ts_uc"),
+        Index("ix_tsdb_faction_presences_is_backfilled_ts", "is_backfilled", "timestamp"),
         {"schema": "timescaledb"},
     )
 
@@ -298,6 +299,7 @@ class ProcessedPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressT
         UniqueConstraint(
             "system_id", "power_name", "timestamp", name="_tsdb_power_conflict_progress_s_id_p_name_ts_uc"
         ),
+        Index("ix_tsdb_power_conflict_progress_is_backfilled_ts", "is_backfilled", "timestamp"),
         {"schema": "timescaledb"},
     )
 

@@ -19,7 +19,7 @@ target_metadata = BaseModel.metadata
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-APP_SCHEMAS = {"core", "derived", "api", "timescaledb", "helpers", "monitoring"}
+APP_SCHEMAS = {"core", "derived", "api", "raw_timescaledb", "timescaledb", "helpers", "monitoring"}
 
 
 def include_object(

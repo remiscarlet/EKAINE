@@ -7,7 +7,7 @@ as $$
 with constants as (
   select
     p_bucket_interval_duration::interval as duration,
-    date_trunc('minute', now() at time zone 'utc') as now
+    date_trunc('minute', now()::timestamp without time zone) as now
 ), time_bucket as (
   select generate_series(
     date_trunc('week', (select now from constants)),
