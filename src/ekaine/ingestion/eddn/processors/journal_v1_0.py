@@ -5,8 +5,13 @@ from typing import cast
 from sqlalchemy.orm import Session
 
 from ekaine.common.logging import get_logger
-from ekaine.postgresql.adapter import FactionsAdapter, SystemsAdapter
-from ekaine.postgresql.db import FactionPresencesDB, SystemsDB
+from ekaine.postgresql.adapter import (
+    BodiesAdapter,
+    FactionsAdapter,
+    StationsAdapter,
+    SystemsAdapter,
+)
+from ekaine.postgresql.db import FactionPresencesDB, StationsDB, SystemsDB
 from ekaine.postgresql.timeseries import (
     RawFactionPresencesTimeseries,
     RawPowerConflictProgressTimeseries,
@@ -57,6 +62,32 @@ def process_system_entities(
 
     system_dict = RawSystemsTimeseries.to_dict_from_eddn(model, system.id, controlling_faction_id)
     upsert_all(session, RawSystemsTimeseries, [system_dict])
+
+
+def process_station_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
+    """Process Station related entries from the journal-v1.0 EDDN event"""
+
+    station_dict = StationsDB.to_dict_from_eddn(
+        model,
+        system.id,
+        lambda body_name: BodiesAdapter().get_body(body_name),
+        lambda station_name, system_id: StationsAdapter().get_station(station_name, system_id),
+        lambda faction_name: FactionsAdapter().get_faction(faction_name),
+    )
+
+    if station_dict is None:
+        # Was not a station-including Journal entry
+        return
+
+    stations = upsert_all(session, StationsDB, [station_dict])
+    logger.info(f"[Stations DB Updated] {stations[0].name} ({stations[0].type})")
+
+    # if len(systems) == 0:
+    #     raise RuntimeError("Upserted a system but got no object back!")
+    # system = systems[0]
+
+    # system_dict = RawSystemsTimeseries.to_dict_from_eddn(model, system.id, controlling_faction_id)
+    # upsert_all(session, RawSystemsTimeseries, [system_dict])
 
 
 def process_faction_entities(
@@ -307,6 +338,7 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
     logger.trace(f"Processing event {event_name} in {system_name}")
 
     faction_id_mapping = model_to_faction_name_to_id_mapping(model)
+
     # Handle SystemsDB updates
     if event_name in ["FSDJump", "Location"]:
         process_system_entities(session, model, system, faction_id_mapping)
@@ -314,6 +346,11 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
     # Handle FactionPresences updates
     if event_name in ["FSDJump", "Location"]:
         process_faction_entities(session, model, system, faction_id_mapping)
+
+    # Handle StationsDB updates
+    if event_name in ["Docked", "Location"]:
+        # Order matters - must come after FactionPresences
+        process_station_entities(session, model, system)
 
     # Handle Powerplay updates
     if event_name in ["FSDJump"]:

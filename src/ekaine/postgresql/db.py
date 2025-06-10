@@ -1,6 +1,6 @@
 from datetime import datetime
 from pprint import pformat
-from typing import Any, Optional, Tuple, Union, cast
+from typing import Any, Callable, Optional, Tuple, Union, cast
 
 from geoalchemy2 import Geometry, WKBElement
 from geoalchemy2.shape import from_shape
@@ -40,6 +40,7 @@ from ekaine.ingestion.spansh.models.system_spansh import (
     ThargoidWarSpansh,
 )
 from ekaine.postgresql import BaseModel, BaseModelWithId
+from ekaine.postgresql.types import ResolvedStationResult
 from gen.eddn_models import commodity_v3_0, journal_v1_0
 
 logger = get_logger(__name__)
@@ -344,30 +345,211 @@ class StationsDB(BaseModelWithId):
             "spansh_updated_at": spansh_station.update_time,
         }
 
-    # @staticmethod
-    # def to_dicts_from_eddn(eddn_model: approachsettlement_v1_0.Model, system_id: int) -> list[dict[str, Any]]:
-    #     dicts = []
-    #     for commodity in eddn_model.message:
-    #         symbol = get_symbol_by_eddn_name(commodity.name)
-    #         if symbol is None:
-    #             logger.warning(
-    #                 "Encountered a commodity in an EDDN Commodity model we didn't know about! "
-    #                 f"Got: '{commodity.name}'"
-    #             )
-    #             continue
+    planetary_station_types: list[str] = [
+        "Planetary Outpost",
+        "Planetary Port",
+        "Planetary Settlement",
+        "Planetary Engineer Base",
+        "Unknown Planetary",
+        "Odyssey Settlement",
+    ]
+    starport_station_types: list[str] = [
+        "Bernal Starport",
+        "Coriolis Starport",
+        "Ocellus Starport",
+        "Orbis Starport",
+        "Outpost",
+        "Asteroid base",
+        "Mega ship",
+    ]
 
-    #         dicts.append(
-    #             {
-    #                 "station_id": station_id,
-    #                 "commodity_sym": symbol,
-    #                 "buy_price": commodity.buyPrice,
-    #                 "sell_price": commodity.sellPrice,
-    #                 "supply": commodity.stock,
-    #                 "demand": commodity.demand,
-    #                 "updated_at": eddn_model.message.timestamp,
-    #             }
-    #         )
-    #     return dicts
+    @staticmethod
+    def to_owner_id_and_type_from_eddn(
+        journal_entry: journal_v1_0.Message,
+        station_type: str,
+        system_id: int,
+        body_name_to_db_fn: Callable[[str], BodiesDB],
+    ) -> Tuple[int, str]:
+        owner_type = None
+        if station_type in StationsDB.planetary_station_types:
+            owner_type = "body"
+        elif station_type in StationsDB.starport_station_types:
+            owner_type = "system"
+        else:
+            logger.warning(f"Got a station type we didn't know about! '{station_type}'\n{pformat(journal_entry)}")
+            raise ValueError(f"Unknown station type '{station_type}'!")
+
+        if owner_type == "system":
+            owner_id = system_id
+        elif owner_type == "body":
+            body_name = getattr(journal_entry, "Body", None)
+            if body_name is None:
+                logger.error(
+                    "Tried saving a Planetary station but could not find a 'Body' field in the Journal entry! "
+                    f"'{pformat(journal_entry)}'"
+                )
+                raise ValueError("Journal entry has no 'Body' field!")
+            try:
+                body = body_name_to_db_fn(body_name)
+            except Exception:
+                logger.error(
+                    f"Tried saving a Planetary station but did not know about its planetary body! Body: '{body_name}'"
+                )
+                raise ValueError(f"Didn't know about a Body name from a Journal Entry! '{body_name}'")
+            owner_id = body.id
+        else:
+            raise Exception(f"Somehow got unknown owner_type: '{owner_type}'")
+
+        return (owner_id, owner_type)
+
+    blocklisted_faction_names: list[str] = [
+        "FleetCarrier",
+        "Felicity Farseer",
+        "Juri Ishmaak",
+        "Colonel Bris Dekker",
+        "The Sarge",
+        "Elvira Martuuk",
+        "Marco Qwent",
+        "Professor Palin",
+        "Lori Jameson",
+        "Chloe Sedesi",
+        "Zacariah Nemo",
+        "Mel Brandon",
+        "The Dweller",
+        "Lei Cheung",
+        "Ram Tah",
+        "Marsha Hicks",
+        "Tod 'The Blaster' McQuinn",
+        "Selene Jean",
+        "Didi Vatermann",
+        "Bill Turner",
+        "Petra Olmanova",
+        "Liz Ryder",
+        "Hera Tani",
+        "Broo Tarquin",
+        "Tiana Fortune",
+        "Etienne Dorn",
+        "Hero Ferrari",
+        "Wellington Beck",
+        "Uma Laszlo",
+        "Jude Navarro",
+        "Terra Velasquez",
+        "Oden Geiger",
+        "Domino Green",
+        "Kit Fowler",
+        "Yarden Bond",
+        "Eleanor Bresa",
+        "Yi Shen",
+        "Rosa Dayette",
+        "Baltanos",
+    ]
+
+    @staticmethod
+    def to_dict_from_eddn(
+        eddn_model: journal_v1_0.Model,
+        system_id: int,
+        body_name_to_db_fn: Callable[[str], BodiesDB],
+        station_name_and_system_id_to_db_fn: Callable[[str, int], ResolvedStationResult],
+        faction_name_to_db_fn: Callable[[str], "FactionsDB"],
+    ) -> dict[str, Any] | None:
+        # TODO: Black market, Carrier Name
+        journal_entry = eddn_model.message
+
+        station_name = getattr(journal_entry, "StationName", None)
+        if station_name is None:
+            return None  # Has no station information
+
+        id64 = getattr(journal_entry, "MarketID", None)
+        if id64 is None:
+            logger.warning(f"Tried saving a station with no MarketId! '{pformat(journal_entry)}'")
+            return None
+
+        try:
+            existing_station = station_name_and_system_id_to_db_fn(station_name, system_id)
+        except ValueError:
+            logger.debug(f"Did not know about station '{station_name}' in system id {system_id}")
+            existing_station = None
+
+        if existing_station is not None:
+            # Some Journal entries don't contain a Body field, which makes it impossible to determine
+            # which body a planetary station belongs to. In such a case, we must rely on the station already existing in
+            # the DB in order to map its correct owner_id (body_id)
+            #
+            # My hypothesis is that certain journal event enums contain Body while others don't,
+            # even for the same logical station (Eg, Docked vs Location). Thus "order matters" with the event ingestion
+            normalized_station_type = existing_station.type
+            owner_id = existing_station.owner_id
+            owner_type = existing_station.owner_type
+        else:
+            station_type = getattr(journal_entry, "StationType", None)
+            if station_type is None:
+                logger.warning(f"Got a Journal entry with a StationName but no StationType!\n{pformat(eddn_model)}")
+                return None  # Has no station type
+
+            sym = get_symbol_by_eddn_name(station_type)
+            if sym is None:
+                logger.warning(f"==> Skipping Station Type: {station_type}")
+                return None  # TODO: Remove
+            normalized_station_type = sym
+
+            try:
+                [owner_id, owner_type] = StationsDB.to_owner_id_and_type_from_eddn(
+                    journal_entry, normalized_station_type, system_id, body_name_to_db_fn
+                )
+            except ValueError:
+                return None  # TODO: Remove
+
+        primary_economy = getattr(journal_entry, "StationEconomy", None)
+        government = getattr(journal_entry, "StationGovernment", None)
+        economies = {}
+        for econ in getattr(journal_entry, "StationEconomies", []):
+            econ_type = get_symbol_by_eddn_name(econ["Name"])
+            try:
+                economies[econ_type] = float(econ["Proportion"]) * 100
+            except ValueError:
+                logger.warning(f"Could not convert economy proportion to a valid float! Got: '{pformat(econ)}'")
+                return None
+
+        # Base Attributes
+        d: dict[str, Any] = {
+            "id64": id64,
+            "name": station_name,
+            "type": normalized_station_type,
+            "owner_id": owner_id,
+            "owner_type": owner_type,
+            "distance_to_arrival": getattr(journal_entry, "DistFromStarLS", None),
+            "primary_economy": get_symbol_by_eddn_name(primary_economy) if primary_economy is not None else None,
+            "economies": economies,
+            "government": get_symbol_by_eddn_name(government) if government is not None else None,
+            "services": getattr(journal_entry, "StationServices", []),
+            "eddn_updated_at": eddn_model.message.timestamp,
+            "latitude": getattr(journal_entry, "Latitude", None),
+            "longitude": getattr(journal_entry, "Longitude", None),
+        }
+
+        # Controlling Faction
+        try:
+            station_faction = getattr(journal_entry, "StationFaction", {})
+            station_faction_name = station_faction.get("Name")
+            station_faction_state = station_faction.get("State", None)
+        except Exception:
+            station_faction_name = None
+            station_faction_state = None
+
+        if station_faction_name is not None and station_faction_name not in StationsDB.blocklisted_faction_names:
+            faction = faction_name_to_db_fn(station_faction_name)
+            d["allegiance"] = faction.allegiance
+            d["controlling_faction"] = faction.name
+            d["controlling_faction_state"] = station_faction_state
+
+        # Landing Pads
+        landing_pads = getattr(journal_entry, "LandingPads", None)
+        if landing_pads is not None:
+            d["small_landing_pads"] = landing_pads.get("Small", 0)
+            d["medium_landing_pads"] = landing_pads.get("Medium", 0)
+            d["large_landing_pads"] = landing_pads.get("Large", 0)
+
+        return {k: v for k, v in d.items() if v is not None}
 
     def __repr__(self) -> str:
         return f"<StationsDB(id={self.id}, name={self.name!r})>"

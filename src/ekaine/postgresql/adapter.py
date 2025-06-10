@@ -7,7 +7,7 @@ from ekaine.common.logging import get_logger
 from ekaine.common.timer import Timer
 from ekaine.common.utils import dur_to_interval_str
 from ekaine.postgresql import SessionLocal
-from ekaine.postgresql.db import FactionPresencesDB, FactionsDB, SystemsDB
+from ekaine.postgresql.db import BodiesDB, FactionPresencesDB, FactionsDB, SystemsDB
 from ekaine.postgresql.types import (
     HotspotResult,
     MiningAcquisitionResult,
@@ -168,6 +168,18 @@ class SystemsAdapter:
         if not db_system:
             raise ValueError(f"System '{system_name}' not found")
         return db_system
+
+
+class BodiesAdapter:
+    def __init__(self, session: Session | None = None) -> None:
+        self.session = session or SessionLocal()
+
+    def get_body(self, body_name: str) -> BodiesDB:
+        query = select(BodiesDB).where(BodiesDB.name == body_name)
+        db_body = self.session.scalars(query).first()
+        if not db_body:
+            raise ValueError(f"Body '{body_name}' not found")
+        return db_body
 
 
 class StationsAdapter:
