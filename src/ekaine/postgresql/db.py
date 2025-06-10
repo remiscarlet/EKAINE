@@ -167,6 +167,72 @@ class BodiesDB(BaseModelWithId):
             "distance_to_arrival_updated_at": getattr(spansh_body.timestamps, "distance_to_arrival", None),
         }
 
+    @staticmethod
+    def to_dict_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> dict[str, Any] | None:
+        msg = eddn_model.message
+        body_name = getattr(msg, "Body", None)
+        if body_name is None:
+            body_name = getattr(msg, "BodyName", None)
+        if body_name is None:
+            # Journal entry with no body name - no body present.
+            return None
+
+        materials = {}
+        for mat in getattr(msg, "Materials", []):
+            name = mat.get("Name")
+            if name is None:
+                raise ValueError(f"Could not parse material name out of body! '{pformat(mat)}'")
+            percent = mat.get("Percent")
+            if percent is None:
+                raise ValueError(f"Could not parse material percent out of body! '{pformat(mat)}'")
+            materials[name] = percent
+
+        d = {
+            "system_id": system_id,
+            "body_id": getattr(msg, "BodyID", None),
+            "name": body_name,
+            # "absolute_magnitude": getattr(msg, "BodyID", None),
+            # "age": spansh_body.age,
+            "arg_of_periapsis": getattr(msg, "Periapsis", None),
+            "ascending_node": getattr(msg, "AscendingNode", None),
+            "atmosphere_composition": getattr(msg, "AtmosphericComposition", None),
+            "atmosphere_type": getattr(msg, "AtmosphereType", None),
+            "axial_tilt": getattr(msg, "AxialTilt", None),
+            "distance_to_arrival": getattr(msg, "DistanceFromArrivalLS", None),
+            "earth_masses": getattr(msg, "MassEM", None),
+            "gravity": getattr(msg, "SurfaceGravity", None),
+            "is_landable": getattr(msg, "Landable", None),
+            "luminosity": getattr(msg, "Luminosity", None),
+            # "main_star": spansh_body.main_star,
+            "materials": materials if materials else None,
+            "mean_anomaly": getattr(msg, "MeanAnomaly", None),
+            "orbital_eccentricity": getattr(msg, "Eccentricity", None),
+            "orbital_inclination": getattr(msg, "OrbitalInclination", None),
+            "orbital_period": getattr(msg, "OrbitalPeriod", None),
+            "parents": getattr(msg, "Parents", None),
+            "radius": getattr(msg, "Radius", None),
+            # "reserve_level": getattr(msg, "Luminosity", None),
+            "rotational_period": getattr(msg, "RotationPeriod", None),
+            # "rotational_period_tidally_locked": getattr(msg, "Luminosity", None),
+            "semi_major_axis": getattr(msg, "SemiMajorAxis", None),
+            # "solar_masses": getattr(msg, "Luminosity", None),
+            # "solar_radius": getattr(msg, "Luminosity", None),
+            "solid_composition": getattr(msg, "Composition", None),
+            # "spectral_class": spansh_body.spectral_class,
+            # "sub_type": spansh_body.sub_type,
+            "surface_pressure": getattr(msg, "SurfacePressure", None),
+            "surface_temperature": getattr(msg, "SurfaceTemperature", None),
+            "terraforming_state": getattr(msg, "TerraformState", None),
+            "type": getattr(msg, "BodyType", None),
+            "volcanism_type": getattr(msg, "Volcanism", None),
+            "mean_anomaly_updated_at": None if getattr(msg, "MeanAnomaly", None) is None else msg.timestamp,
+            "distance_to_arrival_updated_at": (
+                None if getattr(msg, "DistanceFromArrivalLS", None) is None else msg.timestamp
+            ),
+        }
+
+        return {k: v for k, v in d.items() if v is not None}
+
     def __repr__(self) -> str:
         return f"<BodiesDB(id={self.id}, name={self.name!r})>"
 

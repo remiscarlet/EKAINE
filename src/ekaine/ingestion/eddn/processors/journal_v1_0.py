@@ -10,7 +10,13 @@ from ekaine.postgresql.adapter import (
     FactionsAdapter,
     StationsAdapter,
 )
-from ekaine.postgresql.db import FactionPresencesDB, FactionsDB, StationsDB, SystemsDB
+from ekaine.postgresql.db import (
+    BodiesDB,
+    FactionPresencesDB,
+    FactionsDB,
+    StationsDB,
+    SystemsDB,
+)
 from ekaine.postgresql.timeseries import (
     RawFactionPresencesTimeseries,
     RawPowerConflictProgressTimeseries,
@@ -106,6 +112,23 @@ def process_faction_entities(session: Session, model: journal_v1_0.Model) -> Non
         logger.info(f"[Factions DB Updated] {model.message.StarSystem} - {len(faction_dicts)} factions")
 
 
+def process_body_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
+    """Process Bodies entries from the journal-v1.0 EDDN event"""
+    body_dict = BodiesDB.to_dict_from_eddn(model, system.id)
+    if body_dict is None:
+        return
+
+    try:
+        upsert_all(session, BodiesDB, [body_dict])
+    except Exception:
+        logger.warning(traceback.format_exc())
+        logger.warning(pformat(body_dict))
+        logger.warning(pformat(model.message.Factions))
+        return
+
+    logger.info(f"[Bodies DB Updated] {model.message.StarSystem} - {body_dict['name']}")
+
+
 def process_faction_presence_entities(
     session: Session, model: journal_v1_0.Model, system: SystemsDB, faction_id_mapping: dict[str, int]
 ) -> None:
@@ -121,16 +144,19 @@ def process_faction_presence_entities(
         logger.warning(pformat(model.message.Factions))
         return
 
-    if len(faction_presence_dicts) == len(faction_presence_ts_dicts):
-        logger.info(
-            f"[Faction Presence DB + Timeseries Updated] {system.name} - {len(faction_presence_dicts)} factions"
-        )
-    else:
-        logger.warning("?? Updated different numbers of rows in the DB vs Timeseries for Faction Presence!")
-        logger.info(
-            f"[Faction Presence DB + Timeseries Updated] {system.name} - {len(faction_presence_dicts)} factions"
-        )
-        logger.info(f"[Faction Presence Timeseries Updated] {system.name} - {len(faction_presence_ts_dicts)} factions")
+    if len(faction_presence_dicts + faction_presence_ts_dicts):
+        if len(faction_presence_dicts) == len(faction_presence_ts_dicts):
+            logger.info(
+                f"[Faction Presence DB + Timeseries Updated] {system.name} - {len(faction_presence_dicts)} factions"
+            )
+        else:
+            logger.warning("?? Updated different numbers of rows in the DB vs Timeseries for Faction Presence!")
+            logger.info(
+                f"[Faction Presence DB + Timeseries Updated] {system.name} - {len(faction_presence_dicts)} factions"
+            )
+            logger.info(
+                f"[Faction Presence Timeseries Updated] {system.name} - {len(faction_presence_ts_dicts)} factions"
+            )
 
 
 def process_powerplay_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
@@ -342,6 +368,7 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
     - CodexEntry
     """
     event_name = model.message.event.value
+    logger.trace(f"Processing event {event_name} in {model.message.StarSystem}")
 
     # Handle FactionPresences updates
     if event_name in ["FSDJump", "Location"]:
@@ -355,7 +382,9 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         logger.error(f"Could not upsert system! '{model.message.StarSystem}'")
         return
 
-    logger.trace(f"Processing event {event_name} in {system.name}")
+    # Handle BodiesDB updates
+    if event_name in ["Scan", "Location"]:
+        process_body_entities(session, model, system)
 
     # Handle FactionPresences updates
     if event_name in ["FSDJump", "Location"]:

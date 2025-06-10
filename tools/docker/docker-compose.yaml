@@ -29,10 +29,7 @@ services:
       - ./timescaledb/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./timescaledb/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf
       - ./timescaledb/conf/pg_ident.conf:/etc/postgresql/pg_ident.conf
-    command:
-      - bash
-      - -c
-      - exec postgres -c config_file=/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     logging: *default-logging
 
   smallstep-ca:
@@ -95,6 +92,7 @@ services:
 
 volumes:
   pg-data:
+  pg-data2:
 
 networks:
   ekaine_net:
