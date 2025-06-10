@@ -57,10 +57,11 @@ def upgrade() -> None:
     with open(functions_sql_dir / "monitoring_insert_tsdb_hypertable_sizes_v1.sql") as f:
         op.execute(f.read())
 
-    every = 15  # minutes
     op.execute(
         "SELECT cron.schedule('insert_tsdb_hypertable_sizes', "
-        f"'*/{every} * * * *', $$CALL monitoring.insert_tsdb_hypertable_sizes('{every} minutes');$$);"
+        "'2-59/5 * * * *', $$CALL monitoring.insert_tsdb_hypertable_sizes();$$);"
+        # Every 5 minutes offset by 2 minutes.
+        # Eg, :02, :07, :12, which allows processor crons to run on the :00, :05, etc
     )
 
 
