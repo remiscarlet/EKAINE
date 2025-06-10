@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.schema import SchemaItem
 
 import ekaine.postgresql.db  # noqa: F401
+import ekaine.postgresql.monitoring  # noqa: F401
 import ekaine.postgresql.timeseries  # noqa: F401
 from ekaine.postgresql import BaseModel
 
@@ -18,7 +19,7 @@ target_metadata = BaseModel.metadata
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
-APP_SCHEMAS = {"core", "derived", "api", "timescaledb"}
+APP_SCHEMAS = {"core", "derived", "api", "timescaledb", "helpers", "monitoring"}
 
 
 def include_object(
