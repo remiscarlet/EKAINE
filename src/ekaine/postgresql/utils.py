@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import Insert as PGInsert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.dml import ReturningInsert
 
 from ekaine.common.logging import get_logger
 from ekaine.postgresql import BaseModel
@@ -34,16 +35,20 @@ def upsert_all[T: BaseModel](
     logger.trace(repr([{k: v for k, v in item.items() if k in cols_to_print} for item in rows]))
 
     updatable_cols = [
-        col.key
-        for col in model.__table__.columns
-        if col.name not in conflict_cols and col.name not in exclude_update_cols
+        col for col in model.__table__.columns if col.name not in conflict_cols and col.name not in exclude_update_cols
     ]
 
     insert_stmt: PGInsert = pg_insert(model).values(rows)
     excluded = insert_stmt.excluded  # This line actually matters. Must explicitly grab 'excluded' namespace
-    coalesce_updates = {col: func.coalesce(getattr(excluded, col), getattr(model, col)) for col in updatable_cols}
+    coalesce_updates = {
+        col: func.coalesce(
+            getattr(excluded, col.name),  # new value: EXCLUDED.sy_cf_id
+            model.__table__.c[col.name],  # existing:  table.c["sy_cf_id"]
+        )
+        for col in updatable_cols
+    }
 
-    returning_stmt = insert_stmt.on_conflict_do_update(
+    returning_stmt: ReturningInsert[tuple[T]] = insert_stmt.on_conflict_do_update(
         index_elements=conflict_cols,
         set_=coalesce_updates,
     ).returning(model)

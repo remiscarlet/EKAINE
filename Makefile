@@ -137,6 +137,12 @@ up-db:
 down-db:
 	docker compose -f tools/docker/docker-compose.yaml stop postgres
 
+up-app:
+	docker compose -f tools/docker/docker-compose.yaml up --build -d app
+
+down-app:
+	docker compose -f tools/docker/docker-compose.yaml stop app
+
 ## Alembic
 
 alembic-downgrade-one:

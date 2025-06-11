@@ -229,7 +229,12 @@ class BodiesDB(BaseModelWithId):
 
         spectral_class = BodiesDB.to_spectral_class_from_journal_entry(journal_entry)
         materials = BodiesDB.to_materials_from_journal_entry(journal_entry)
-        type = BodiesDB.to_type_from_journal_entry(journal_entry, body_name, luminosity, sub_type)
+        try:
+            type = BodiesDB.to_type_from_journal_entry(journal_entry, body_name, luminosity, sub_type)
+        except ValueError:
+            # ValueErrors if entry is a Ring (which Journals expose as a type of Body)
+            # In such a case, just bail from the BodiesDB and let RingsDB take care of this journal.
+            return None
 
         if type is None:
             logger.info(pformat(journal_entry))
