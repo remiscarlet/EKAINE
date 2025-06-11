@@ -1226,7 +1226,9 @@ class SystemsDB(BaseModelWithId):
             "powers_updated_at": msg.timestamp,
         }
 
-        return {k: v for k, v in d.items() if v is not None}
+        rtn = {k: v for k, v in d.items() if v is not None}
+        logger.info(pformat(rtn))
+        return rtn
 
     def __repr__(self) -> str:
         return f"<SystemsDB(id={self.id}, name={self.name!r})>"

@@ -27,7 +27,7 @@ def upgrade() -> None:
     """Upgrade schema."""
     op.execute("create schema if not exists helpers")
 
-    with open(functions_sql_dir / "derived_calculate_epoch_duration_since_timestamp_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_calculate_epoch_duration_since_timestamp_v1.sql") as f:
         op.execute(f.read())
 
     op.execute("CREATE SCHEMA IF NOT EXISTS raw_timescaledb")
@@ -238,11 +238,11 @@ def downgrade() -> None:
     op.execute("drop extension if exists pg_cron")
 
     op.execute("drop function if exists helpers.calculate_commodity_score")
-    with open(functions_sql_dir / "derived_calculate_commodity_score_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_calculate_commodity_score_v1.sql") as f:
         op.execute(f.read())
 
     op.execute("drop function if exists helpers.calculate_epoch_duration_since_timestamp")
-    with open(functions_sql_dir / "derived_calculate_epoch_duration_since_timestamp_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_calculate_epoch_duration_since_timestamp_v1.sql") as f:
         op.execute(f.read())
 
     op.drop_index(

@@ -15,6 +15,7 @@ with constants as (
     (select duration from constants)
   ) as bucket_start
   order by bucket_start desc
+  offset 1
   limit 1
 ), config as (
   select

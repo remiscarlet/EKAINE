@@ -33,11 +33,11 @@ def upgrade() -> None:
         op.execute(f.read())
     with open(views_sql_dir / "derived_unoccupied_systems_view_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "derived_calculate_commodity_score_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_calculate_commodity_score_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "derived_get_top_buy_commodities_in_system_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_get_top_buy_commodities_in_system_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "derived_get_top_sell_commodities_in_system_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "derived_get_top_sell_commodities_in_system_v1.sql") as f:
         op.execute(f.read())
     with open(functions_sql_dir / "derived_get_systems_with_power_and_state_v1.sql") as f:
         op.execute(f.read())

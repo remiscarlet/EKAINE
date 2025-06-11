@@ -2,6 +2,8 @@ import re
 import traceback
 from typing import Any, Type
 
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import Insert as PGInsert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -37,16 +39,19 @@ def upsert_all[T: BaseModel](
         if col.name not in conflict_cols and col.name not in exclude_update_cols
     ]
 
-    stmt = (
-        pg_insert(model)
-        .values(rows)
-        .on_conflict_do_update(
-            index_elements=conflict_cols, set_={col: getattr(pg_insert(model).excluded, col) for col in updatable_cols}
-        )
-    )
+    insert_stmt: PGInsert = pg_insert(model).values(rows)
+    excluded = insert_stmt.excluded  # This line actually matters. Must explicitly grab 'excluded' namespace
+    coalesce_updates = {col: func.coalesce(getattr(excluded, col), getattr(model, col)) for col in updatable_cols}
+
+    returning_stmt = insert_stmt.on_conflict_do_update(
+        index_elements=conflict_cols,
+        set_=coalesce_updates,
+    ).returning(model)
+
+    logger.info(str(returning_stmt))
 
     try:
-        results = session.scalars(stmt.returning(model), execution_options={"populate_existing": True})
+        results = session.scalars(returning_stmt, execution_options={"populate_existing": True})
         session.commit()
         return list(iter(results.all()))
     except SQLAlchemyError:
