@@ -29,13 +29,12 @@ class BaseModelWithId(BaseModel):
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
 
-# Synchronous engine (common for Alembic migrations, etc)
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
-    echo=True,  # Set to True for SQL query debug logs
+    echo=False,  # Set to True for SQL query debug logs
 )
 
 SessionLocal = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))

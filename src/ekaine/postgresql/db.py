@@ -1227,7 +1227,6 @@ class SystemsDB(BaseModelWithId):
         }
 
         rtn = {k: v for k, v in d.items() if v is not None}
-        logger.info(pformat(rtn))
         return rtn
 
     def __repr__(self) -> str:

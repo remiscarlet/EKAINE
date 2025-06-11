@@ -34,7 +34,7 @@ def upsert_all[T: BaseModel](
     logger.trace(repr([{k: v for k, v in item.items() if k in cols_to_print} for item in rows]))
 
     updatable_cols = [
-        col.name
+        col.key
         for col in model.__table__.columns
         if col.name not in conflict_cols and col.name not in exclude_update_cols
     ]
@@ -47,8 +47,6 @@ def upsert_all[T: BaseModel](
         index_elements=conflict_cols,
         set_=coalesce_updates,
     ).returning(model)
-
-    logger.info(str(returning_stmt))
 
     try:
         results = session.scalars(returning_stmt, execution_options={"populate_existing": True})
