@@ -218,11 +218,13 @@ order by timestamp, system_id, power_name, updated_at desc;"""
     with open(functions_sql_dir / "helpers_process_raw_tsdb_power_conflict_progress_v1.sql") as f:
         op.execute(f.read())
 
-    every = 5  # minutes
+    every = 15  # minutes
     op.execute(
         "SELECT cron.schedule('process_raw_tsdb_faction_presences', "
         f"'*/{every} * * * *', $$CALL helpers.process_raw_tsdb_faction_presences('{every} minutes');$$);"
     )
+
+    every = 5  # minutes
     op.execute(
         "SELECT cron.schedule('process_raw_tsdb_power_conflict_progress', "
         f"'*/{every} * * * *', $$CALL helpers.process_raw_tsdb_power_conflict_progress('{every} minutes');$$);"
