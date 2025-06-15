@@ -29,7 +29,7 @@ def upgrade() -> None:
     op.add_column("market_commodities", sa.Column("demand_bracket", sa.SmallInteger(), nullable=True), schema="core")
     op.add_column("market_commodities", sa.Column("supply_bracket", sa.SmallInteger(), nullable=True), schema="core")
 
-    with open(views_sql_dir / "derived_acquisition_routes_v1.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v1.sql") as f:
         op.execute(f.read())
 
     op.create_table(
