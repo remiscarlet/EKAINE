@@ -11,6 +11,7 @@ services:
     container_name: ekaine_db
     image: timescale/timescaledb-ha:pg17
     restart: always
+    shm_size: 2g
     environment:
       POSTGRES_USER: ekaine
       POSTGRES_PASSWORD: ekaine_pw

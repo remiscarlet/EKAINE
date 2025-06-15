@@ -25,7 +25,7 @@ class ResolvedStationResult(BaseModel):
     primary_economy: str | None
     services: list[str]
     type: str
-    prohibited_commodities: list[str]
+    prohibited_commodities: list[str] | None
     carrier_name: str | None
     latitude: float | None
     longitude: float | None

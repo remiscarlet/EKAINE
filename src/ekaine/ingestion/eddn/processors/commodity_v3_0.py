@@ -33,16 +33,17 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
 
     try:
         system = SystemsAdapter().get_system(system_name)
-    except ValueError:
-        logger.warning(f"Encountered system name that we don't know about! '{system_name}'")
+    except ValueError as e:
+        logger.warning(f"Encountered system name that we don't know about! '{system_name}' - {str(e)}")
         return
 
     try:
         station = StationsAdapter().get_station(station_name, system.id)
-    except ValueError:
+    except ValueError as e:
         logger.warning(
             "Encountered station name that we don't know about! "
             f"Station name '{station_name}', System id: '{system.id}'"
+            f" - {str(e)}"
         )
         return
 
@@ -66,10 +67,11 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         system_controlling_faction = FactionPresencesAdapter().get_faction_presence(
             system.controlling_faction_id, system.id
         )
-    except ValueError:
+    except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know its FactionPresence about! "
             f"System Controlling Faction Id '{system.controlling_faction_id}', System id: '{system.id}'"
+            f" - {str(e)}"
         )
         return
 
@@ -82,19 +84,21 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
 
     try:
         station_faction = FactionsAdapter().get_faction(station.controlling_faction)
-    except ValueError:
+    except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know about! "
             f"Faction Name '{station.controlling_faction}', Station id: '{station.id}'"
+            f" - {str(e)}"
         )
         return
 
     try:
         station_controlling_faction = FactionPresencesAdapter().get_faction_presence(station_faction.id, system.id)
-    except ValueError:
+    except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know its FactionPresence about! "
             f"Station Controlling Faction id '{station_faction.id}', System id: '{system.id}'"
+            f" - {str(e)}"
         )
         return
 
