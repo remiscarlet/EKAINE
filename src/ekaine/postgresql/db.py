@@ -60,7 +60,7 @@ class BodiesDB(BaseModelWithId):
         {"schema": "core"},
     )
 
-    name: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False, index=True)
 
     id64: Mapped[Optional[int]] = mapped_column(BigInteger)
     id_spansh: Mapped[Optional[int]] = mapped_column(BigInteger)
@@ -365,7 +365,9 @@ class HotspotsDB(BaseModelWithId):
 
     ring_id: Mapped[int] = mapped_column(ForeignKey("core.rings.id"), nullable=False, index=True)
     ring: Mapped["RingsDB"] = relationship(back_populates="hotspots")
-    commodity_sym: Mapped[str] = mapped_column(ForeignKey("core.commodities.symbol"))  # Small lookup table; no index
+    commodity_sym: Mapped[str] = mapped_column(
+        ForeignKey("core.commodities.symbol"), index=True
+    )  # Small lookup table; no index
 
     count: Mapped[Optional[int]] = mapped_column(Integer)
 
@@ -390,7 +392,7 @@ class HotspotsDB(BaseModelWithId):
 class StationsDB(BaseModelWithId):
     unique_columns = ("name", "owner_id")
     __tablename__ = "stations"
-    __table_args__ = (UniqueConstraint(*unique_columns, name="_station_name_owner_distanace_uc"), {"schema": "core"})
+    __table_args__ = (UniqueConstraint(*unique_columns, name="_station_name_owner_distance_uc"), {"schema": "core"})
 
     id64: Mapped[Optional[int]] = mapped_column(BigInteger)
     id_spansh: Mapped[Optional[int]] = mapped_column(BigInteger)
@@ -742,17 +744,17 @@ class CommoditiesDB(BaseModel):
     id64: Mapped[Optional[int]] = mapped_column(BigInteger)
 
     symbol: Mapped[str] = mapped_column(Text, primary_key=True)
-    name: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False, index=True)
 
     avg_price: Mapped[Optional[int]] = mapped_column(Integer)
-    rare_goods: Mapped[Optional[bool]] = mapped_column(Boolean)
-    corrosive: Mapped[Optional[bool]] = mapped_column(Boolean)
+    rare_goods: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
+    corrosive: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
 
-    category: Mapped[Optional[str]] = mapped_column(Text)
-    is_mineable: Mapped[Optional[bool]] = mapped_column(Boolean)
-    ring_types: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
-    mining_method: Mapped[Optional[str]] = mapped_column(Text)
-    has_hotspots: Mapped[Optional[bool]] = mapped_column(Boolean)
+    category: Mapped[Optional[str]] = mapped_column(Text, index=True)
+    is_mineable: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
+    ring_types: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text), index=True)
+    mining_method: Mapped[Optional[str]] = mapped_column(Text, index=True)
+    has_hotspots: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
 
     def __repr__(self) -> str:
         return f"<CommoditiesDB(id='{self.symbol}', name={self.name!r})>"
@@ -767,13 +769,13 @@ class MarketCommoditiesDB(BaseModelWithId):
     )
 
     station_id: Mapped[int] = mapped_column(Integer, ForeignKey("core.stations.id"), nullable=False, index=True)
-    commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False)
+    commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False, index=True)
 
     buy_price: Mapped[Optional[int]] = mapped_column(Integer)
     sell_price: Mapped[Optional[int]] = mapped_column(Integer)
     supply: Mapped[Optional[int]] = mapped_column(Integer)
     demand: Mapped[Optional[int]] = mapped_column(Integer)
-    updated_at: Mapped[Optional[DateTime]] = mapped_column(DateTime)
+    updated_at: Mapped[Optional[DateTime]] = mapped_column(DateTime, index=True)
 
     demand_bracket: Mapped[Optional[int]] = mapped_column(SmallInteger)
     supply_bracket: Mapped[Optional[int]] = mapped_column(SmallInteger)
@@ -1000,11 +1002,11 @@ class FactionPresencesDB(BaseModelWithId):
     faction: Mapped["FactionsDB"] = relationship(back_populates="faction_presences")
 
     influence: Mapped[Optional[float]] = mapped_column(Float)
-    state: Mapped[Optional[str]] = mapped_column(Text)
+    state: Mapped[Optional[str]] = mapped_column(Text, index=True)
     happiness: Mapped[Optional[str]] = mapped_column(Text)
-    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, index=True)
 
-    active_states: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
+    active_states: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text), index=True)
     pending_states: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
     recovering_states: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text))
 

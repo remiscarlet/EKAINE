@@ -104,7 +104,7 @@ def upgrade() -> None:
         sa.Column("eddn_updated_at", sa.DateTime(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name", "owner_id", name="_station_name_owner_distanace_uc"),
+        sa.UniqueConstraint("name", "owner_id", name="_station_name_owner_distance_uc"),
         schema="core",
     )
     op.create_index(op.f("ix_core_stations_name"), "stations", ["name"], unique=False, schema="core")

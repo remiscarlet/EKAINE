@@ -224,7 +224,6 @@ order by timestamp, system_id, power_name, updated_at desc;"""
         f"'*/{every} * * * *', $$CALL helpers.process_raw_tsdb_faction_presences('{every} minutes');$$);"
     )
 
-    every = 5  # minutes
     op.execute(
         "SELECT cron.schedule('process_raw_tsdb_power_conflict_progress', "
         f"'*/{every} * * * *', $$CALL helpers.process_raw_tsdb_power_conflict_progress('{every} minutes');$$);"

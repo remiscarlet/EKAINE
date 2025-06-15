@@ -10,6 +10,8 @@ select
     mc.demand,
     mc.buy_price,
     mc.supply,
+    mc.demand_bracket,
+    mc.supply_bracket,
     mc.updated_at
 from core.market_commodities as mc
 inner join derived.resolved_stations_view as st on mc.station_id = st.id

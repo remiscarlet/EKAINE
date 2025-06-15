@@ -68,7 +68,7 @@ Table "core"."stations" {
   "id" int4 [pk, not null, increment]
 
   Indexes {
-    (name, owner_id) [type: btree, name: "_station_name_owner_distanace_uc"]
+    (name, owner_id) [type: btree, name: "_station_name_owner_distance_uc"]
     name [type: btree, name: "ix_core_stations_name"]
     owner_id [type: btree, name: "ix_core_stations_owner_id"]
     owner_type [type: btree, name: "ix_core_stations_owner_type"]
