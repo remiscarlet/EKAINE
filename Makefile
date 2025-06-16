@@ -21,6 +21,10 @@ run-prod:
 discord-bot:
 	python src/ekaine/interfaces/discord/bot.py
 
+## FastAPI
+fast-api:
+	fastapi run src/ekaine/interfaces/rest/api_handler.py --port 8001
+
 ## EDDN
 eddn-listener:
 	poetry run cli ingestion eddn-listener

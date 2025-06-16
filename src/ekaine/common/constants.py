@@ -1,7 +1,6 @@
 # Data comes from Spansh and EDSM dumps
+import os
 from pathlib import Path
-
-import yaml
 
 PWD = Path.cwd()
 REPO_ROOT = Path(__file__).parent.parent.parent.parent
@@ -39,13 +38,8 @@ EDDN_SCHEMA_MAPPING_FILE = GEN_DIR / "eddn_schema_to_model_mapping.json"
 # Others
 SQL_DIR = REL_ROOT_PATH / "src" / "ekaine" / "postgresql" / "sql"
 
-
-CONFIG_FILE = REL_ROOT_PATH / "config.yaml"
-if not CONFIG_FILE.exists():
-    raise RuntimeError(
-        "config.yaml could not be found! Please create one while using config.example.yaml as an example."
-    )
-
-with CONFIG_FILE.open("r") as file:
-    data = yaml.safe_load(file)
-    DISCORD_BOT_TOKEN = data.get("discord_bot", {}).get("token", "NO_TOKEN")
+GRAFANA_URL = os.getenv("GRAFANA_URL", None)
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", None)
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", None)
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", None)
+SESSION_SECRET = os.getenv("COOKIE_SECRET", None)

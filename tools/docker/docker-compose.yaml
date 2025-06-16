@@ -27,6 +27,7 @@ services:
       - pg-data:/home/postgres/pgdata
       - ./ekaine_ca/certs:/etc/postgresql/ssl:ro
       - ./timescaledb/scripts/020_fix-perms.sh:/docker-entrypoint-initdb.d/020_fix-perms.sh
+      - ./timescaledb/scripts/030_add-grafana.sql:/docker-entrypoint-initdb.d/030_add-grafana.sql
       - ./timescaledb/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./timescaledb/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf
       - ./timescaledb/conf/pg_ident.conf:/etc/postgresql/pg_ident.conf
@@ -40,7 +41,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports: [3000:3000]
+    expose:
+      - "3000"
+    # ports: [3000:3000]
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
@@ -95,8 +98,15 @@ services:
         condition: service_completed_successfully
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     environment:
+      GRAFANA_URL: "http://grafana:3000"
+      DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
+      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+      DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
+      COOKIE_SECRET: "${COOKIE_SECRET}"
       DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine?sslmode=disable # Talks locally through docker network
-    ports: [8000:8000]
+    ports:
+      - 8000:8000
+      - 8001:8001
     networks: [ekaine_net]
     volumes:
       - ../../tools/:/app/tools
@@ -115,4 +125,5 @@ networks:
     driver: bridge
     ipam:
       config:
+        # Used in tools/docker/grafana/conf/grafana.ini
         - subnet: 172.66.0.0/16
