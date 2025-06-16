@@ -33,6 +33,20 @@ services:
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
     logging: *default-logging
 
+  grafana:
+    container_name: ekaine_grafana
+    image: grafana/grafana-enterprise
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: [3000:3000]
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+    networks: [ekaine_net]
+    logging: *default-logging
+
   smallstep-ca:
     image: remiscarlet/ekaine_ca
     container_name: ekaine_ca
@@ -94,6 +108,7 @@ services:
 volumes:
   pg-data:
   pg-data2:
+  grafana-data:
 
 networks:
   ekaine_net:

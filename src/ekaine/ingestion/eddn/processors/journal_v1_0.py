@@ -220,7 +220,6 @@ def process_hotspot_entities(session: Session, model: journal_v1_0.Model, system
             logger.warning(pformat(hotspot_dicts))
             return
 
-        logger.info("!!!!!!!!!!!")
         logger.info("[Hotspots DB Updated] " f"{body_name} - {len(hotspot_dicts)} Hotspots")
 
 
@@ -257,19 +256,17 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
     if event_name in ["Scan", "Location", "SAASignalsFound"]:
         process_ring_entities(session, model)
 
-    # if event_name in ["FSDJump", "Location"]:
-    #     process_faction_presence_entities(session, model, system, faction_id_mapping)
+    if event_name in ["FSDJump", "Location"]:
+        process_faction_presence_entities(session, model, system, faction_id_mapping)
 
-    # if event_name in ["Docked", "Location"]:
-    #     # Order matters - must come after FactionPresences
-    #     process_station_entities(session, model, system)
+    if event_name in ["Docked", "Location"]:
+        # Order matters - must come after FactionPresences
+        process_station_entities(session, model, system)
 
-    # if event_name in ["FSDJump"]:
-    #     process_powerplay_entities(session, model, system)
+    if event_name in ["FSDJump"]:
+        process_powerplay_entities(session, model, system)
 
     if event_name in ["SAASignalsFound"]:
-        logger.info("SAA SIGNALS???")
-        logger.info(pformat(model))
         process_hotspot_entities(session, model, system)
 
 
