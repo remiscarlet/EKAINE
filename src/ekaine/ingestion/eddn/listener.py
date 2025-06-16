@@ -16,7 +16,7 @@ from ekaine.ingestion.eddn import processors
 from ekaine.ingestion.eddn.schemas import get_schema_model_mapping
 from ekaine.postgresql import SessionLocal
 from ekaine.postgresql.adapter import FactionsAdapter
-from gen.eddn_models import (
+from gen.eddn_models import (  # fssbodysignals_v1_0,
     approachsettlement_v1_0,
     commodity_v3_0,
     fsssignaldiscovered_v1_0,
@@ -52,7 +52,7 @@ processor_mapping: dict[type[Any], Callable[[Session, Any], None]] = {
     # approachsettlement_v1_0.Model: self.process_approachsettlement_v1_0,
     journal_v1_0.Model: processors.journal_v1_0.process_model,
     fsssignaldiscovered_v1_0.Model: processors.fsssignaldiscovered_v1_0.process_model,
-    # fssbodysignals_v1_0.Model: processors.fssbodysignals_v1_0,
+    # fssbodysignals_v1_0.Model: processors.fssbodysignals_v1_0.process_model,
 }
 
 
@@ -86,7 +86,8 @@ def run_listener(session: Session) -> None:
     print("Listening for messages...")
     while True:
         msg = sub.recv_multipart()
-        d = json.loads(zlib.decompress(msg[0]))
+        raw_json = zlib.decompress(msg[0])
+        d = json.loads(raw_json)
         schema = d.get("$schemaRef")
         if schema is None:
             logger.warning("Could not find a valid $schemaRef field in decoded EDDN message!")
@@ -108,6 +109,10 @@ def run_listener(session: Session) -> None:
         if issubclass(obj_type, BaseModel) and obj_type in processor_mapping:
             try:
                 event = d.get("message", {}).get("event")
+                if "eRingClass" in raw_json.decode("utf8"):
+                    logger.trace("\n")
+                    logger.trace("RING RING RING RING")
+                    logger.trace(d)
                 if event not in ["Scan", "FSDJump", "Docked"]:
                     logger.trace("\n")
                     logger.trace(d)

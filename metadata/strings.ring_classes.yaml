@@ -1,0 +1,6 @@
+---
+# https://github.com/EDCD/EDDI/blob/0eb98497bbdb1a5e49cf06f6702dbf9f9322798d/DataDefinitions/SecurityLevel.cs
+Rocky: eRingClass_Rocky
+Icy: eRingClass_Icy
+Metallic: [eRingClass_Metalic, eRingClass_Metallic]  # Seems to come through misspelled normally...
+Metal Rich: eRingClass_MetalRich

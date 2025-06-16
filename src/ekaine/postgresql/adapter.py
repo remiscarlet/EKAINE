@@ -7,7 +7,13 @@ from ekaine.common.logging import get_logger
 from ekaine.common.timer import Timer
 from ekaine.common.utils import dur_to_interval_str
 from ekaine.postgresql import SessionLocal
-from ekaine.postgresql.db import BodiesDB, FactionPresencesDB, FactionsDB, SystemsDB
+from ekaine.postgresql.db import (
+    BodiesDB,
+    FactionPresencesDB,
+    FactionsDB,
+    RingsDB,
+    SystemsDB,
+)
 from ekaine.postgresql.types import (
     HotspotResult,
     MiningAcquisitionResult,
@@ -180,6 +186,18 @@ class BodiesAdapter:
         if not db_body:
             raise ValueError(f"Body '{body_name}' not found")
         return db_body
+
+
+class RingsAdapter:
+    def __init__(self, session: Session | None = None) -> None:
+        self.session = session or SessionLocal()
+
+    def get_ring(self, ring_name: str) -> RingsDB:
+        query = select(RingsDB).where(RingsDB.name == ring_name)
+        db_ring = self.session.scalars(query).first()
+        if not db_ring:
+            raise ValueError(f"Ring '{ring_name}' not found")
+        return db_ring
 
 
 class StationsAdapter:

@@ -16,15 +16,15 @@ class ResolvedStationResult(BaseModel):
     allegiance: str | None
     controlling_faction: str | None
     controlling_faction_state: str | None
-    distance_to_arrival: float
+    distance_to_arrival: float | None
     economies: dict[str, float] | None
     government: str | None
-    small_landing_pads: int
-    medium_landing_pads: int
-    large_landing_pads: int
+    small_landing_pads: int | None
+    medium_landing_pads: int | None
+    large_landing_pads: int | None
     primary_economy: str | None
-    services: list[str]
-    type: str
+    services: list[str] | None
+    type: str | None
     prohibited_commodities: list[str] | None
     carrier_name: str | None
     latitude: float | None

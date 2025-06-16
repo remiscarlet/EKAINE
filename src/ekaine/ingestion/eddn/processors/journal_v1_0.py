@@ -8,12 +8,15 @@ from ekaine.common.logging import get_logger
 from ekaine.postgresql.adapter import (
     BodiesAdapter,
     FactionsAdapter,
+    RingsAdapter,
     StationsAdapter,
 )
 from ekaine.postgresql.db import (
     BodiesDB,
     FactionPresencesDB,
     FactionsDB,
+    HotspotsDB,
+    RingsDB,
     StationsDB,
     SystemsDB,
 )
@@ -129,6 +132,25 @@ def process_body_entities(session: Session, model: journal_v1_0.Model, system: S
     logger.info(f"[Bodies DB Updated] {model.message.StarSystem} - {body_dict['name']}")
 
 
+def process_ring_entities(session: Session, model: journal_v1_0.Model) -> None:
+    """Process Rings entries from the journal-v1.0 EDDN event"""
+    ring_dicts = RingsDB.to_dicts_from_eddn(
+        model,
+        lambda body_name: BodiesAdapter().get_body(body_name),
+    )
+    if not ring_dicts:
+        return None
+
+    try:
+        upsert_all(session, RingsDB, ring_dicts)
+    except Exception:
+        logger.warning(traceback.format_exc())
+        logger.warning(pformat(ring_dicts))
+        return None
+
+    logger.info(f"[Rings DB Updated] {model.message.StarSystem} - {[r['name'] for r in ring_dicts]}")
+
+
 def process_faction_presence_entities(
     session: Session, model: journal_v1_0.Model, system: SystemsDB, faction_id_mapping: dict[str, int]
 ) -> None:
@@ -177,6 +199,31 @@ def process_powerplay_entities(session: Session, model: journal_v1_0.Model, syst
         )
 
 
+def process_hotspot_entities(session: Session, model: journal_v1_0.Model, system: SystemsDB) -> None:
+    msg = model.message
+    body_name = getattr(msg, "BodyName", None)
+    if body_name is None:
+        return None
+    elif "Ring" not in body_name:
+        return None
+
+    hotspot_dicts = HotspotsDB.to_dicts_from_eddn(
+        model,
+        lambda ring_name: RingsAdapter().get_ring(ring_name),
+    )
+
+    if hotspot_dicts:
+        try:
+            upsert_all(session, HotspotsDB, hotspot_dicts)
+        except Exception:
+            logger.warning(traceback.format_exc())
+            logger.warning(pformat(hotspot_dicts))
+            return
+
+        logger.info("!!!!!!!!!!!")
+        logger.info("[Hotspots DB Updated] " f"{body_name} - {len(hotspot_dicts)} Hotspots")
+
+
 def process_model(session: Session, model: journal_v1_0.Model) -> None:
     """
     Process journal-v1.0 EDDN messages
@@ -204,18 +251,26 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         logger.error(f"Could not upsert system! '{model.message.StarSystem}'")
         return
 
-    if event_name in ["Scan", "Location"]:
+    if event_name in ["Scan", "Location", "SAASignalsFound"]:
         process_body_entities(session, model, system)
 
-    if event_name in ["FSDJump", "Location"]:
-        process_faction_presence_entities(session, model, system, faction_id_mapping)
+    if event_name in ["Scan", "Location", "SAASignalsFound"]:
+        process_ring_entities(session, model)
 
-    if event_name in ["Docked", "Location"]:
-        # Order matters - must come after FactionPresences
-        process_station_entities(session, model, system)
+    # if event_name in ["FSDJump", "Location"]:
+    #     process_faction_presence_entities(session, model, system, faction_id_mapping)
 
-    if event_name in ["FSDJump"]:
-        process_powerplay_entities(session, model, system)
+    # if event_name in ["Docked", "Location"]:
+    #     # Order matters - must come after FactionPresences
+    #     process_station_entities(session, model, system)
+
+    # if event_name in ["FSDJump"]:
+    #     process_powerplay_entities(session, model, system)
+
+    if event_name in ["SAASignalsFound"]:
+        logger.info("SAA SIGNALS???")
+        logger.info(pformat(model))
+        process_hotspot_entities(session, model, system)
 
 
 """
@@ -445,6 +500,19 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         'StarSystem': 'Col 285 Sector XS-E b26-4',
         'SystemAddress': 9464899839481,
         'event': 'SAASignalsFound', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:54:04Z'}}
+
+        Message(
+            timestamp=datetime.datetime(2025, 6, 16, 2, 8, 5, tzinfo=TzInfo(UTC)),
+            event=<Event.SAASignalsFound: 'SAASignalsFound'>, horizons=True, odyssey=True,
+            StarSystem='Blo Eurl VX-T d3-19', StarPos=[3764.4375, 400.1875, 4446.625], SystemAddress=664101014307,
+            Factions=None, BodyID=10, BodyName='Blo Eurl VX-T d3-19 B 2',
+            Genuses=[
+                {'Genus': '$Codex_Ent_Aleoids_Genus_Name;'},
+                {'Genus': '$Codex_Ent_Bacterial_Genus_Name;'},
+                {'Genus': '$Codex_Ent_Stratum_Genus_Name;'},
+                {'Genus': '$Codex_Ent_Shrubs_Genus_Name;'},
+                {'Genus': '$Codex_Ent_Tussocks_Genus_Name;'}
+            ], Signals=[{'Count': 5, 'Type': '$SAA_SignalType_Biological;'}]))
     - CarrierJump
         'Body': 'Pipe (stem) Sector JH-V b2-5 3',
         'BodyID': 11,

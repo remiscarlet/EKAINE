@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Callable, Optional, Tuple, Union, cast
@@ -188,7 +189,7 @@ class BodiesDB(BaseModelWithId):
         type = getattr(journal_entry, "BodyType", None)
         if type is None:
             if body_name.endswith("Ring"):
-                raise ValueError(f"Tried processing a Ring as a Body: '{body_name}'")
+                type = "Ring"
             elif "Belt Cluster" in body_name:
                 type = "Belt Cluster"
             elif luminosity is not None:
@@ -210,6 +211,18 @@ class BodiesDB(BaseModelWithId):
 
         return f"{star_type}{subclass}"
 
+    """
+    - SAASignalsFound # Hotspots
+        'BodyID': 9,
+        'BodyName': 'Col 285 Sector XS-E b26-4 1 B Ring',
+        'Genuses': [],
+        'Signals': [{'Count': 1, 'Type': 'Rhodplumsite'}, {'Count': 1, 'Type': 'Monazite'}],
+        'StarPos': [-161.0, -54.875, 200.15625],
+        'StarSystem': 'Col 285 Sector XS-E b26-4',
+        'SystemAddress': 9464899839481,
+        'event': 'SAASignalsFound', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:54:04Z'}}
+    """
+
     @staticmethod
     def to_dict_from_eddn(eddn_model: journal_v1_0.Model, system_id: int) -> dict[str, Any] | None:
         journal_entry = eddn_model.message
@@ -229,14 +242,11 @@ class BodiesDB(BaseModelWithId):
 
         spectral_class = BodiesDB.to_spectral_class_from_journal_entry(journal_entry)
         materials = BodiesDB.to_materials_from_journal_entry(journal_entry)
-        try:
-            type = BodiesDB.to_type_from_journal_entry(journal_entry, body_name, luminosity, sub_type)
-        except ValueError:
-            # ValueErrors if entry is a Ring (which Journals expose as a type of Body)
-            # In such a case, just bail from the BodiesDB and let RingsDB take care of this journal.
-            return None
 
-        if type is None:
+        type = BodiesDB.to_type_from_journal_entry(journal_entry, body_name, luminosity, sub_type)
+        if type == "Ring":
+            body_name = RingsDB.ring_to_body_name_re.sub(r"\g<parent_body_name>", body_name)
+        elif type is None:
             logger.info(pformat(journal_entry))
 
         d = {
@@ -354,6 +364,182 @@ class RingsDB(BaseModelWithId):
             "outer_radius": spansh_asteroid.outer_radius,
         }
 
+    """
+    Message(
+        timestamp=datetime.datetime(2025, 6, 16, 0, 16, 50, tzinfo=TzInfo(UTC)),
+        event=<Event.Scan: 'Scan'>, horizons=True, odyssey=True,
+        StarSystem='Gliese 3680', StarPos=[116.25, 72.90625, 32.65625], SystemAddress=1522339432811,
+        Factions=None, AscendingNode=0.0, BodyID=39,
+        BodyName='Gliese 3680 6 A Ring',
+        DistanceFromArrivalLS=1702.978673,
+        Eccentricity=0.0,
+        MeanAnomaly=30.131683, OrbitalInclination=0.0,
+        OrbitalPeriod=48714.509606,
+        Parents=[{'Planet': 38}, {'Null': 37}, {'Star': 0}], Periapsis=0.0,
+        ScanType='AutoScan', SemiMajorAxis=142331823.706627, WasDiscovered=True, WasMapped=True)
+    """
+
+    @staticmethod
+    def to_dicts_from_eddn_ring_body(
+        ring_name: str, body_name_to_db_fn: Callable[[str], BodiesDB]
+    ) -> list[dict[str, Any]] | None:
+        parent_body_name = RingsDB.ring_to_body_name_re.sub(r"\g<parent_body_name>", ring_name)
+        try:
+            body = body_name_to_db_fn(parent_body_name)
+        except ValueError as e:
+            logger.warning(f"Could not find a body with name '{parent_body_name}! Err: {str(e)}")
+            return None
+
+        return [
+            {
+                "body_id": body.id,
+                "name": ring_name,
+            }
+        ]
+
+    """
+    {
+        '$schemaRef': 'https://eddn.edcd.io/schemas/journal/1',
+        'header': {
+            'gamebuild': 'r313544/r0 ', 'gameversion': '4.1.2.100',
+            'gatewayTimestamp': '2025-06-16T01:12:40.409907Z', 'softwareName': 'EDDiscovery',
+            'softwareVersion': '18.1.6.0', 'uploaderID': 'f58dd0fea82aed5bb11f7aab23ec464beba594aa'},
+        'message': {
+            'AbsoluteMagnitude': 9.251236,
+            'Age_MY': 4216,
+            'AxialTilt': 0.0,
+            'BodyID': 0,
+            'BodyName': 'Jinoharis',
+            'DistanceFromArrivalLS': 0.0,
+            'Luminosity': 'Va',
+            'Radius': 352292096.0,
+            'Rings': [
+                {'InnerRad': 581280000.0, 'MassMT': 1091300000.0, 'Name': 'Jinoharis A Belt',
+                    'OuterRad': 1837600000.0, 'RingClass': 'eRingClass_MetalRich'}
+            ],
+            'RotationPeriod': 179751.6339,
+            'ScanType': 'AutoScan',
+            'StarPos': [74.09375, 7.09375, 29.625],
+            'StarSystem': 'Jinoharis',
+            'StarType': 'M',
+            'StellarMass': 0.375,
+            'Subclass': 4,
+            'SurfaceTemperature': 2934.0,
+            'SystemAddress': 16064922592689, 'WasDiscovered': True, 'WasMapped': False, 'event': 'Scan',
+            'horizons': True, 'odyssey': True, 'timestamp': '2025-06-16T01:12:33Z'}}
+    {
+        '$schemaRef': 'https://eddn.edcd.io/schemas/journal/1',
+        'header': {
+            'gamebuild': 'r313544/r0 ', 'gameversion': '4.1.2.100', 'gatewayTimestamp': '2025-06-16T01:12:47.860211Z',
+            'softwareName': 'EDDiscovery', 'softwareVersion': '18.1.9.0',
+            'uploaderID': 'f32da817cc82e258998c0dd25630b3274d530129'},
+        'message': {
+            'AscendingNode': 167.656986, 'Atmosphere': '',
+            'AtmosphereComposition': [
+                {'Name': 'Hydrogen', 'Percent': 73.491508}, {'Name': 'Helium', 'Percent': 26.508499}
+            ],
+            'AxialTilt': -0.327288, 'BodyID': 20,
+            'BodyName': 'BD-15 447 A 2',
+            'DistanceFromArrivalLS': 1010.523621, 'Eccentricity': 0.000715,
+            'Landable': False, 'MassEM': 202.44722, 'MeanAnomaly': 36.052861, 'OrbitalInclination': 0.022825,
+            'OrbitalPeriod': 108180999.755859,
+            'Parents': [{'Star': 1}, {'Null': 0}], 'Periapsis': 0.611626, 'PlanetClass': 'Sudarsky class I gas giant',
+            'Radius': 67883640.0, 'ReserveLevel': 'CommonResources',
+            'Rings': [
+                {'InnerRad': 112010000.0, 'MassMT': 134080000000.0, 'Name': 'BD-15 447 A 2 A Ring',
+                    'OuterRad': 131560000.0, 'RingClass': 'eRingClass_Rocky'},
+                {'InnerRad': 131650000.0, 'MassMT': 867260000000.0, 'Name': 'BD-15 447 A 2 B Ring',
+                    'OuterRad': 216940000.0, 'RingClass': 'eRingClass_Icy'}
+            ],
+            'RotationPeriod': 64090.258668, 'ScanType': 'NavBeaconDetail', 'SemiMajorAxis': 303122597932.81555,
+            'StarPos': [8.0, -81.25, -40.125], 'StarSystem': 'BD-15 447', 'SurfaceGravity': 17.5102,
+            'SurfacePressure': 0.0, 'SurfaceTemperature': 143.07103, 'SystemAddress': 2007997813450,
+            'TerraformState': '', 'TidalLock': False, 'Volcanism': '', 'WasDiscovered': False, 'WasMapped': True,
+            'event': 'Scan', 'horizons': True, 'odyssey': True, 'timestamp': '2025-06-16T01:12:16Z'}}
+    """
+
+    @staticmethod
+    def to_dicts_from_eddn_body(
+        msg: journal_v1_0.Message, parent_body_name: str, body_name_to_db_fn: Callable[[str], BodiesDB]
+    ) -> list[dict[str, Any]] | None:
+        try:
+            body = body_name_to_db_fn(parent_body_name)
+        except ValueError as e:
+            logger.warning(f"Could not find a body with name '{parent_body_name}! Err: {str(e)}")
+            return None
+
+        rings = []
+        for ring in getattr(msg, "Rings", []):
+            name = ring.get("Name", None)
+            if name is None:
+                logger.warning(f"Got a ring with no name! Got: {pformat(ring)}")
+                continue
+            elif "Belt" in name:
+                continue  # We don't store belts/asteroid clusters
+
+            inner_radius = ring.get("InnerRad", None)
+            if inner_radius is None:
+                logger.warning(f"Got a ring with no inner radius! Got: {pformat(ring)}")
+                continue
+
+            outer_radius = ring.get("OuterRad", None)
+            if outer_radius is None:
+                logger.warning(f"Got a ring with no outer radius! Got: {pformat(ring)}")
+                continue
+
+            mass_mt = ring.get("MassMT", None)
+            if mass_mt is None:
+                logger.warning(f"Got a ring with no mass! Got: {pformat(ring)}")
+                continue
+
+            ring_class = ring.get("RingClass", None)
+            if ring_class is None:
+                logger.warning(f"Got a ring with ring class! Got: {pformat(ring)}")
+                continue
+
+            rings.append(
+                {
+                    "body_id": body.id,
+                    "name": name,
+                    "inner_radius": inner_radius,
+                    "outer_radius": outer_radius,
+                    "mass": mass_mt,
+                    "type": get_symbol_by_eddn_name(ring_class),
+                }
+            )
+
+        return rings
+
+    """
+    - SAASignalsFound # Hotspots
+        'BodyID': 9,
+        'BodyName': 'Col 285 Sector XS-E b26-4 1 B Ring',
+        'Genuses': [],
+        'Signals': [{'Count': 1, 'Type': 'Rhodplumsite'}, {'Count': 1, 'Type': 'Monazite'}],
+        'StarPos': [-161.0, -54.875, 200.15625],
+        'StarSystem': 'Col 285 Sector XS-E b26-4',
+        'SystemAddress': 9464899839481,
+        'event': 'SAASignalsFound', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:54:04Z'}}
+    """
+    ring_to_body_name_re = re.compile(r"(?P<parent_body_name>.*)\s+\w+ Ring")
+
+    @staticmethod
+    def to_dicts_from_eddn(
+        model: journal_v1_0.Model, body_name_to_db_fn: Callable[[str], BodiesDB]
+    ) -> list[dict[str, Any]] | None:
+        msg = model.message
+
+        body_name = getattr(msg, "BodyName", None)
+        if body_name is None:
+            return None
+
+        if "Ring" in body_name:
+            # Scan events for an actual Ring don't contain ring information.
+            # Just store the ring name so we know it exists.
+            return RingsDB.to_dicts_from_eddn_ring_body(body_name, body_name_to_db_fn)
+        else:
+            return RingsDB.to_dicts_from_eddn_body(msg, body_name, body_name_to_db_fn)
+
     def __repr__(self) -> str:
         return f"<RingsDB(id={self.id}, name={self.name})>"
 
@@ -384,6 +570,60 @@ class HotspotsDB(BaseModelWithId):
             }
             for signal_type, count in spansh_signal.signals.items()
         ]
+
+    """
+    - SAASignalsFound # Hotspots
+        'BodyID': 9,
+        'BodyName': 'Col 285 Sector XS-E b26-4 1 B Ring',
+        'Genuses': [],
+        'Signals': [{'Count': 1, 'Type': 'Rhodplumsite'}, {'Count': 1, 'Type': 'Monazite'}],
+        'StarPos': [-161.0, -54.875, 200.15625],
+        'StarSystem': 'Col 285 Sector XS-E b26-4',
+        'SystemAddress': 9464899839481,
+        'event': 'SAASignalsFound', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:54:04Z'}}
+    """
+
+    @staticmethod
+    def to_dicts_from_eddn(
+        model: journal_v1_0.Model, ring_name_to_ring_db: Callable[[str], RingsDB]
+    ) -> list[dict[str, Any]] | None:
+        msg = model.message
+        ring_name = getattr(msg, "BodyName", None)
+        if ring_name is None:
+            return None
+
+        try:
+            ring = ring_name_to_ring_db(ring_name)
+        except ValueError as e:
+            logger.warning(f"Tried saving a hotspot but could not find a ring with name '{ring_name}'! Err: {str(e)}")
+            return None
+
+        hotspot_dicts = []
+        for signal in getattr(msg, "Signals", []):
+            commodity = signal.get("Type", None)
+            if commodity is None:
+                logger.warning(f"Got a signal with no Type! Got: '{pformat(signal)}'")
+                continue
+
+            count = signal.get("Count", None)
+            if count is None:
+                logger.warning(f"Got a signal with no Count! Got: '{pformat(signal)}'")
+                continue
+
+            # For whatever reason, Tritium gets submitted lowercase... The rest are capitalized.
+            if commodity == "tritium":
+                commodity = "Tritium"
+
+            hotspot_dicts.append(
+                {
+                    "ring_id": ring.id,
+                    "commodity_sym": commodity,
+                    "count": count,
+                    "updated_at": msg.timestamp,
+                }
+            )
+
+        return hotspot_dicts
 
     def __repr__(self) -> str:
         return f"<HotspotsDB(id={self.id}, commodity_sym={self.commodity_sym})>"
