@@ -76,7 +76,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine?sslmode=disable # Talks locally through docker network
+      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
     networks: [ekaine_net]
     entrypoint: ["bash", "-c", "pwd && ls -al && make setup-container && make hydrate-db"]
     restart: "no"
@@ -104,7 +104,7 @@ services:
       DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
       COOKIE_SECRET: "${COOKIE_SECRET}"
-      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine?sslmode=disable # Talks locally through docker network
+      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
     ports:
       - 8000:8000
       - 8001:8001

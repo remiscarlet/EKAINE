@@ -141,6 +141,12 @@ up-db:
 down-db:
 	docker compose -f tools/docker/docker-compose.yaml stop postgres
 
+up-grafana:
+	docker compose -f tools/docker/docker-compose.yaml up --build -d grafana
+
+down-grafana:
+	docker compose -f tools/docker/docker-compose.yaml stop grafana
+
 up-app:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d app
 

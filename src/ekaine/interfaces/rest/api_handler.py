@@ -22,6 +22,31 @@ from ekaine.postgresql import AsyncSessionLocal
 configure_logger(logging.INFO)
 logger = get_logger(__name__)
 
+"""EKAINE FastApi
+
+Currently only used as a custom implemented OAuth2 proxy for Discord OAuth2
+Originally tried using oauth2-proxy but I couldn't get it configured to work with Discord
+with the available providers. As such, this file is a relatively lightweight implementation for it.
+
+The file contains four real endpoints and everything else gets proxied directly to the Grafana container that's
+only accessible through the local Docker network. In other words, any and all requests to Grafana is processed and
+responded to by this proxy.
+- /oauth2/login
+- /oauth2/callback
+- /oauth2/auth
+- /logout
+    - Grafana doesn't offer a custom logout url so we have to match Grafana's hardcoded path
+
+Communication Flow:
+[Browser]
+    V
+[OAuth2 Proxy] (Public IP) <-> [Discord Servers] (Token Validation)
+    V
+[Grafana Cluster] (Accessible only through internal Docker network)
+    V
+[Postgresql] (Internal docker network OR mTLS)
+"""
+
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
