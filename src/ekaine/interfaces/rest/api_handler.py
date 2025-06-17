@@ -71,7 +71,13 @@ async def auth_check(request: Request) -> JSONResponse:
     return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
 
 
-@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
+@app.get("/logout", response_model=None)
+async def logout(request: Request) -> RedirectResponse:
+    request.session.clear()
+    return RedirectResponse(url="/")
+
+
+@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], response_model=None)
 async def proxy_all_other_requests(request: Request, path: str) -> RedirectResponse | Response:
     # Skip auth-protected endpoints
     if path.startswith("oauth2/"):
@@ -86,24 +92,27 @@ async def proxy_all_other_requests(request: Request, path: str) -> RedirectRespo
 
     # Build the full URL to proxy to Grafana
     target_url = f"{GRAFANA_URL}/{path}"
-    method = request.method
+
     headers = dict(request.headers)
-    headers["host"] = GRAFANA_URL.replace("http://", "").replace("https://", "")
     headers["X-Forwarded-Discord-Username"] = user["username"]
     headers["X-Forwarded-Discord-ID"] = user["id"]
-
-    logger.info(pformat([headers, user]))
 
     body = await request.body()
 
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        grafana_response = await client.request(method, target_url, headers=headers, content=body)
+        grafana_response = await client.request(
+            request.method,
+            target_url,
+            headers=headers,
+            content=body,
+            cookies=request.cookies,
+            params=request.query_params,
+        )
 
     final_headers = {
         k: v
         for k, v in grafana_response.headers.items()
         if k.lower() not in ("content-encoding", "transfer-encoding", "connection")
     }
-    logger.info("FINAL BEFORE GRAFANA")
-    logger.info(pformat(final_headers))
+
     return Response(content=grafana_response.content, status_code=grafana_response.status_code, headers=final_headers)

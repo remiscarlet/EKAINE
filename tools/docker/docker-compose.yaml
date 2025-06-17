@@ -24,7 +24,7 @@ services:
     ports: ["${PG_PORT:-5432}:5432"]
     networks: [ekaine_net]
     volumes:
-      - pg-data:/home/postgres/pgdata/data
+      - pg-data:/home/postgres/pgdata
       - ./ekaine_ca/certs:/etc/postgresql/ssl:ro
       - ./timescaledb/scripts/015_add-grafana.sql:/docker-entrypoint-initdb.d/015_add-grafana.sql
       - ./timescaledb/scripts/020_fix-perms.sh:/docker-entrypoint-initdb.d/020_fix-perms.sh
