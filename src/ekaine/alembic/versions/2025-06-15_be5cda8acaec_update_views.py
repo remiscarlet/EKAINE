@@ -23,13 +23,21 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.execute("drop function if exists derived.acquisition_routes")
+    op.execute("drop view if exists derived.acquisition_routes")
+    op.execute("drop view if exists derived.station_commodities_view")
+
+    with open(views_sql_dir / "derived_station_commodities_view_v2.sql") as f:
+        op.execute(f.read())
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("drop function if exists derived.acquisition_routes")
+    op.execute("drop view if exists derived.acquisition_routes")
+    op.execute("drop view if exists derived.station_commodities_view")
+
+    with open(views_sql_dir / "archives" / "derived_station_commodities_view_v1.sql") as f:
+        op.execute(f.read())
     with open(views_sql_dir / "archives" / "derived_acquisition_routes_v1.sql") as f:
         op.execute(f.read())

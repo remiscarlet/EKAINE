@@ -9,7 +9,7 @@ x-logging: &default-logging
 services:
   postgres:
     container_name: ekaine_db
-    image: timescale/timescaledb-ha:pg17
+    image: timescale/timescaledb:latest-pg17
     restart: always
     shm_size: 2g
     environment:
@@ -24,10 +24,10 @@ services:
     ports: ["${PG_PORT:-5432}:5432"]
     networks: [ekaine_net]
     volumes:
-      - pg-data:/home/postgres/pgdata
+      - pg-data:/var/lib/postgresql/data
       - ./ekaine_ca/certs:/etc/postgresql/ssl:ro
+      - ./timescaledb/scripts/015_add-grafana.sql:/docker-entrypoint-initdb.d/015_add-grafana.sql
       - ./timescaledb/scripts/020_fix-perms.sh:/docker-entrypoint-initdb.d/020_fix-perms.sh
-      - ./timescaledb/scripts/030_add-grafana.sql:/docker-entrypoint-initdb.d/030_add-grafana.sql
       - ./timescaledb/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./timescaledb/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf
       - ./timescaledb/conf/pg_ident.conf:/etc/postgresql/pg_ident.conf
