@@ -2,6 +2,7 @@ import os
 from typing import Any, Tuple
 
 from sqlalchemy import Integer, create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -31,6 +32,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhos
 
 engine = create_engine(
     DATABASE_URL,
+    connect_args={"ssl": None},
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
@@ -38,3 +40,18 @@ engine = create_engine(
 )
 
 SessionLocal = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
+
+
+async_engine = create_async_engine(
+    DATABASE_URL.replace("postgresql:", "postgresql+asyncpg:"),
+    connect_args={"ssl": None},
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    echo=False,  # Set to True for SQL query debug logs
+)
+AsyncSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    bind=async_engine,
+    expire_on_commit=False,
+    autoflush=False,
+)

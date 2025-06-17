@@ -6,6 +6,7 @@ import httpx
 from authlib.integrations.starlette_client import OAuth
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
@@ -16,6 +17,7 @@ from ekaine.common.constants import (
     SESSION_SECRET,
 )
 from ekaine.common.logging import configure_logger, get_logger
+from ekaine.postgresql import AsyncSessionLocal
 
 configure_logger(logging.INFO)
 logger = get_logger(__name__)
@@ -34,6 +36,32 @@ oauth.register(
     client_kwargs={"scope": "identify"},
     api_base_url="https://discord.com/api/",
 )
+
+
+async def maybe_initialize_cache(user_id: str) -> None:
+    """
+    Grafana inserts these caches per query. If multiple queries are executing simultaneously on a cold cache,
+    a race condition can occur with multiple INSERT INTO's with no ON CONFLICT. This can then fail, failing the request.
+
+    We bypass this by initializing the cache before we proxy the request to Grafana.
+    """
+    key = f"authn-proxy-sync-ttl:{user_id}"
+    async with AsyncSessionLocal() as session:
+        await session.execute(
+            text(
+                """
+                INSERT INTO cache_data (cache_key, data, created_at, expires)
+                VALUES (
+                    :key,
+                    '{}',
+                    EXTRACT(EPOCH FROM now())::BIGINT,
+                    EXTRACT(EPOCH FROM now() + interval '1 hour')::BIGINT
+                )
+                ON CONFLICT DO NOTHING
+            """
+            ),
+            {"key": key},
+        )
 
 
 @app.get("/oauth2/login")
@@ -93,13 +121,18 @@ async def proxy_all_other_requests(request: Request, path: str) -> RedirectRespo
     # Build the full URL to proxy to Grafana
     target_url = f"{GRAFANA_URL}/{path}"
 
+    username = user["username"]
     headers = dict(request.headers)
-    headers["X-Forwarded-Discord-Username"] = user["username"]
+    headers["X-Forwarded-Discord-Username"] = username
     headers["X-Forwarded-Discord-ID"] = user["id"]
+
+    await maybe_initialize_cache(username)
 
     body = await request.body()
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    timeout = httpx.Timeout(60.0, connect=5.0, read=60.0)
+
+    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
         grafana_response = await client.request(
             request.method,
             target_url,
