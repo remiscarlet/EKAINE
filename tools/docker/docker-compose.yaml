@@ -47,6 +47,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning/access-control:/etc/grafana/provisioning/access-control
     networks: [ekaine_net]
     logging: *default-logging
 

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+permissions:
+  - folderUid: general
+    permissions:
+      - role: Viewer
+        permission: none
+      - role: Editor
+        permission: none
+      - role: Admin
+        permission: none
