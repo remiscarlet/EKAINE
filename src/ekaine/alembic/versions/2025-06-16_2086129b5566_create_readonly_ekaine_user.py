@@ -10,6 +10,10 @@ from typing import Sequence
 
 from alembic import op
 
+from ekaine.common.constants import SQL_DIR
+
+funcs_sql_dir = SQL_DIR / "functions"
+
 # revision identifiers, used by Alembic.
 revision: str = "2086129b5566"
 down_revision: str | None = "be5cda8acaec"
@@ -38,9 +42,23 @@ def upgrade() -> None:
     op.execute(f"GRANT SELECT ON cron.job TO {readonly_user}")
     op.execute(f"GRANT SELECT ON cron.job_run_details TO {readonly_user}")
 
+    with open(funcs_sql_dir / "monitoring_get_all_cron_jobs_v1.sql") as f:
+        op.execute(f.read())
+    op.execute(f"GRANT EXECUTE ON FUNCTION monitoring.get_all_cron_jobs() TO {readonly_user}")
+
+    with open(funcs_sql_dir / "monitoring_get_all_cron_job_run_details_v1.sql") as f:
+        op.execute(f.read())
+    op.execute(f"GRANT EXECUTE ON FUNCTION monitoring.get_all_cron_job_run_details() TO {readonly_user}")
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.execute(f"REVOKE EXECUTE ON FUNCTION monitoring.get_all_cron_job_run_details() FROM {readonly_user}")
+    op.execute("DROP FUNCTION IF EXISTS monitoring.get_all_cron_job_run_details")
+
+    op.execute(f"REVOKE EXECUTE ON FUNCTION monitoring.get_all_cron_jobs() FROM {readonly_user}")
+    op.execute("DROP FUNCTION IF EXISTS monitoring.get_all_cron_jobs")
+
     op.execute(f"REVOKE SELECT ON cron.job FROM {readonly_user}")
     op.execute(f"REVOKE SELECT ON cron.job_run_details FROM {readonly_user}")
 
