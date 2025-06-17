@@ -34,9 +34,15 @@ def upgrade() -> None:
         op.execute(f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT SELECT ON TABLES TO {readonly_user}")
         op.execute(f"ALTER DEFAULT PRIVILEGES IN SCHEMA {schema} GRANT EXECUTE ON FUNCTIONS TO {readonly_user}")
 
+    # pg_cron needs explicit grants
+    op.execute(f"GRANT SELECT ON cron.job TO {readonly_user}")
+    op.execute(f"GRANT SELECT ON cron.job_run_details TO {readonly_user}")
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.execute(f"REVOKE SELECT ON cron.job FROM {readonly_user}")
+    op.execute(f"REVOKE SELECT ON cron.job_run_details FROM {readonly_user}")
 
     for schema in schemas:
         op.execute(f"REVOKE USAGE ON SCHEMA {schema} FROM {readonly_user}")
