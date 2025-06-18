@@ -6,6 +6,25 @@ x-logging: &default-logging
     max-file: "10"
 
 
+x-app: &ekaine_app
+  image: remiscarlet/ekaine
+  stdin_open: true
+  tty: true
+  environment:
+    GRAFANA_URL: "http://grafana:3000"
+    DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
+    DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+    DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
+    COOKIE_SECRET: "${COOKIE_SECRET}"
+    DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
+  networks: [ekaine_net]
+  volumes:
+    - ../../tools/:/app/tools
+    - ../../src/:/app/src
+    - ../../Makefile:/app/Makefile
+    - ../../app_logs:/app/logs
+  logging: *default-logging
+
 services:
   postgres:
     container_name: ekaine_db
@@ -41,15 +60,27 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    expose:
-      - "3000"
-    # ports: [3000:3000]
+    environment:
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "${DISCORD_CLIENT_ID}"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
+    # expose:
+    #   - "3000"
+    ports: [3000:3000]
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/provisioning/access-control:/etc/grafana/provisioning/access-control
     networks: [ekaine_net]
     logging: *default-logging
+
+  redis:
+    container_name: ekaine_redis
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    networks: [ekaine_net]
 
   smallstep-ca:
     image: remiscarlet/ekaine_ca
@@ -70,6 +101,7 @@ services:
     logging: *default-logging
 
   setup:
+    <<: *ekaine_app
     container_name: ekaine_setup
     image: remiscarlet/ekaine
     depends_on:
@@ -87,39 +119,57 @@ services:
       - ../../setup_logs:/app/logs
     logging: *default-logging
 
-  app:
-    container_name: ekaine_app
-    image: remiscarlet/ekaine
-    stdin_open: true
-    tty: true
+  fastapi:
+    <<: *ekaine_app
+    container_name: ekaine_fastapi
     depends_on:
       postgres:
         condition: service_healthy
       setup:
         condition: service_completed_successfully
-    command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-    environment:
-      GRAFANA_URL: "http://grafana:3000"
-      DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
-      DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
-      DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
-      COOKIE_SECRET: "${COOKIE_SECRET}"
-      DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
-    ports:
-      - 8000:8000
-      - 8001:8001
-    networks: [ekaine_net]
-    volumes:
-      - ../../tools/:/app/tools
-      - ../../src/:/app/src
-      - ../../Makefile:/app/Makefile
-      - ../../app_logs:/app/logs
-    logging: *default-logging
+    ports: ["8001:8001"]
+    command:
+      - "poetry"
+      - "run"
+      - "uvicorn"
+      - "src.ekaine.interfaces.rest.api_handler:app"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8001"
+
+  discord:
+    <<: *ekaine_app
+    container_name: ekaine_discord
+    depends_on:
+      postgres:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+    command:
+    - "python"
+    - "src/ekaine/interfaces/discord/bot.py"
+
+  eddn:
+    container_name: ekaine_eddn
+    <<: *ekaine_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+    command:
+    - "poetry"
+    - "run"
+    - "cli"
+    - "ingestion"
+    - "eddn-listener"
 
 volumes:
   pg-data:
   pg-data2:
   grafana-data:
+  redis-data:
 
 networks:
   ekaine_net:

@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: black
         args: ["--config=pyproject.toml", "-v", "src/"]
-        language_version: python3.13
+        language_version: python3.12
 
   - repo: https://github.com/PyCQA/isort
     rev: 6.0.1
