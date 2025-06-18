@@ -1,20 +1,24 @@
+import json
 import logging
-from pprint import pformat
-from typing import cast
+import uuid
+from typing import Any, Dict, Optional
 
 import httpx
-from authlib.integrations.starlette_client import OAuth
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse, Response
+from redis.asyncio import Redis
+from redis.exceptions import RedisError
 from sqlalchemy import text
-from starlette.middleware.sessions import SessionMiddleware
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+from starlette.datastructures import URL
 
 from ekaine.common.constants import (
     DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET,
+    DISCORD_REDIRECT_URI,
     GRAFANA_URL,
-    SESSION_SECRET,
+    REDIS_DSN,
+    SESSION_COOKIE_NAME,
+    SESSION_TTL_SECONDS,
 )
 from ekaine.common.logging import configure_logger, get_logger
 from ekaine.postgresql import AsyncSessionLocal
@@ -31,9 +35,8 @@ with the available providers. As such, this file is a relatively lightweight imp
 The file contains four real endpoints and everything else gets proxied directly to the Grafana container that's
 only accessible through the local Docker network. In other words, any and all requests to Grafana is processed and
 responded to by this proxy.
-- /oauth2/login
 - /oauth2/callback
-- /oauth2/auth
+- /login
 - /logout
     - Grafana doesn't offer a custom logout url so we have to match Grafana's hardcoded path
 
@@ -47,19 +50,12 @@ Communication Flow:
 [Postgresql] (Internal docker network OR mTLS)
 """
 
+# Initialize
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
-
-oauth = OAuth()
-oauth.register(
-    name="discord",
-    client_id=DISCORD_CLIENT_ID,
-    client_secret=DISCORD_CLIENT_SECRET,
-    authorize_url="https://discord.com/api/oauth2/authorize",
-    access_token_url="https://discord.com/api/oauth2/token",
-    client_kwargs={"scope": "identify"},
-    api_base_url="https://discord.com/api/",
+redis: Redis = Redis.from_url(
+    REDIS_DSN,
+    encoding="utf-8",
+    decode_responses=True,
 )
 
 
@@ -89,88 +85,166 @@ async def maybe_initialize_cache(user_id: str) -> None:
         )
 
 
-@app.get("/oauth2/login")
-async def login(request: Request) -> Response:
-    logger.info("Calling /oauth2/login")
-    logger.info(pformat(request))
+def _session_key(session_id: str) -> str:
+    return f"session:{session_id}"
 
-    redirect_uri = request.url_for("auth_callback")
-    return cast(Response, await oauth.discord.authorize_redirect(request, redirect_uri))
+
+async def get_current_user(request: Request) -> Dict[str, Any]:
+    session_id: Optional[str] = request.cookies.get(SESSION_COOKIE_NAME)
+    if not session_id:
+        raise HTTPException(status_code=401)
+
+    try:
+        data: Optional[str] = await redis.get(_session_key(session_id))
+    except RedisError:
+        raise HTTPException(status_code=500, detail="Session store error")
+
+    if not data:
+        raise HTTPException(status_code=401)
+
+    return json.loads(data)  # type: ignore
+
+
+@app.get("/login")
+async def login(next: str = "/") -> RedirectResponse:
+    # Pass original path in state for post-auth redirect
+    auth_url = URL("https://discord.com/api/oauth2/authorize").include_query_params(
+        client_id=DISCORD_CLIENT_ID,
+        redirect_uri=DISCORD_REDIRECT_URI,
+        response_type="code",
+        scope="identify",
+        state=next,
+    )
+    return RedirectResponse(str(auth_url))
+
+
+@app.get("/logout")
+async def logout(request: Request) -> RedirectResponse:
+    session_id: Optional[str] = request.cookies.get(SESSION_COOKIE_NAME)
+    if session_id:
+        await redis.delete(_session_key(session_id))
+
+    response = RedirectResponse(url="/login")
+    response.delete_cookie(SESSION_COOKIE_NAME)
+    return response
 
 
 @app.get("/oauth2/callback")
-async def auth_callback(request: Request) -> RedirectResponse:
-    logger.info("Calling /oauth2/callback")
-    logger.info(pformat(request))
+async def oauth2_callback(request: Request) -> RedirectResponse:
+    code: Optional[str] = request.query_params.get("code")
+    state: str = request.query_params.get("state", "/")
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing code")
 
-    token = await oauth.discord.authorize_access_token(request)
-    user = await oauth.discord.get("users/@me", token=token)
-    request.session["user"] = user.json()
-    return RedirectResponse(url="/")  # or /grafana
+    async with httpx.AsyncClient() as client:
+        token_resp = await client.post(
+            "https://discord.com/api/oauth2/token",
+            data={
+                "client_id": DISCORD_CLIENT_ID,
+                "client_secret": DISCORD_CLIENT_SECRET,
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": DISCORD_REDIRECT_URI,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        token_resp.raise_for_status()
+        tokens = token_resp.json()
+
+        user_resp = await client.get(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"},
+        )
+        user_resp.raise_for_status()
+        user = user_resp.json()
+
+    # Create a new session
+    session_id = str(uuid.uuid4())
+    await redis.set(
+        _session_key(session_id),
+        json.dumps({"id": user["id"], "username": user["username"]}),
+        ex=SESSION_TTL_SECONDS,
+    )
+
+    response = RedirectResponse(state)
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=session_id,
+        max_age=SESSION_TTL_SECONDS,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+    )
+    return response
 
 
-@app.get("/oauth2/auth")
-async def auth_check(request: Request) -> JSONResponse:
-    logger.info("Calling /oauth2/auth")
-    logger.info(pformat(request))
+@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
+async def proxy(request: Request, path: str) -> Response:
+    # Authenticate manually to catch 401s
+    try:
+        user = await get_current_user(request)
+    except HTTPException as e:
+        if e.status_code == 401:
+            # Redirect to login, preserving original path
+            return RedirectResponse(url=f"/login?next=/{path}")
+        raise
 
-    user = request.session.get("user")
-    if user:
-        headers = {
-            "X-Forwarded-Discord-Username": user["username"],
-            "X-Forwarded-Discord-ID": user["id"],
-        }
-        return JSONResponse(status_code=200, content={}, headers=headers)
-    return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    # Build target URL
+    target = f"{GRAFANA_URL}/{path}"
 
+    # Forward headers (excluding hop-by-hop)
+    headers = {
+        k: v
+        for k, v in request.headers.items()
+        if k.lower()
+        not in (
+            "host",
+            "connection",
+            "keep-alive",
+            "proxy-authenticate",
+            "proxy-authorization",
+            "te",
+            "trailers",
+            "transfer-encoding",
+            "upgrade",
+        )
+    }
 
-@app.get("/logout", response_model=None)
-async def logout(request: Request) -> RedirectResponse:
-    request.session.clear()
-    return RedirectResponse(url="/")
+    logger.info(user)
 
+    # Inject Grafana auth headers
+    username = user.get("username", "")
+    if not username:
+        logger.error("Got a user from current context yet did not contain a valid username!")
+        return RedirectResponse(url="/logout")
 
-@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], response_model=None)
-async def proxy_all_other_requests(request: Request, path: str) -> RedirectResponse | Response:
-    # Skip auth-protected endpoints
-    if path.startswith("oauth2/"):
-        return Response("Not Found", status_code=404)
-
-    user = request.session.get("user")
-    if not user:
-        return RedirectResponse("/oauth2/login")
-
-    if GRAFANA_URL is None:
-        return Response("Internal Server Error - Grafana Url Missing", status_code=500)
-
-    # Build the full URL to proxy to Grafana
-    target_url = f"{GRAFANA_URL}/{path}"
-
-    username = user["username"]
-    headers = dict(request.headers)
     headers["X-Forwarded-Discord-Username"] = username
-    headers["X-Forwarded-Discord-ID"] = user["id"]
 
     await maybe_initialize_cache(username)
 
-    body = await request.body()
-
-    timeout = httpx.Timeout(60.0, connect=5.0, read=60.0)
-
-    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
-        grafana_response = await client.request(
-            request.method,
-            target_url,
+    # Forward the request
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        proxied = await client.request(
+            method=request.method,
+            url=target,
             headers=headers,
-            content=body,
-            cookies=request.cookies,
+            content=await request.body(),
             params=request.query_params,
+            timeout=60.0,
         )
 
-    final_headers = {
-        k: v
-        for k, v in grafana_response.headers.items()
-        if k.lower() not in ("content-encoding", "transfer-encoding", "connection")
-    }
-
-    return Response(content=grafana_response.content, status_code=grafana_response.status_code, headers=final_headers)
+    # Build the response
+    return Response(
+        content=proxied.content,
+        status_code=proxied.status_code,
+        headers={
+            k: v
+            for k, v in proxied.headers.items()
+            if k.lower()
+            not in (
+                "content-encoding",
+                "transfer-encoding",
+                "connection",
+            )
+        },
+    )

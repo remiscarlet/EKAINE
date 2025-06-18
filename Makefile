@@ -147,11 +147,17 @@ up-grafana:
 down-grafana:
 	docker compose -f tools/docker/docker-compose.yaml stop grafana
 
-up-app:
-	docker compose -f tools/docker/docker-compose.yaml up --build -d app
+up-fastapi:
+	docker compose -f tools/docker/docker-compose.yaml up --build -d fastapi
 
-down-app:
-	docker compose -f tools/docker/docker-compose.yaml stop app
+down-fastapi:
+	docker compose -f tools/docker/docker-compose.yaml stop fastapi
+
+up-eddn:
+	docker compose -f tools/docker/docker-compose.yaml up --build -d eddn
+
+down-eddn:
+	docker compose -f tools/docker/docker-compose.yaml stop eddn
 
 ## Alembic
 

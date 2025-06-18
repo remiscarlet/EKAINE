@@ -38,8 +38,14 @@ EDDN_SCHEMA_MAPPING_FILE = GEN_DIR / "eddn_schema_to_model_mapping.json"
 # Others
 SQL_DIR = REL_ROOT_PATH / "src" / "ekaine" / "postgresql" / "sql"
 
+SESSION_COOKIE_NAME = "ekaine_session"
+SESSION_TTL_SECONDS = 3600
+
 GRAFANA_URL = os.getenv("GRAFANA_URL", None)
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", None)
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", None)
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", None)
+SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
+DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", None)
+REDIS_DSN = os.getenv("REDIS_DSN", None)
 SESSION_SECRET = os.getenv("COOKIE_SECRET", None)

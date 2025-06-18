@@ -5,18 +5,19 @@ x-logging: &default-logging
     max-size: "5m"
     max-file: "10"
 
-
 x-app: &ekaine_app
   image: remiscarlet/ekaine
   stdin_open: true
   tty: true
   environment:
-    GRAFANA_URL: "http://grafana:3000"
+    REDIS_DSN: "redis://ekaine_redis:6379/0"
+    GRAFANA_URL: "http://ekaine_grafana:3000"
+    DATABASE_URL: "postgresql://ekaine:ekaine_pw@ekaine_db:5432/ekaine"
+    DISCORD_REDIRECT_URI: "${EKAINE_ROOT_URL}/oauth2/callback"
     DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
     DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
     DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
     COOKIE_SECRET: "${COOKIE_SECRET}"
-    DATABASE_URL: postgresql://ekaine:ekaine_pw@postgres:5432/ekaine
   networks: [ekaine_net]
   volumes:
     - ../../tools/:/app/tools
