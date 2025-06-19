@@ -14,6 +14,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    LargeBinary,
     SmallInteger,
     Text,
     UniqueConstraint,
@@ -627,6 +628,75 @@ class HotspotsDB(BaseModelWithId):
 
     def __repr__(self) -> str:
         return f"<HotspotsDB(id={self.id}, commodity_sym={self.commodity_sym})>"
+
+
+class MiningMapsDB(BaseModelWithId):
+    unique_columns = ("system_id", "body_id", "hotspot_id", "name")
+    __tablename__ = "mining_maps"
+    __table_args__ = (UniqueConstraint(*unique_columns, name="_mining_map_uc"), {"schema": "core"})
+
+    # Probably default to ring name + hotspot
+    name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+
+    system_id: Mapped[int] = mapped_column(ForeignKey("core.systems.id"), nullable=False, index=True)
+    body_id: Mapped[int] = mapped_column(ForeignKey("core.bodies.id"), nullable=False, index=True)
+    hotspot_id: Mapped[int] = mapped_column(ForeignKey("core.hotspots.id"), nullable=False, index=True)
+
+    rock_count: Mapped[int] = mapped_column(SmallInteger)
+    map_url: Mapped[str] = mapped_column(Text)
+    approximate_merits_solo: Mapped[int] = mapped_column(Integer)  # Approx when _solo_. Wings will get multipliers.
+
+    def __repr__(self) -> str:
+        return f"<MiningMapsDB(id={self.id}, name={self.name})>"
+
+
+class MiningMapCommoditiesDB(BaseModelWithId):
+    unique_columns = ("mining_map_id", "commodity_sym")
+    __tablename__ = "mining_map_commodities"
+    __table_args__ = (UniqueConstraint(*unique_columns, name="_mining_map_commodities_uc"), {"schema": "core"})
+
+    mining_map_id: Mapped[int] = mapped_column(ForeignKey("core.mining_maps.id"), nullable=False, index=True)
+    commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False, index=True)
+
+    # Optional but potentially useful approximate tonnage of commodity from map, SOLO
+    approximate_tonnage_solo: Mapped[int] = mapped_column(Integer)
+
+    def __repr__(self) -> str:
+        return (
+            f"<MiningMapCommodity(id={self.id}, map_id={self.mining_map_id}, "
+            f"commodity={self.commodity_sym}, tons={self.approximate_tonnage_solo})>"
+        )
+
+
+class FarmableCoresDB(BaseModelWithId):
+    unique_columns = ("system_id", "body_id", "hotspot_id", "commodity_sym")
+    __tablename__ = "farmable_cores"
+    __table_args__ = (UniqueConstraint(*unique_columns, name="_farmable_cores_uc"), {"schema": "core"})
+
+    system_id: Mapped[int] = mapped_column(ForeignKey("core.systems.id"), nullable=False, index=True)
+    body_id: Mapped[int] = mapped_column(ForeignKey("core.bodies.id"), nullable=False, index=True)
+    hotspot_id: Mapped[int] = mapped_column(ForeignKey("core.hotspots.id"), nullable=False, index=True)
+
+    commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False, index=True)
+
+    hotspot_from_sc_img: Mapped[int] = mapped_column(ForeignKey("core.binary_data.id"), nullable=False, index=True)
+    core_from_drop_img: Mapped[int] = mapped_column(ForeignKey("core.binary_data.id"), nullable=False, index=True)
+
+    def __repr__(self) -> str:
+        return f"<FarmableCoresDB(id={self.id}, hotspot_id={self.hotspot_id}, commodity_sym={self.commodity_sym}>"
+
+
+class BinaryDataDB(BaseModelWithId):
+    unique_columns = ("id",)
+    __tablename__ = "binary_data"
+    __table_args__ = {"schema": "core"}
+
+    # https://amat.su/M067l-
+    data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    type: Mapped[str] = mapped_column(Text)
+
+    def __repr__(self) -> str:
+        return f"<ImagesDB(id={self.id}, size={len(self.data)}"
 
 
 class StationsDB(BaseModelWithId):

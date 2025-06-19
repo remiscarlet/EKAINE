@@ -29,7 +29,7 @@ def upsert_all[T: BaseModel](
     exclude_update_cols = exclude_update_cols or []
     exclude_update_cols.append("id")  # Never update id column
 
-    conflict_cols = list(model.unique_columns)
+    conflict_cols = list(model.unique_columns or [])
     cols_to_print = conflict_cols + debug_print_extra_cols
     logger.debug(f"{len(rows)} {model.__name__} items being upserted...")
     logger.trace(repr([{k: v for k, v in item.items() if k in cols_to_print} for item in rows]))
