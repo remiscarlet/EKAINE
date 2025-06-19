@@ -21,7 +21,7 @@ from ekaine.common.constants import (
     SESSION_TTL_SECONDS,
 )
 from ekaine.common.logging import configure_logger, get_logger
-from ekaine.postgresql import AsyncSessionLocal
+from ekaine.postgresql import AsyncSessionLocalGrafana
 
 configure_logger(logging.INFO)
 logger = get_logger(__name__)
@@ -67,7 +67,7 @@ async def maybe_initialize_cache(user_id: str) -> None:
     We bypass this by initializing the cache before we proxy the request to Grafana.
     """
     key = f"authn-proxy-sync-ttl:{user_id}"
-    async with AsyncSessionLocal() as session:
+    async with AsyncSessionLocalGrafana() as session:
         await session.execute(
             text(
                 """

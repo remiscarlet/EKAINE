@@ -49,3 +49,8 @@ SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", None)
 REDIS_DSN = os.getenv("REDIS_DSN", None)
 SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
+
+# These should get overwritten by docker-compose.yaml environment configs.
+# Default values are used when running outside a docker context, ie make targets
+EKAINE_DATABASE_URL = os.getenv("EKAINE_DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
+GRAFANA_DATABASE_URL = os.getenv("GRAFANA_DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/grafana_meta")

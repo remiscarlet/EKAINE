@@ -26,7 +26,7 @@ from ekaine.ingestion.spansh.models.system_spansh import (
     FactionSpansh,
     SystemSpansh,
 )
-from ekaine.postgresql import SessionLocal
+from ekaine.postgresql import SessionLocalEkaine
 from ekaine.postgresql.db import (
     BodiesDB,
     CommoditiesDB,
@@ -337,7 +337,7 @@ class SpanshDataLayerPartitioner:
     """
 
     def __init__(self, total_running_str_fn: Callable[[], str], max_market_data_age_days: int) -> None:
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
         self.id_cache: dict[int, int] = {}
         self.total_running_str_fn = total_running_str_fn
         self.max_market_data_age_days = max_market_data_age_days
@@ -447,7 +447,7 @@ class SpanshDataPipeline:
         self.process_every = process_every
         self.max_market_data_age_days = max_market_data_age_days
 
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
         self.pipeline_timer = Timer("Spansh data import pipeline")
         self.partitioner = SpanshDataLayerPartitioner(self.total_running_str, self.max_market_data_age_days)
 

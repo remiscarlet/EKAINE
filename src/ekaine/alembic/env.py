@@ -1,4 +1,3 @@
-import os
 from logging.config import fileConfig
 from typing import Literal
 
@@ -9,6 +8,7 @@ from sqlalchemy.schema import SchemaItem
 import ekaine.postgresql.db  # noqa: F401
 import ekaine.postgresql.monitoring  # noqa: F401
 import ekaine.postgresql.timeseries  # noqa: F401
+from ekaine.common.constants import EKAINE_DATABASE_URL
 from ekaine.postgresql import BaseModel
 
 config = context.config
@@ -16,8 +16,7 @@ fileConfig(config.config_file_name or "")
 
 target_metadata = BaseModel.metadata
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", EKAINE_DATABASE_URL)
 
 APP_SCHEMAS = {"core", "derived", "api", "raw_timescaledb", "timescaledb", "helpers", "monitoring"}
 

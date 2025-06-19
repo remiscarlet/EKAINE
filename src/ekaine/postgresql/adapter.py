@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ekaine.common.logging import get_logger
 from ekaine.common.timer import Timer
 from ekaine.common.utils import dur_to_interval_str
-from ekaine.postgresql import SessionLocal
+from ekaine.postgresql import SessionLocalEkaine
 from ekaine.postgresql.db import (
     BodiesDB,
     FactionPresencesDB,
@@ -28,7 +28,7 @@ logger = get_logger(__name__)
 
 class ApiCommandAdapter:
     def __init__(self) -> None:
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
 
     def get_acquirable_systems_from_origin(self, system_name: str) -> list[SystemResult]:
         stmt = text("SELECT * FROM api.get_acquirable_systems_from_origin(:system_name)")
@@ -166,7 +166,7 @@ class ApiCommandAdapter:
 
 class SystemsAdapter:
     def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocal()
+        self.session = session or SessionLocalEkaine()
 
     def get_system(self, system_name: str) -> SystemsDB:
         query = select(SystemsDB).where(SystemsDB.name == system_name)
@@ -178,7 +178,7 @@ class SystemsAdapter:
 
 class BodiesAdapter:
     def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocal()
+        self.session = session or SessionLocalEkaine()
 
     def get_body(self, body_name: str) -> BodiesDB:
         query = select(BodiesDB).where(BodiesDB.name == body_name)
@@ -190,7 +190,7 @@ class BodiesAdapter:
 
 class RingsAdapter:
     def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocal()
+        self.session = session or SessionLocalEkaine()
 
     def get_ring(self, ring_name: str) -> RingsDB:
         query = select(RingsDB).where(RingsDB.name == ring_name)
@@ -202,7 +202,7 @@ class RingsAdapter:
 
 class StationsAdapter:
     def __init__(self) -> None:
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
 
     def get_station(self, station_name: str, system_id: int) -> ResolvedStationResult:
         stmt = text(
@@ -233,7 +233,7 @@ class StationsAdapter:
 
 class FactionsAdapter:
     def __init__(self) -> None:
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
 
     def get_faction(self, faction_name: str) -> FactionsDB:
         query = select(FactionsDB).where(FactionsDB.name == faction_name)
@@ -245,7 +245,7 @@ class FactionsAdapter:
 
 class FactionPresencesAdapter:
     def __init__(self) -> None:
-        self.session = SessionLocal()
+        self.session = SessionLocalEkaine()
 
     def get_faction_presence(self, faction_id: int, system_id: int) -> FactionPresencesDB:
         query = select(FactionPresencesDB).where(

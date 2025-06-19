@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from ekaine.common.logging import get_logger
 from ekaine.ingestion.eddn import processors
 from ekaine.ingestion.eddn.schemas import get_schema_model_mapping
-from ekaine.postgresql import SessionLocal
+from ekaine.postgresql import SessionLocalEkaine
 from ekaine.postgresql.adapter import FactionsAdapter
 from gen.eddn_models import (  # fssbodysignals_v1_0,
     approachsettlement_v1_0,
@@ -122,7 +122,7 @@ def run_listener(session: Session) -> None:
 
 
 def main() -> None:
-    session = SessionLocal()
+    session = SessionLocalEkaine()
     run_listener(session)
 
 
