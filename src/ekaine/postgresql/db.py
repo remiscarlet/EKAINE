@@ -1473,7 +1473,23 @@ class SystemsDB(BaseModelWithId):
             "powers_updated_at": msg.timestamp,
         }
 
+        # Filter out any Nones from the payload
         rtn = {k: v for k, v in d.items() if v is not None}
+
+        # Add back Nones that logically should "clear out" any fields.
+        # This is relevant when a system might go back and forth between Unoccupied and an Exploited+ state, where
+        # fields like power_state_undermining and power_state_reinforcement need to be cleared out if the system reverts
+        # back to Unoccupied
+
+        power_state = rtn.get("power_state", None)
+        if power_state == "Unoccupied":
+            rtn["controlling_power"] = None
+            rtn["power_state_control_progress"] = None
+            rtn["power_state_reinforcement"] = None
+            rtn["power_state_undermining"] = None
+        elif power_state in ["Exploited", "Fortified", "Stronghold"]:
+            rtn["power_conflict_progress"] = []
+
         return rtn
 
     def __repr__(self) -> str:
