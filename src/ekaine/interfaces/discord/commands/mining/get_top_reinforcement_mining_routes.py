@@ -1,12 +1,13 @@
 from collections import defaultdict
 from pprint import pformat
 
-from interactions import Embed, OptionType, SlashContext, slash_command, slash_option
+from interactions import Embed, OptionType, SlashContext, slash_option
 from tabulate import tabulate
 
 from ekaine.common.logging import get_logger
 from ekaine.common.utils import get_time_since
 from ekaine.interfaces.discord import send_error_embed
+from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.interfaces.discord.utils import split_comma_delimited_string
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -16,7 +17,9 @@ from ekaine.postgresql.types import MiningReinforcementResult
 logger = get_logger(__name__)
 
 
-@slash_command(name="get-top-reinf-mining-routes", description="Get top N mining reinforcement routes in the galaxy")
+@cmd_group.subcommand(
+    sub_cmd_name="get-top-reinf-routes", sub_cmd_description="Get top N mining reinforcement routes in the galaxy"
+)
 @slash_option(name="power_name", description="Power to query for", required=False, opt_type=OptionType.STRING)
 @slash_option(
     name="power_states",

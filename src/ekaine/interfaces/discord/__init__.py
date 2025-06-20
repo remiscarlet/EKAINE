@@ -1,8 +1,10 @@
 from collections import namedtuple
 
-from interactions import Embed, SlashContext
+from interactions import Embed, SlashCommand, SlashContext
 
 from ekaine.postgresql.types import MiningAcquisitionResult
+
+cmd_base = SlashCommand(name="ekaine", description="EKAINE bot commands base")
 
 
 async def send_error_embed(ctx: SlashContext, msg: str) -> None:

@@ -26,7 +26,7 @@ x-app: &ekaine_app
     - ../../tools/:/app/tools
     - ../../src/:/app/src
     - ../../Makefile:/app/Makefile
-    - ../../app_logs:/app/logs
+    - ../../app_logs:/app/app_logs
   logging: *default-logging
 
 services:
@@ -67,9 +67,7 @@ services:
     environment:
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "${DISCORD_CLIENT_ID}"
       GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
-    # expose:
-    #   - "3000"
-    ports: [3000:3000]
+    expose: ["3000"]
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/conf/grafana.ini:/etc/grafana/grafana.ini
@@ -137,8 +135,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      setup:
-        condition: service_completed_successfully
+      # setup:
+      #   condition: service_completed_successfully
     command:
     - "python"
     - "src/ekaine/interfaces/discord/bot.py"

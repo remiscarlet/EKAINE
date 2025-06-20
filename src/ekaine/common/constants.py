@@ -54,3 +54,5 @@ SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
 # Default values are used when running outside a docker context, ie make targets
 EKAINE_DATABASE_URL = os.getenv("EKAINE_DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/ekaine")
 GRAFANA_DATABASE_URL = os.getenv("GRAFANA_DATABASE_URL", "postgresql://ekaine:ekaine_pw@localhost:5432/grafana_meta")
+
+DEV_GUILD_ID = 604536071891714069

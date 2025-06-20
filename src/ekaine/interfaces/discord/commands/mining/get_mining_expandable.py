@@ -1,9 +1,10 @@
 from pprint import pformat
 
-from interactions import Embed, OptionType, SlashContext, slash_command, slash_option
+from interactions import Embed, OptionType, SlashContext, slash_option
 
 from ekaine.common.logging import get_logger
 from ekaine.interfaces.discord import MineableDataDisplay, send_error_embed
+from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
     SystemsAdapter,
@@ -12,7 +13,9 @@ from ekaine.postgresql.adapter import (
 logger = get_logger(__name__)
 
 
-@slash_command(name="get-mining-expandable", description="Get list of mining routes for acquiring a target system")
+@cmd_group.subcommand(
+    sub_cmd_name="get-expandable", sub_cmd_description="Get list of mining routes for acquiring a target system"
+)
 @slash_option(
     name="system_name", description="Target system name to acquire", required=True, opt_type=OptionType.STRING
 )

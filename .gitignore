@@ -5,6 +5,7 @@ src/gen/
 __pycache__/
 .DS_STORE
 config.yaml
+tools/docker/.env
 tools/docker/ekaine_ca/certs/
 tools/docker/ekaine_ca/config/
 tools/docker/ekaine_ca/db/

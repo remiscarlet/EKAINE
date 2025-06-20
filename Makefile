@@ -147,6 +147,12 @@ up-grafana:
 down-grafana:
 	docker compose -f tools/docker/docker-compose.yaml stop grafana
 
+up-discord:
+	docker compose -f tools/docker/docker-compose.yaml up --build -d discord
+
+down-discord:
+	docker compose -f tools/docker/docker-compose.yaml stop discord
+
 up-fastapi:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d fastapi
 
