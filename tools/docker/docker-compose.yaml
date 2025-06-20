@@ -83,6 +83,7 @@ services:
     volumes:
       - redis-data:/data
     networks: [ekaine_net]
+    logging: *default-logging
 
   smallstep-ca:
     image: remiscarlet/ekaine_ca
@@ -135,8 +136,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      # setup:
-      #   condition: service_completed_successfully
+      setup:
+        condition: service_completed_successfully
     command:
     - "python"
     - "src/ekaine/interfaces/discord/bot.py"

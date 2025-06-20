@@ -2,7 +2,6 @@ import re
 import traceback
 from typing import Any, Type
 
-from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import Insert as PGInsert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import SQLAlchemyError
@@ -41,10 +40,7 @@ def upsert_all[T: BaseModel](
     insert_stmt: PGInsert = pg_insert(model).values(rows)
     excluded = insert_stmt.excluded  # This line actually matters. Must explicitly grab 'excluded' namespace
     coalesce_updates = {
-        col: func.coalesce(
-            getattr(excluded, col.name),  # new value: EXCLUDED.sy_cf_id
-            model.__table__.c[col.name],  # existing:  table.c["sy_cf_id"]
-        )
+        col: (getattr(excluded, col.name) if hasattr(excluded, col.name) else model.__table__.c[col.name])
         for col in updatable_cols
     }
 
