@@ -186,7 +186,10 @@ async def proxy(request: Request, path: str) -> Response:
     except HTTPException as e:
         if e.status_code == 401:
             # Redirect to login, preserving original path
-            return RedirectResponse(url=f"/login?next=/{path}")
+            target_url = request.url_for("login").include_query_params(
+                next=f"/{path}",
+            )
+            return RedirectResponse(url=target_url)
         raise
 
     # Build target URL
