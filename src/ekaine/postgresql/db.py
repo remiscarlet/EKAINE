@@ -1,4 +1,5 @@
 import re
+import typing
 from datetime import datetime
 from pprint import pformat
 from typing import Any, Callable, Optional, Tuple, Union, cast
@@ -13,6 +14,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     LargeBinary,
     SmallInteger,
@@ -23,7 +25,14 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, Session, foreign, mapped_column, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    Session,
+    declared_attr,
+    foreign,
+    mapped_column,
+    relationship,
+)
 
 from ekaine.common.game_constants import get_symbol_by_eddn_name
 from ekaine.common.logging import get_logger
@@ -702,7 +711,19 @@ class BinaryDataDB(BaseModelWithId):
 class StationsDB(BaseModelWithId):
     unique_columns = ("name", "owner_id")
     __tablename__ = "stations"
-    __table_args__ = (UniqueConstraint(*unique_columns, name="_station_name_owner_distance_uc"), {"schema": "core"})
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls) -> tuple[Any, ...] | dict[str, Any]:
+        return (
+            UniqueConstraint(*cls.unique_columns, name="_station_name_owner_distance_uc"),
+            Index(
+                "ix_core_stations_owner_id_type",
+                cls.owner_id,
+                cls.owner_type,
+            ),
+            {"schema": "core"},
+        )
 
     id64: Mapped[Optional[int]] = mapped_column(BigInteger)
     id_spansh: Mapped[Optional[int]] = mapped_column(BigInteger)
@@ -1073,10 +1094,20 @@ class CommoditiesDB(BaseModel):
 class MarketCommoditiesDB(BaseModelWithId):
     unique_columns = ("station_id", "commodity_sym")
     __tablename__ = "market_commodities"
-    __table_args__ = (
-        UniqueConstraint(*unique_columns, name="_station_market_commodity_uc"),
-        {"schema": "core"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls):
+        return (
+            UniqueConstraint(*cls.unique_columns, name="_station_market_commodity_uc"),
+            Index(
+                "ix_core_market_commodities_supplydemand_updated_at",
+                cls.updated_at,
+                cls.supply,
+                cls.demand,
+            ),
+            {"schema": "core"},
+        )
 
     station_id: Mapped[int] = mapped_column(Integer, ForeignKey("core.stations.id"), nullable=False, index=True)
     commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False, index=True)
