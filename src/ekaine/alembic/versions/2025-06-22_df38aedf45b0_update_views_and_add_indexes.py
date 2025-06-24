@@ -8,11 +8,13 @@ Create Date: 2025-06-22 14:05:29.435523
 
 from typing import Sequence
 
+import sqlalchemy as sa
 from alembic import op
 
 from ekaine.common.constants import SQL_DIR
 
 views_sql_dir = SQL_DIR / "views"
+functions_sql_dir = SQL_DIR / "functions"
 
 
 # revision identifiers, used by Alembic.
@@ -36,6 +38,10 @@ def upgrade() -> None:
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
+    # New function
+    with open(functions_sql_dir / "derived_get_rings_in_system_v1.sql") as f:
+        op.execute(f.read())
+
     # Add indexes
     op.create_index(
         op.f("ix_core_market_commodities_supplydemand_updated_at"),
@@ -52,9 +58,35 @@ def upgrade() -> None:
         schema="core",
     )
 
+    # Add columns
+    op.add_column(
+        "mining_maps",
+        sa.Column(
+            "ring_id",
+            sa.Integer(),
+            sa.ForeignKey("core.rings.id", ondelete="CASCADE"),
+            nullable=True,
+            index=True,
+        ),
+        schema="core",
+    )
+    op.drop_column("mining_maps", "hotspot_id", schema="core")
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.add_column(
+        "mining_maps",
+        sa.Column(
+            "hotspot_id",
+            sa.Integer(),
+            nullable=True,
+            index=True,
+        ),
+        schema="core",
+    )
+    op.drop_column("mining_maps", "ring_id", schema="core")
+
     # Drop new indexes
     op.drop_index("ix_core_market_commodities_supplydemand_updated_at", "market_commodities", schema="core")
     op.drop_index("ix_core_stations_owner_id_type", "stations", schema="core")
@@ -70,3 +102,5 @@ def downgrade() -> None:
         op.execute(f.read())
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
+
+    op.execute("drop function if exists derived.get_rings_in_system")

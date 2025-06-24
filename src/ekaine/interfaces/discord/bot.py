@@ -29,5 +29,5 @@ async def on_ready() -> None:
     logger.info(f"This bot is owned by {bot.owner}")
 
 
-configure_logger(logging.INFO)
+configure_logger(logging.DEBUG)
 bot.start(DISCORD_BOT_TOKEN)

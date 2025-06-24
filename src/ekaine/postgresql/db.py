@@ -640,7 +640,7 @@ class HotspotsDB(BaseModelWithId):
 
 
 class MiningMapsDB(BaseModelWithId):
-    unique_columns = ("system_id", "body_id", "hotspot_id", "name")
+    unique_columns = ("system_id", "body_id", "ring_id", "name")
     __tablename__ = "mining_maps"
     __table_args__ = (UniqueConstraint(*unique_columns, name="_mining_map_uc"), {"schema": "core"})
 
@@ -649,7 +649,7 @@ class MiningMapsDB(BaseModelWithId):
 
     system_id: Mapped[int] = mapped_column(ForeignKey("core.systems.id"), nullable=False, index=True)
     body_id: Mapped[int] = mapped_column(ForeignKey("core.bodies.id"), nullable=False, index=True)
-    hotspot_id: Mapped[int] = mapped_column(ForeignKey("core.hotspots.id"), nullable=False, index=True)
+    ring_id: Mapped[int] = mapped_column(ForeignKey("core.rings.id"), nullable=False, index=True)
 
     rock_count: Mapped[int] = mapped_column(SmallInteger)
     map_url: Mapped[str] = mapped_column(Text)
@@ -1077,7 +1077,7 @@ class CommoditiesDB(BaseModel):
     symbol: Mapped[str] = mapped_column(Text, primary_key=True)
     name: Mapped[str] = mapped_column(Text, nullable=False, index=True)
 
-    avg_price: Mapped[Optional[int]] = mapped_column(Integer)
+    # average prices are gathered via materialized view `derived.commodity_prices_view`
     rare_goods: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
     corrosive: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
 

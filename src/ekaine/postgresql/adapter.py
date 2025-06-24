@@ -137,6 +137,7 @@ class ApiCommandAdapter:
         else:
             stmt = text("SELECT * FROM api.get_systems_with_power(:power_name)")
 
+        logger.debug(str(stmt))
         result = self.session.execute(stmt, params)
 
         rows: Sequence[RowMapping] = result.mappings().all()
@@ -170,10 +171,19 @@ class SystemsAdapter:
 
     def get_system(self, system_name: str) -> SystemsDB:
         query = select(SystemsDB).where(SystemsDB.name == system_name)
+        logger.debug(str(query))
         db_system = self.session.scalars(query).first()
         if not db_system:
             raise ValueError(f"System '{system_name}' not found")
         return db_system
+
+    def get_system_by_prefix(self, system_prefix: str) -> list[SystemsDB]:
+        query = select(SystemsDB).where(SystemsDB.name.ilike(f"{system_prefix}%"))
+        logger.debug(str(query))
+        db_systems = self.session.scalars(query).all()
+        if not db_systems:
+            raise ValueError(f"Systems with prefix '{system_prefix}' not found")
+        return list(db_systems)
 
 
 class BodiesAdapter:
@@ -182,10 +192,20 @@ class BodiesAdapter:
 
     def get_body(self, body_name: str) -> BodiesDB:
         query = select(BodiesDB).where(BodiesDB.name == body_name)
+        logger.debug(str(query))
         db_body = self.session.scalars(query).first()
         if not db_body:
             raise ValueError(f"Body '{body_name}' not found")
         return db_body
+
+    def get_bodies_by_system_id(self, system_id: int) -> list[BodiesDB]:
+        query = select(BodiesDB).where(BodiesDB.system_id == system_id)
+        logger.debug(str(query))
+        logger.debug(system_id)
+        db_bodies = self.session.scalars(query).all()
+        if not db_bodies:
+            raise ValueError(f"No bodies in system id '{system_id}' found")
+        return list(db_bodies)
 
 
 class RingsAdapter:
@@ -194,10 +214,32 @@ class RingsAdapter:
 
     def get_ring(self, ring_name: str) -> RingsDB:
         query = select(RingsDB).where(RingsDB.name == ring_name)
+        logger.debug(str(query))
         db_ring = self.session.scalars(query).first()
         if not db_ring:
             raise ValueError(f"Ring '{ring_name}' not found")
         return db_ring
+
+    def get_rings_by_system_and_substring(self, system: SystemsDB, ring_name_substring: str) -> list[RingsDB]:
+        stmt = (
+            select(RingsDB)
+            .from_statement(
+                text(
+                    """select *
+                from derived.get_rings_in_system(:system_id)
+                where lower(name) like lower(:ring_name_partial)"""
+                )
+            )
+            .params(system_id=system.id, ring_name_partial=f"%{ring_name_substring}%")
+        )
+
+        logger.info(str(stmt))
+        bodies: list[RingsDB] = list(self.session.scalars(stmt).all())
+
+        if not bodies:
+            raise ValueError(f"No bodies found in system '{system.id}'")
+
+        return bodies
 
 
 class StationsAdapter:
