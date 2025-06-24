@@ -31,7 +31,7 @@ def upgrade() -> None:
     op.execute("drop view if exists derived.acquisition_routes")
     op.execute("drop view if exists derived.hotspot_ring_view")
 
-    with open(views_sql_dir / "derived_hotspot_ring_view_v2.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_hotspot_ring_view_v2.sql") as f:
         op.execute(f.read())
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())

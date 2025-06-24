@@ -47,7 +47,7 @@ services:
     ports: ["${PG_PORT:-5432}:5432"]
     networks: [ekaine_net]
     volumes:
-      - pg-data:/home/postgres/pgdata
+      - pg-data-hostfs:/home/postgres/pgdata
       - ./ekaine_ca/certs:/etc/postgresql/ssl:ro
       - ./timescaledb/scripts/015_add-grafana.sql:/docker-entrypoint-initdb.d/015_add-grafana.sql
       - ./timescaledb/scripts/020_fix-perms.sh:/docker-entrypoint-initdb.d/020_fix-perms.sh
@@ -158,8 +158,12 @@ services:
     - "eddn-listener"
 
 volumes:
-  pg-data:
-  pg-data2:
+  pg-data-hostfs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${PG_DATA_PATH:-/var/lib/ekaine/postgresql}"
   grafana-data:
   redis-data:
 
