@@ -38,6 +38,10 @@ def upgrade() -> None:
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
+    # New views
+    with open(views_sql_dir / "derived_commodity_prices_view_v1.sql") as f:
+        op.execute(f.read())
+
     # New function
     with open(functions_sql_dir / "derived_get_rings_in_system_v1.sql") as f:
         op.execute(f.read())
@@ -72,9 +76,21 @@ def upgrade() -> None:
     )
     op.drop_column("mining_maps", "hotspot_id", schema="core")
 
+    # Materialized view refresh cron
+    every = 6  # hours
+    op.execute(
+        "SELECT cron.schedule('refresh_derived_commodity_prices_view', "
+        f"'0 */{every} * * *', $$REFRESH MATERIALIZED VIEW CONCURRENTLY derived.commodity_prices_view;$$);"
+    )
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+
+    # Stop materialized view refresh cron
+    op.execute("SELECT cron.unschedule('process_raw_tsdb_faction_presences')")
+
+    # Drop new column/add old one
     op.add_column(
         "mining_maps",
         sa.Column(
@@ -103,4 +119,8 @@ def downgrade() -> None:
     with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
+    # Drop new view
+    op.execute("drop view if exists derived.commodity_prices_view")
+
+    # Drop new function
     op.execute("drop function if exists derived.get_rings_in_system")
