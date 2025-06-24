@@ -88,7 +88,7 @@ def downgrade() -> None:
     """Downgrade schema."""
 
     # Stop materialized view refresh cron
-    op.execute("SELECT cron.unschedule('process_raw_tsdb_faction_presences')")
+    op.execute("SELECT cron.unschedule('refresh_derived_commodity_prices_view')")
 
     # Drop new column/add old one
     op.add_column(
