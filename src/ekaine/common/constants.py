@@ -6,7 +6,8 @@ PWD = Path.cwd()
 REPO_ROOT = Path(__file__).parent.parent.parent.parent
 REL_ROOT_PATH = PWD.relative_to(REPO_ROOT)
 
-LOG_DIR = REL_ROOT_PATH / "logs"
+CONTAINER_NAME = os.getenv("CONTAINER_NAME", "default")
+LOG_DIR = REL_ROOT_PATH / "logs" / CONTAINER_NAME
 DEFAULT_LOG_LEVEL = "INFO"
 
 # Data dir

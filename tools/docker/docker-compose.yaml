@@ -26,7 +26,7 @@ x-app: &ekaine_app
     - ../../tools/:/app/tools
     - ../../src/:/app/src
     - ../../Makefile:/app/Makefile
-    - ../../app_logs:/app/app_logs
+    - ../../logs:/app/logs
   logging: *default-logging
 
 services:
@@ -106,6 +106,9 @@ services:
   setup:
     <<: *ekaine_app
     container_name: ekaine_setup
+    environment:
+      <<: *ekaine_envvars
+      CONTAINER_NAME: ekaine_setup
     depends_on:
       postgres:
         condition: service_healthy
@@ -114,6 +117,9 @@ services:
   fastapi:
     <<: *ekaine_app
     container_name: ekaine_fastapi
+    environment:
+      <<: *ekaine_envvars
+      CONTAINER_NAME: ekaine_fastapi
     depends_on:
       postgres:
         condition: service_healthy
@@ -133,6 +139,9 @@ services:
   discord:
     <<: *ekaine_app
     container_name: ekaine_discord
+    environment:
+      <<: *ekaine_envvars
+      CONTAINER_NAME: ekaine_discord
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,6 +154,9 @@ services:
   eddn:
     container_name: ekaine_eddn
     <<: *ekaine_app
+    environment:
+      <<: *ekaine_envvars
+      CONTAINER_NAME: ekaine_eddn
     depends_on:
       postgres:
         condition: service_healthy
