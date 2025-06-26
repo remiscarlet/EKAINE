@@ -4,7 +4,6 @@ BasicNarcotics:
   is_mineable: false
   id64: 128049212
   name: Narcotics
-  avg_price: 9966
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ Tobacco:
   is_mineable: false
   id64: 128049213
   name: Tobacco
-  avg_price: 5035
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ Beer:
   is_mineable: false
   id64: 128049214
   name: Beer
-  avg_price: 186
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ Wine:
   is_mineable: false
   id64: 128049215
   name: Wine
-  avg_price: 260
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ Liquor:
   is_mineable: false
   id64: 128049216
   name: Liquor
-  avg_price: 587
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ BootlegLiquor:
   is_mineable: false
   id64: 128672306
   name: Bootleg Liquor
-  avg_price: 855
   rare_goods: false
   corrosive: false
 
@@ -58,6 +52,5 @@ OnionHeadC:
   is_mineable: false
   id64: 128983059
   name: Onionhead Gamma Strain
-  avg_price: 5387
   rare_goods: false
   corrosive: false

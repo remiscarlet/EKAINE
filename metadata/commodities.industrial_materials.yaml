@@ -4,7 +4,6 @@ Polymers:
   is_mineable: false
   id64: 128049197
   name: Polymers
-  avg_price: 171
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ Semiconductors:
   is_mineable: false
   id64: 128049199
   name: Semiconductors
-  avg_price: 967
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ Superconductors:
   is_mineable: false
   id64: 128049200
   name: Superconductors
-  avg_price: 6609
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ MedbStarlube:
   is_mineable: false
   id64: 128667690
   name: Medb Starlube
-  avg_price: 8191
   rare_goods: true
   corrosive: false
 
@@ -40,7 +36,6 @@ CeramicComposites:
   is_mineable: false
   id64: 128672302
   name: Ceramic Composites
-  avg_price: 232
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ MetaAlloys:
   is_mineable: false
   id64: 128672701
   name: Meta Alloys
-  avg_price: 88148
   rare_goods: false
   corrosive: true
 
@@ -58,7 +52,6 @@ InsulatingMembrane:
   is_mineable: false
   id64: 128673855
   name: Insulating Membrane
-  avg_price: 7837
   rare_goods: false
   corrosive: false
 
@@ -67,7 +60,6 @@ CMMComposite:
   is_mineable: false
   id64: 128673856
   name: CMM Composite
-  avg_price: 3132
   rare_goods: false
   corrosive: false
 
@@ -76,7 +68,6 @@ CoolingHoses:
   is_mineable: false
   id64: 128673857
   name: Cooling Hoses
-  avg_price: 403
   rare_goods: false
   corrosive: false
 
@@ -85,6 +76,5 @@ NeofabricInsulation:
   is_mineable: false
   id64: 128673858
   name: Neofabric Insulation
-  avg_price: 2769
   rare_goods: false
   corrosive: false

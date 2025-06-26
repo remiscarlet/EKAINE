@@ -4,7 +4,6 @@ DomesticAppliances:
   is_mineable: false
   id64: 128049238
   name: Domestic Appliances
-  avg_price: 487
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ ConsumerTechnology:
   is_mineable: false
   id64: 128049240
   name: Consumer Technology
-  avg_price: 6769
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ Clothing:
   is_mineable: false
   id64: 128049241
   name: Clothing
-  avg_price: 285
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ AlacarakmoSkinArt:
   is_mineable: false
   id64: 128667036
   name: Alacarakmo Skin Art
-  avg_price: 8899
   rare_goods: true
   corrosive: false
 
@@ -40,7 +36,6 @@ EleuThermals:
   is_mineable: false
   id64: 128667037
   name: Eleu Thermals
-  avg_price: 8507
   rare_goods: true
   corrosive: false
 
@@ -49,7 +44,6 @@ EshuUmbrellas:
   is_mineable: false
   id64: 128667038
   name: Eshu Umbrellas
-  avg_price: 9343
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ KaretiiCouture:
   is_mineable: false
   id64: 128667039
   name: Karetii Couture
-  avg_price: 11582
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ NjangariSaddles:
   is_mineable: false
   id64: 128667040
   name: Njangari Saddles
-  avg_price: 8356
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ KinagoInstruments:
   is_mineable: false
   id64: 128667045
   name: Kinago Instruments
-  avg_price: 13030
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ NgunaModernAntiques:
   is_mineable: false
   id64: 128667046
   name: Nguna Modern Antiques
-  avg_price: 8545
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ RajukruStoves:
   is_mineable: false
   id64: 128667047
   name: Rajukru Stoves
-  avg_price: 8378
   rare_goods: true
   corrosive: false
 
@@ -103,7 +92,6 @@ TiolceWaste2PasteUnits:
   is_mineable: false
   id64: 128667048
   name: Tiolce Waste2Paste Units
-  avg_price: 8710
   rare_goods: true
   corrosive: false
 
@@ -112,7 +100,6 @@ OphiuchiExinoArtefacts:
   is_mineable: false
   id64: 128667668
   name: Ophiuchi Exino Artefacts
-  avg_price: 10969
   rare_goods: true
   corrosive: false
 
@@ -121,7 +108,6 @@ HavasupaiDreamCatcher:
   is_mineable: false
   id64: 128667680
   name: Havasupai Dream Catcher
-  avg_price: 14639
   rare_goods: true
   corrosive: false
 
@@ -131,7 +117,6 @@ JaradharrePuzzlebox:
   is_mineable: false
   id64: 128667683
   name: Jaradharre Puzzle Box
-  avg_price: 16816
   rare_goods: true
   corrosive: false
 
@@ -140,7 +125,6 @@ UzumokuLowGWings:
   is_mineable: false
   id64: 128667696
   name: Uzumoku Low-G Wings
-  avg_price: 13845
   rare_goods: true
   corrosive: false
 
@@ -149,7 +133,6 @@ AltairianSkin:
   is_mineable: false
   id64: 128667700
   name: Altairian Skin
-  avg_price: 8432
   rare_goods: true
   corrosive: false
 
@@ -158,7 +141,6 @@ JotunMookah:
   is_mineable: false
   id64: 128667702
   name: Jotun Mookah
-  avg_price: 8780
   rare_goods: true
   corrosive: false
 
@@ -167,7 +149,6 @@ ZeesszeAntGlue:
   is_mineable: false
   id64: 128667707
   name: Zeessze Ant Glue
-  avg_price: 8161
   rare_goods: true
   corrosive: false
 
@@ -176,7 +157,6 @@ MomusBogSpaniel:
   is_mineable: false
   id64: 128667713
   name: Momus Bog Spaniel
-  avg_price: 9184
   rare_goods: true
   corrosive: false
 
@@ -185,7 +165,6 @@ AlienEggs:
   is_mineable: false
   id64: 128667717
   name: Alien Eggs
-  avg_price: 25067
   rare_goods: true
   corrosive: false
 
@@ -194,7 +173,6 @@ VidavantianLace:
   is_mineable: false
   id64: 128667719
   name: Vidavantian Lace
-  avg_price: 12615
   rare_goods: true
   corrosive: false
 
@@ -203,7 +181,6 @@ JaquesQuinentianStill:
   is_mineable: false
   id64: 128668017
   name: Jaques Quinentian Still
-  avg_price: 2108
   rare_goods: true
   corrosive: false
 
@@ -212,7 +189,6 @@ SoontillRelics:
   is_mineable: false
   id64: 128668018
   name: Soontill Relics
-  avg_price: 19885
   rare_goods: true
   corrosive: false
 
@@ -221,7 +197,6 @@ Advert1:
   is_mineable: false
   id64: 128671119
   name: Advert1
-  avg_price: 21542
   rare_goods: true
   corrosive: false
 
@@ -230,7 +205,6 @@ TheHuttonMug:
   is_mineable: false
   id64: 128672121
   name: The Hutton Mug
-  avg_price: 7986
   rare_goods: true
   corrosive: false
 
@@ -239,7 +213,6 @@ EvacuationShelter:
   is_mineable: false
   id64: 128672314
   name: Evacuation Shelter
-  avg_price: 343
   rare_goods: false
   corrosive: false
 
@@ -248,7 +221,6 @@ PersonalGifts:
   is_mineable: false
   id64: 128672431
   name: Personal Gifts
-  avg_price: 16535
   rare_goods: false
   corrosive: false
 
@@ -257,7 +229,6 @@ CrystallineSpheres:
   is_mineable: false
   id64: 128672432
   name: Crystalline Spheres
-  avg_price: 12216
   rare_goods: true
   corrosive: false
 
@@ -266,7 +237,6 @@ SurvivalEquipment:
   is_mineable: false
   id64: 128682048
   name: Survival Equipment
-  avg_price: 485
   rare_goods: false
   corrosive: false
 
@@ -275,7 +245,6 @@ ShansCharisOrchid:
   is_mineable: false
   id64: 128732551
   name: Shans Charis Orchid
-  avg_price: 9043
   rare_goods: true
   corrosive: false
 
@@ -284,7 +253,6 @@ BuckyballBeerMats:
   is_mineable: false
   id64: 128748428
   name: Buckyball Beer Mats
-  avg_price: 7957
   rare_goods: true
   corrosive: false
 
@@ -293,6 +261,5 @@ Duradrives:
   is_mineable: false
   id64: 128922524
   name: Duradrives
-  avg_price: 19356
   rare_goods: true
   corrosive: false

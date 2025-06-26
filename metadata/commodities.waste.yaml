@@ -4,7 +4,6 @@ Biowaste:
   is_mineable: false
   id64: 128049244
   name: Biowaste
-  avg_price: 63
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ ToxicWaste:
   is_mineable: false
   id64: 128049245
   name: Toxic Waste
-  avg_price: 287
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ ChemicalWaste:
   is_mineable: false
   id64: 128049246
   name: Chemical Waste
-  avg_price: 131
   rare_goods: false
   corrosive: false
 
@@ -31,6 +28,5 @@ Scrap:
   is_mineable: false
   id64: 128049248
   name: Scrap
-  avg_price: 48
   rare_goods: false
   corrosive: false

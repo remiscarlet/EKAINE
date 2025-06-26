@@ -4,7 +4,6 @@ Water:
   is_mineable: false
   id64: 128049166
   name: Water
-  avg_price: 120
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ HydrogenFuel:
   is_mineable: false
   id64: 128049202
   name: Hydrogen Fuel
-  avg_price: 110
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ MineralOil:
   is_mineable: false
   id64: 128049203
   name: Mineral Oil
-  avg_price: 181
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ Explosives:
   is_mineable: false
   id64: 128049204
   name: Explosives
-  avg_price: 261
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ Pesticides:
   is_mineable: false
   id64: 128049205
   name: Pesticides
-  avg_price: 241
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ DeltaPhoenicisPalms:
   is_mineable: false
   id64: 128667073
   name: Delta Phoenicis Palms
-  avg_price: 8188
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ ToxandjiVirocide:
   is_mineable: false
   id64: 128667074
   name: Toxandji Virocide
-  avg_price: 8275
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ AnduligaFireWorks:
   is_mineable: false
   id64: 128667673
   name: Anduliga Fire Works
-  avg_price: 8519
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ HIPOrganophosphates:
   is_mineable: false
   id64: 128667682
   name: HIP Organophosphates
-  avg_price: 8169
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ KorroKungPellets:
   is_mineable: false
   id64: 128667684
   name: Korro Kung Pellets
-  avg_price: 8067
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ SyntheticReagents:
   is_mineable: false
   id64: 128672303
   name: Synthetic Reagents
-  avg_price: 6675
   rare_goods: false
   corrosive: false
 
@@ -103,7 +92,6 @@ NerveAgents:
   is_mineable: false
   id64: 128672304
   name: Nerve Agents
-  avg_price: 13526
   rare_goods: false
   corrosive: false
 
@@ -112,7 +100,6 @@ SurfaceStabilisers:
   is_mineable: false
   id64: 128672305
   name: Surface Stabilisers
-  avg_price: 467
   rare_goods: false
   corrosive: false
 
@@ -121,7 +108,6 @@ HydrogenPeroxide:
   is_mineable: false
   id64: 128673850
   name: Hydrogen Peroxide
-  avg_price: 917
   rare_goods: false
   corrosive: false
 
@@ -130,7 +116,6 @@ LiquidOxygen:
   is_mineable: false
   id64: 128673851
   name: Liquid Oxygen
-  avg_price: 263
   rare_goods: false
   corrosive: false
 
@@ -139,7 +124,6 @@ RockforthFertiliser:
   is_mineable: false
   id64: 128924333
   name: Rockforth Fertiliser
-  avg_price: 8
   rare_goods: false
   corrosive: false
 
@@ -148,7 +132,6 @@ AgronomicTreatment:
   is_mineable: false
   id64: 128924334
   name: Agronomic Treatment
-  avg_price: 3464
   rare_goods: false
   corrosive: false
 
@@ -157,7 +140,6 @@ Tritium:
   is_mineable: true
   id64: 128961249
   name: Tritium
-  avg_price: 41684
   rare_goods: false
   corrosive: false
   ring_types: [Icy]

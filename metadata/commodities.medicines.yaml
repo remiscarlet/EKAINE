@@ -4,7 +4,6 @@ AgriculturalMedicines:
   is_mineable: false
   id64: 128049208
   name: Agricultural Medicines
-  avg_price: 1038
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ PerformanceEnhancers:
   is_mineable: false
   id64: 128049209
   name: Performance Enhancers
-  avg_price: 6816
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ BasicMedicines:
   is_mineable: false
   id64: 128049210
   name: Basic Medicines
-  avg_price: 279
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ ProgenitorCells:
   is_mineable: false
   id64: 128049669
   name: Progenitor Cells
-  avg_price: 6779
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ CombatStabilisers:
   is_mineable: false
   id64: 128049670
   name: Combat Stabilisers
-  avg_price: 3505
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ KachiriginLeaches:
   is_mineable: false
   id64: 128667027
   name: Kachirigin Leaches
-  avg_price: 8227
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ AganippeRush:
   is_mineable: false
   id64: 128667068
   name: Aganippe Rush
-  avg_price: 14220
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ TerraMaterBloodBores:
   is_mineable: false
   id64: 128667069
   name: Terra Mater BloodBores
-  avg_price: 13414
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ WatersOfShintara:
   is_mineable: false
   id64: 128667085
   name: Waters Of Shintara
-  avg_price: 13711
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ HonestyPills:
   is_mineable: false
   id64: 128667686
   name: Honesty Pills
-  avg_price: 8860
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ VHerculisBodyRub:
   is_mineable: false
   id64: 128667697
   name: V Herculis Body Rub
-  avg_price: 8010
   rare_goods: true
   corrosive: false
 
@@ -104,7 +93,6 @@ VegaSlimWeed:
   is_mineable: false
   id64: 128667699
   name: Vega Slimweed
-  avg_price: 9588
   rare_goods: true
   corrosive: false
 
@@ -113,7 +101,6 @@ TauriChimes:
   is_mineable: false
   id64: 128667706
   name: Tauri Chimes
-  avg_price: 8549
   rare_goods: true
   corrosive: false
 
@@ -122,7 +109,6 @@ PantaaPrayerSticks:
   is_mineable: false
   id64: 128667708
   name: Pantaa Prayer Sticks
-  avg_price: 9177
   rare_goods: true
   corrosive: false
 
@@ -131,7 +117,6 @@ FujinTea:
   is_mineable: false
   id64: 128667709
   name: Fujin Tea
-  avg_price: 8597
   rare_goods: true
   corrosive: false
 
@@ -140,7 +125,6 @@ AlyaBodilySoap:
   is_mineable: false
   id64: 128667718
   name: Alya Bodily Soap
-  avg_price: 8218
   rare_goods: true
   corrosive: false
 
@@ -149,7 +133,6 @@ AdvancedMedicines:
   is_mineable: false
   id64: 128682046
   name: Advanced Medicines
-  avg_price: 1259
   rare_goods: false
   corrosive: false
 
@@ -158,6 +141,5 @@ Nanomedicines:
   is_mineable: false
   id64: 128913661
   name: Nanomedicines
-  avg_price: 9859
   rare_goods: true
   corrosive: false

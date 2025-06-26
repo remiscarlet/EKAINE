@@ -4,7 +4,6 @@ Bertrandite:
   is_mineable: true
   id64: 128049156
   name: Bertrandite
-  avg_price: 2374
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -16,7 +15,6 @@ Indite:
   is_mineable: true
   id64: 128049157
   name: Indite
-  avg_price: 2088
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -28,7 +26,6 @@ Gallite:
   is_mineable: true
   id64: 128049158
   name: Gallite
-  avg_price: 1819
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -40,7 +37,6 @@ Coltan:
   is_mineable: true
   id64: 128049159
   name: Coltan
-  avg_price: 1319
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -52,7 +48,6 @@ Uraninite:
   is_mineable: true
   id64: 128049160
   name: Uraninite
-  avg_price: 836
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -64,7 +59,6 @@ Lepidolite:
   is_mineable: true
   id64: 128049161
   name: Lepidolite
-  avg_price: 544
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -76,7 +70,6 @@ Rutile:
   is_mineable: true
   id64: 128049163
   name: Rutile
-  avg_price: 299
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -88,7 +81,6 @@ Bauxite:
   is_mineable: true
   id64: 128049165
   name: Bauxite
-  avg_price: 120
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -100,7 +92,6 @@ CherbonesBloodCrystals:
   is_mineable: false
   id64: 128667675
   name: Cherbones Blood Crystals
-  avg_price: 16714
   rare_goods: true
   corrosive: false
 
@@ -109,7 +100,6 @@ NgadandariFireOpals:
   is_mineable: false
   id64: 128667694
   name: Ngadandari Fire Opals
-  avg_price: 19112
   rare_goods: true
   corrosive: false
 
@@ -118,7 +108,6 @@ Painite:
   is_mineable: true
   id64: 128668550
   name: Painite
-  avg_price: 40508
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -130,7 +119,6 @@ Cryolite:
   is_mineable: false
   id64: 128672294
   name: Cryolite
-  avg_price: 2266
   rare_goods: false
   corrosive: false
 
@@ -139,7 +127,6 @@ Goslarite:
   is_mineable: false
   id64: 128672295
   name: Goslarite
-  avg_price: 916
   rare_goods: false
   corrosive: false
 
@@ -148,7 +135,6 @@ Moissanite:
   is_mineable: false
   id64: 128672296
   name: Moissanite
-  avg_price: 8273
   rare_goods: false
   corrosive: false
 
@@ -157,7 +143,6 @@ Pyrophyllite:
   is_mineable: false
   id64: 128672297
   name: Pyrophyllite
-  avg_price: 1565
   rare_goods: false
   corrosive: false
 
@@ -166,7 +151,6 @@ Taaffeite:
   is_mineable: false
   id64: 128672775
   name: Taaffeite
-  avg_price: 20696
   rare_goods: false
   corrosive: false
 
@@ -175,7 +159,6 @@ Jadeite:
   is_mineable: false
   id64: 128672776
   name: Jadeite
-  avg_price: 13474
   rare_goods: false
   corrosive: false
 
@@ -184,7 +167,6 @@ Bromellite:
   is_mineable: true
   id64: 128673846
   name: Bromellite
-  avg_price: 7062
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -196,7 +178,6 @@ LowTemperatureDiamond:
   is_mineable: true
   id64: 128673848
   name: Low Temperature Diamond
-  avg_price: 57445
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -208,7 +189,6 @@ MethanolMonohydrateCrystals:
   is_mineable: false
   id64: 128673852
   name: Methanol Monohydrate Crystals
-  avg_price: 2282
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -220,7 +200,6 @@ LithiumHydroxide:
   is_mineable: true
   id64: 128673853
   name: Lithium Hydroxide
-  avg_price: 5646
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -232,7 +211,6 @@ MethaneClathrate:
   is_mineable: false
   id64: 128673854
   name: Methane Clathrate
-  avg_price: 629
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -244,7 +222,6 @@ Rhodplumsite:
   is_mineable: true
   id64: 128924325
   name: Rhodplumsite
-  avg_price: 176791
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -256,7 +233,6 @@ Serendibite:
   is_mineable: true
   id64: 128924326
   name: Serendibite
-  avg_price: 172634
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -268,7 +244,6 @@ Monazite:
   is_mineable: true
   id64: 128924327
   name: Monazite
-  avg_price: 200925
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -280,7 +255,6 @@ Musgravite:
   is_mineable: true
   id64: 128924328
   name: Musgravite
-  avg_price: 198527
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -292,7 +266,6 @@ Benitoite:
   is_mineable: true
   id64: 128924329
   name: Benitoite
-  avg_price: 149325
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -304,7 +277,6 @@ Grandidierite:
   is_mineable: true
   id64: 128924330
   name: Grandidierite
-  avg_price: 197204
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -316,7 +288,6 @@ Alexandrite:
   is_mineable: true
   id64: 128924331
   name: Alexandrite
-  avg_price: 217192
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -328,7 +299,6 @@ Opal:
   is_mineable: true
   id64: 128924332
   name: Void Opal
-  avg_price: 135218
   rare_goods: false
   corrosive: false
   mining_method: Core
@@ -340,6 +310,5 @@ Haematite:
   is_mineable: false
   id64: 129031327
   name: Haematite
-  avg_price: 1791
   rare_goods: false
   corrosive: false

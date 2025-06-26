@@ -4,7 +4,6 @@ Slaves:
   is_mineable: false
   id64: 128049243
   name: Slaves
-  avg_price: 10584
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ ImperialSlaves:
   is_mineable: false
   id64: 128667728
   name: Imperial Slaves
-  avg_price: 15984
   rare_goods: false
   corrosive: false
 
@@ -22,6 +20,5 @@ MasterChefs:
   is_mineable: false
   id64: 128672316
   name: Master Chefs
-  avg_price: 20590
   rare_goods: true
   corrosive: false

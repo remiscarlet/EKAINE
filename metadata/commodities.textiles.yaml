@@ -4,7 +4,6 @@ Leather:
   is_mineable: false
   id64: 128049190
   name: Leather
-  avg_price: 205
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ NaturalFabrics:
   is_mineable: false
   id64: 128049191
   name: Natural Fabrics
-  avg_price: 439
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ SyntheticFabrics:
   is_mineable: false
   id64: 128049193
   name: Synthetic Fabrics
-  avg_price: 211
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ BelalansRayLeather:
   is_mineable: false
   id64: 128667061
   name: Belalans Ray Leather
-  avg_price: 8519
   rare_goods: true
   corrosive: false
 
@@ -40,7 +36,6 @@ DamnaCarapaces:
   is_mineable: false
   id64: 128667062
   name: Damna Carapaces
-  avg_price: 8120
   rare_goods: true
   corrosive: false
 
@@ -49,7 +44,6 @@ RapaBaoSnakeSkins:
   is_mineable: false
   id64: 128667063
   name: Rapa Bao Snake Skins
-  avg_price: 8285
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ VanayequiRhinoFur:
   is_mineable: false
   id64: 128667064
   name: Vanayequi Rhino Fur
-  avg_price: 8331
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ BankiAmphibiousLeather:
   is_mineable: false
   id64: 128667674
   name: Banki Amphibious Leather
-  avg_price: 8338
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ TiegfriesSynthSilk:
   is_mineable: false
   id64: 128667695
   name: Tiegfries Synth Silk
-  avg_price: 8478
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ ChameleonCloth:
   is_mineable: false
   id64: 128667710
   name: Chameleon Cloth
-  avg_price: 9071
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ ConductiveFabrics:
   is_mineable: false
   id64: 128682044
   name: Conductive Fabrics
-  avg_price: 507
   rare_goods: false
   corrosive: false
 
@@ -103,6 +92,5 @@ MilitaryGradeFabrics:
   is_mineable: false
   id64: 128682045
   name: Military Grade Fabrics
-  avg_price: 708
   rare_goods: false
   corrosive: false

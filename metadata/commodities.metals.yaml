@@ -4,7 +4,6 @@ Platinum:
   is_mineable: true
   id64: 128049152
   name: Platinum
-  avg_price: 19279
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -16,7 +15,6 @@ Palladium:
   is_mineable: true
   id64: 128049153
   name: Palladium
-  avg_price: 13298
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -28,7 +26,6 @@ Gold:
   is_mineable: true
   id64: 128049154
   name: Gold
-  avg_price: 9401
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -40,7 +37,6 @@ Silver:
   is_mineable: true
   id64: 128049155
   name: Silver
-  avg_price: 4775
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -52,7 +48,6 @@ Cobalt:
   is_mineable: true
   id64: 128049162
   name: Cobalt
-  avg_price: 647
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -64,7 +59,6 @@ Beryllium:
   is_mineable: false
   id64: 128049168
   name: Beryllium
-  avg_price: 8288
   rare_goods: false
   corrosive: false
 
@@ -73,7 +67,6 @@ Indium:
   is_mineable: false
   id64: 128049169
   name: Indium
-  avg_price: 5727
   rare_goods: false
   corrosive: false
 
@@ -82,7 +75,6 @@ Gallium:
   is_mineable: false
   id64: 128049170
   name: Gallium
-  avg_price: 5135
   rare_goods: false
   corrosive: false
 
@@ -91,7 +83,6 @@ Tantalum:
   is_mineable: false
   id64: 128049171
   name: Tantalum
-  avg_price: 3962
   rare_goods: false
   corrosive: false
 
@@ -100,7 +91,6 @@ Uranium:
   is_mineable: false
   id64: 128049172
   name: Uranium
-  avg_price: 2705
   rare_goods: false
   corrosive: false
 
@@ -109,7 +99,6 @@ Lithium:
   is_mineable: false
   id64: 128049173
   name: Lithium
-  avg_price: 1596
   rare_goods: false
   corrosive: false
 
@@ -118,7 +107,6 @@ Titanium:
   is_mineable: false
   id64: 128049174
   name: Titanium
-  avg_price: 1006
   rare_goods: false
   corrosive: false
 
@@ -127,7 +115,6 @@ Copper:
   is_mineable: false
   id64: 128049175
   name: Copper
-  avg_price: 481
   rare_goods: false
   corrosive: false
 
@@ -136,7 +123,6 @@ Aluminium:
   is_mineable: false
   id64: 128049176
   name: Aluminium
-  avg_price: 340
   rare_goods: false
   corrosive: false
 
@@ -145,7 +131,6 @@ Hafnium178:
   is_mineable: false
   id64: 128668549
   name: Hafnium178
-  avg_price: 69098
   rare_goods: false
   corrosive: false
 
@@ -154,7 +139,6 @@ Osmium:
   is_mineable: true
   id64: 128671118
   name: Osmium
-  avg_price: 7591
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -166,7 +150,6 @@ SothisCrystallineGold:
   is_mineable: false
   id64: 128672122
   name: Sothis Crystalline Gold
-  avg_price: 19112
   rare_goods: true
   corrosive: false
 
@@ -175,7 +158,6 @@ Lanthanum:
   is_mineable: false
   id64: 128672298
   name: Lanthanum
-  avg_price: 8766
   rare_goods: false
   corrosive: false
 
@@ -184,7 +166,6 @@ Thallium:
   is_mineable: false
   id64: 128672299
   name: Thallium
-  avg_price: 3618
   rare_goods: false
   corrosive: false
 
@@ -193,7 +174,6 @@ Bismuth:
   is_mineable: false
   id64: 128672300
   name: Bismuth
-  avg_price: 2284
   rare_goods: false
   corrosive: false
 
@@ -202,7 +182,6 @@ Thorium:
   is_mineable: false
   id64: 128672301
   name: Thorium
-  avg_price: 11513
   rare_goods: false
   corrosive: false
 
@@ -211,7 +190,6 @@ Praseodymium:
   is_mineable: true
   id64: 128673845
   name: Praseodymium
-  avg_price: 7156
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -223,7 +201,6 @@ Samarium:
   is_mineable: true
   id64: 128673847
   name: Samarium
-  avg_price: 6330
   rare_goods: false
   corrosive: false
   mining_method: Laser
@@ -235,7 +212,6 @@ PlatinumAloy:
   is_mineable: false
   id64: 128793114
   name: Platinum Aloy
-  avg_price: 18333
   rare_goods: true
   corrosive: false
 
@@ -244,6 +220,5 @@ Steel:
   is_mineable: false
   id64: 129031238
   name: Steel
-  avg_price: 4179
   rare_goods: false
   corrosive: false

@@ -4,7 +4,6 @@ PersonalWeapons:
   is_mineable: false
   id64: 128049233
   name: Personal Weapons
-  avg_price: 4632
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ BattleWeapons:
   is_mineable: false
   id64: 128049234
   name: Battle Weapons
-  avg_price: 7259
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ ReactiveArmour:
   is_mineable: false
   id64: 128049235
   name: Reactive Armour
-  avg_price: 2113
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ NonLethalWeapons:
   is_mineable: false
   id64: 128049236
   name: Non Lethal Weapons
-  avg_price: 1837
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ BorasetaniPathogenetics:
   is_mineable: false
   id64: 128667032
   name: Borasetani Pathogenetics
-  avg_price: 13679
   rare_goods: true
   corrosive: false
 
@@ -49,7 +44,6 @@ HIP118311Swarm:
   is_mineable: false
   id64: 128667033
   name: HIP 118311 Swarm
-  avg_price: 13448
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ HolvaDuellingBlades:
   is_mineable: false
   id64: 128667070
   name: Holva Duelling Blades
-  avg_price: 12493
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ KamorinHistoricWeapons:
   is_mineable: false
   id64: 128667071
   name: Kamorin Historic Weapons
-  avg_price: 9766
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ GilyaSignatureWeapons:
   is_mineable: false
   id64: 128667072
   name: Gilya Signature Weapons
-  avg_price: 13038
   rare_goods: true
   corrosive: false
 
@@ -85,6 +76,5 @@ Landmines:
   is_mineable: false
   id64: 128672312
   name: Landmines
-  avg_price: 4602
   rare_goods: false
   corrosive: false

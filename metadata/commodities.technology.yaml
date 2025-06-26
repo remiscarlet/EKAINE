@@ -4,7 +4,6 @@ ComputerComponents:
   is_mineable: false
   id64: 128049225
   name: Computer Components
-  avg_price: 513
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ HazardousEnvironmentSuits:
   is_mineable: false
   id64: 128049226
   name: Hazardous Environment Suits
-  avg_price: 340
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ Robotics:
   is_mineable: false
   id64: 128049227
   name: Robotics
-  avg_price: 1856
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ AutoFabricators:
   is_mineable: false
   id64: 128049228
   name: Auto Fabricators
-  avg_price: 3734
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ AnimalMonitors:
   is_mineable: false
   id64: 128049229
   name: Animal Monitors
-  avg_price: 324
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ AquaponicSystems:
   is_mineable: false
   id64: 128049230
   name: Aquaponic Systems
-  avg_price: 314
   rare_goods: false
   corrosive: false
 
@@ -58,7 +52,6 @@ AdvancedCatalysers:
   is_mineable: false
   id64: 128049231
   name: Advanced Catalysers
-  avg_price: 2947
   rare_goods: false
   corrosive: false
 
@@ -67,7 +60,6 @@ TerrainEnrichmentSystems:
   is_mineable: false
   id64: 128049232
   name: Terrain Enrichment Systems
-  avg_price: 4887
   rare_goods: false
   corrosive: false
 
@@ -76,7 +68,6 @@ ResonatingSeparators:
   is_mineable: false
   id64: 128049671
   name: Resonating Separators
-  avg_price: 5958
   rare_goods: false
   corrosive: false
 
@@ -85,7 +76,6 @@ BioReducingLichen:
   is_mineable: false
   id64: 128049672
   name: Bio Reducing Lichen
-  avg_price: 998
   rare_goods: false
   corrosive: false
 
@@ -94,7 +84,6 @@ XiheCompanions:
   is_mineable: false
   id64: 128667075
   name: Xihe Companions
-  avg_price: 11058
   rare_goods: true
   corrosive: false
 
@@ -103,7 +92,6 @@ AZCancriFormula42:
   is_mineable: false
   id64: 128667080
   name: AZ Cancri Formula 42
-  avg_price: 12440
   rare_goods: true
   corrosive: false
 
@@ -112,7 +100,6 @@ MuTomImager:
   is_mineable: false
   id64: 128672310
   name: Mu Tom Imager
-  avg_price: 6353
   rare_goods: false
   corrosive: false
 
@@ -121,7 +108,6 @@ StructuralRegulators:
   is_mineable: false
   id64: 128672311
   name: Structural Regulators
-  avg_price: 1791
   rare_goods: false
   corrosive: false
 
@@ -130,7 +116,6 @@ Nanobreakers:
   is_mineable: false
   id64: 128673871
   name: Nanobreakers
-  avg_price: 639
   rare_goods: false
   corrosive: false
 
@@ -139,7 +124,6 @@ TelemetrySuite:
   is_mineable: false
   id64: 128673872
   name: Telemetry Suite
-  avg_price: 2080
   rare_goods: false
   corrosive: false
 
@@ -148,7 +132,6 @@ MicroControllers:
   is_mineable: false
   id64: 128673873
   name: Micro Controllers
-  avg_price: 3274
   rare_goods: false
   corrosive: false
 
@@ -157,7 +140,6 @@ IonDistributor:
   is_mineable: false
   id64: 128673874
   name: Ion Distributor
-  avg_price: 1133
   rare_goods: false
   corrosive: false
 
@@ -166,7 +148,6 @@ DiagnosticSensor:
   is_mineable: false
   id64: 128673875
   name: Diagnostic Sensor
-  avg_price: 4337
   rare_goods: false
   corrosive: false
 
@@ -175,7 +156,6 @@ MedicalDiagnosticEquipment:
   is_mineable: false
   id64: 128682047
   name: Medical Diagnostic Equipment
-  avg_price: 2848
   rare_goods: false
   corrosive: false
 
@@ -184,6 +164,5 @@ ClassifiedExperimentalEquipment:
   is_mineable: false
   id64: 129002574
   name: Classified Experimental Equipment
-  avg_price: 0
   rare_goods: true
   corrosive: false

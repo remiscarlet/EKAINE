@@ -4,7 +4,6 @@ Algae:
   is_mineable: false
   id64: 128049177
   name: Algae
-  avg_price: 137
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ FruitAndVegetables:
   is_mineable: false
   id64: 128049178
   name: Fruit And Vegetables
-  avg_price: 312
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ Grain:
   is_mineable: false
   id64: 128049180
   name: Grain
-  avg_price: 210
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ Animalmeat:
   is_mineable: false
   id64: 128049182
   name: Animal Meat
-  avg_price: 1292
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ Fish:
   is_mineable: false
   id64: 128049183
   name: Fish
-  avg_price: 406
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ FoodCartridges:
   is_mineable: false
   id64: 128049184
   name: Food Cartridges
-  avg_price: 105
   rare_goods: false
   corrosive: false
 
@@ -58,7 +52,6 @@ SyntheticMeat:
   is_mineable: false
   id64: 128049185
   name: Synthetic Meat
-  avg_price: 271
   rare_goods: false
   corrosive: false
 
@@ -67,7 +60,6 @@ Tea:
   is_mineable: false
   id64: 128049188
   name: Tea
-  avg_price: 1467
   rare_goods: false
   corrosive: false
 
@@ -76,7 +68,6 @@ Coffee:
   is_mineable: false
   id64: 128049189
   name: Coffee
-  avg_price: 1279
   rare_goods: false
   corrosive: false
 
@@ -85,7 +76,6 @@ HIP10175BushMeat:
   is_mineable: false
   id64: 128667019
   name: HIP 10175 Bush Meat
-  avg_price: 9382
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ AlbinoQuechuaMammoth:
   is_mineable: false
   id64: 128667020
   name: Albino Quechua Mammoth
-  avg_price: 9687
   rare_goods: true
   corrosive: false
 
@@ -103,7 +92,6 @@ UtgaroarMillenialEggs:
   is_mineable: false
   id64: 128667021
   name: Utgaroar Millenial Eggs
-  avg_price: 9163
   rare_goods: true
   corrosive: false
 
@@ -112,7 +100,6 @@ WitchhaulKobeBeef:
   is_mineable: false
   id64: 128667022
   name: Witchhaul Kobe Beef
-  avg_price: 11085
   rare_goods: true
   corrosive: false
 
@@ -121,7 +108,6 @@ KarsukiLocusts:
   is_mineable: false
   id64: 128667023
   name: Karsuki Locusts
-  avg_price: 8543
   rare_goods: true
   corrosive: false
 
@@ -130,7 +116,6 @@ GiantIrukamaSnails:
   is_mineable: false
   id64: 128667024
   name: Giant Irukama Snails
-  avg_price: 9174
   rare_goods: true
   corrosive: false
 
@@ -139,7 +124,6 @@ BaltahSineVacuumKrill:
   is_mineable: false
   id64: 128667025
   name: Baltah Sine Vacuum Krill
-  avg_price: 8479
   rare_goods: true
   corrosive: false
 
@@ -148,7 +132,6 @@ CetiRabbits:
   is_mineable: false
   id64: 128667026
   name: Ceti Rabbits
-  avg_price: 9079
   rare_goods: true
   corrosive: false
 
@@ -157,7 +140,6 @@ AnyNaCoffee:
   is_mineable: false
   id64: 128667041
   name: Any Na Coffee
-  avg_price: 9160
   rare_goods: true
   corrosive: false
 
@@ -166,7 +148,6 @@ CD75CatCoffee:
   is_mineable: false
   id64: 128667042
   name: CD-75 Kitten Brand Coffee
-  avg_price: 9571
   rare_goods: true
   corrosive: false
 
@@ -175,7 +156,6 @@ GomanYauponCoffee:
   is_mineable: false
   id64: 128667043
   name: Goman Yaupon Coffee
-  avg_price: 8921
   rare_goods: true
   corrosive: false
 
@@ -184,7 +164,6 @@ ChiEridaniMarinePaste:
   is_mineable: false
   id64: 128667049
   name: Chi Eridani Marine Paste
-  avg_price: 8450
   rare_goods: true
   corrosive: false
 
@@ -193,7 +172,6 @@ EsusekuCaviar:
   is_mineable: false
   id64: 128667050
   name: Esuseku Caviar
-  avg_price: 9625
   rare_goods: true
   corrosive: false
 
@@ -202,7 +180,6 @@ LiveHecateSeaWorms:
   is_mineable: false
   id64: 128667051
   name: Live Hecate Sea Worms
-  avg_price: 8737
   rare_goods: true
   corrosive: false
 
@@ -211,7 +188,6 @@ HelvetitjPearls:
   is_mineable: false
   id64: 128667052
   name: Helvetitj Pearls
-  avg_price: 10450
   rare_goods: true
   corrosive: false
 
@@ -220,7 +196,6 @@ HIP41181Squid:
   is_mineable: false
   id64: 128667053
   name: HIP 41181 Squid
-  avg_price: 8497
   rare_goods: true
   corrosive: false
 
@@ -229,7 +204,6 @@ CoquimSpongiformVictuals:
   is_mineable: false
   id64: 128667054
   name: Coquim Spongiform Victuals
-  avg_price: 8077
   rare_goods: true
   corrosive: false
 
@@ -238,7 +212,6 @@ AerialEdenApple:
   is_mineable: false
   id64: 128667055
   name: Aerial Eden Apple
-  avg_price: 8331
   rare_goods: true
   corrosive: false
 
@@ -247,7 +220,6 @@ NeritusBerries:
   is_mineable: false
   id64: 128667056
   name: Neritus Berries
-  avg_price: 8497
   rare_goods: true
   corrosive: false
 
@@ -256,7 +228,6 @@ OchoengChillies:
   is_mineable: false
   id64: 128667057
   name: Ochoeng Chillies
-  avg_price: 8601
   rare_goods: true
   corrosive: false
 
@@ -265,7 +236,6 @@ DeuringasTruffles:
   is_mineable: false
   id64: 128667058
   name: Deuringas Truffles
-  avg_price: 9232
   rare_goods: true
   corrosive: false
 
@@ -274,7 +244,6 @@ HR7221Wheat:
   is_mineable: false
   id64: 128667059
   name: HR 7221 Wheat
-  avg_price: 8190
   rare_goods: true
   corrosive: false
 
@@ -283,7 +252,6 @@ JarouaRice:
   is_mineable: false
   id64: 128667060
   name: Jaroua Rice
-  avg_price: 8169
   rare_goods: true
   corrosive: false
 
@@ -292,7 +260,6 @@ SanumaMEAT:
   is_mineable: false
   id64: 128667076
   name: Sanuma MEAT
-  avg_price: 8504
   rare_goods: true
   corrosive: false
 
@@ -301,7 +268,6 @@ EthgrezeTeaBuds:
   is_mineable: false
   id64: 128667077
   name: Ethgreze Tea Buds
-  avg_price: 10197
   rare_goods: true
   corrosive: false
 
@@ -310,7 +276,6 @@ CeremonialHeikeTea:
   is_mineable: false
   id64: 128667078
   name: Ceremonial Heike Tea
-  avg_price: 9251
   rare_goods: true
   corrosive: false
 
@@ -319,7 +284,6 @@ TanmarkTranquilTea:
   is_mineable: false
   id64: 128667079
   name: Tanmark Tranquil Tea
-  avg_price: 9177
   rare_goods: true
   corrosive: false
 
@@ -328,7 +292,6 @@ BakedGreebles:
   is_mineable: false
   id64: 128667669
   name: Baked Greebles
-  avg_price: 8211
   rare_goods: true
   corrosive: false
 
@@ -337,7 +300,6 @@ CetiAepyornisEgg:
   is_mineable: false
   id64: 128667670
   name: Ceti Aepyornis Egg
-  avg_price: 9769
   rare_goods: true
   corrosive: false
 
@@ -346,7 +308,6 @@ HaidneBlackBrew:
   is_mineable: false
   id64: 128667679
   name: Haidne Black Brew
-  avg_price: 8837
   rare_goods: true
   corrosive: false
 
@@ -355,7 +316,6 @@ LFTVoidExtractCoffee:
   is_mineable: false
   id64: 128667685
   name: Void Extract Coffee
-  avg_price: 9554
   rare_goods: true
   corrosive: false
 
@@ -364,7 +324,6 @@ LTTHyperSweet:
   is_mineable: false
   id64: 128667688
   name: LTT Hyper Sweet
-  avg_price: 8054
   rare_goods: true
   corrosive: false
 
@@ -373,7 +332,6 @@ MechucosHighTea:
   is_mineable: false
   id64: 128667689
   name: Mechucos High Tea
-  avg_price: 8846
   rare_goods: true
   corrosive: false
 
@@ -382,7 +340,6 @@ MokojingBeastFeast:
   is_mineable: false
   id64: 128667691
   name: Mokojing Beast Feast
-  avg_price: 9788
   rare_goods: true
   corrosive: false
 
@@ -391,7 +348,6 @@ MukusubiiChitinOs:
   is_mineable: false
   id64: 128667692
   name: Mukusubii Chitin-os
-  avg_price: 8359
   rare_goods: true
   corrosive: false
 
@@ -400,7 +356,6 @@ MulachiGiantFungus:
   is_mineable: false
   id64: 128667693
   name: Mulachi Giant Fungus
-  avg_price: 7957
   rare_goods: true
   corrosive: false
 
@@ -409,7 +364,6 @@ WheemeteWheatCakes:
   is_mineable: false
   id64: 128667698
   name: Wheemete Wheat Cakes
-  avg_price: 8081
   rare_goods: true
   corrosive: false
 
@@ -418,7 +372,6 @@ AroucaConventualSweets:
   is_mineable: false
   id64: 128667705
   name: Arouca Conventual Sweets
-  avg_price: 8737
   rare_goods: true
   corrosive: false
 
@@ -427,7 +380,6 @@ OrrerianViciousBrew:
   is_mineable: false
   id64: 128667711
   name: Orrerian Vicious Brew
-  avg_price: 8342
   rare_goods: true
   corrosive: false
 
@@ -436,7 +388,6 @@ UszaianTreeGrub:
   is_mineable: false
   id64: 128667712
   name: Uszaian Tree Grub
-  avg_price: 8578
   rare_goods: true
   corrosive: false
 
@@ -445,6 +396,5 @@ DisoMaCorn:
   is_mineable: false
   id64: 128667714
   name: Diso Ma Corn
-  avg_price: 8134
   rare_goods: true
   corrosive: false

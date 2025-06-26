@@ -4,7 +4,6 @@ USSCargoBlackBox:
   is_mineable: false
   id64: 128666752
   name: Black Box
-  avg_price: 6995
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ USSCargoTradeData:
   is_mineable: false
   id64: 128666754
   name: Trade Data
-  avg_price: 2790
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ USSCargoMilitaryPlans:
   is_mineable: false
   id64: 128666755
   name: Military Plans
-  avg_price: 9413
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ USSCargoAncientArtefact:
   is_mineable: false
   id64: 128666756
   name: Ancient Artefact
-  avg_price: 8183
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ USSCargoRareArtwork:
   is_mineable: false
   id64: 128666757
   name: Rare Artwork
-  avg_price: 7774
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ USSCargoExperimentalChemicals:
   is_mineable: false
   id64: 128666758
   name: Experimental Chemicals
-  avg_price: 3524
   rare_goods: false
   corrosive: false
 
@@ -58,7 +52,6 @@ USSCargoRebelTransmissions:
   is_mineable: false
   id64: 128666759
   name: Rebel Transmissions
-  avg_price: 4068
   rare_goods: false
   corrosive: false
 
@@ -67,7 +60,6 @@ USSCargoPrototypeTech:
   is_mineable: false
   id64: 128666760
   name: Prototype Tech
-  avg_price: 10696
   rare_goods: false
   corrosive: false
 
@@ -76,7 +68,6 @@ USSCargoTechnicalBlueprints:
   is_mineable: false
   id64: 128666761
   name: Technical Blueprints
-  avg_price: 6333
   rare_goods: false
   corrosive: false
 
@@ -85,7 +76,6 @@ UnknownArtifact:
   is_mineable: false
   id64: 128668547
   name: Unknown Artifact
-  avg_price: 290190
   rare_goods: false
   corrosive: true
 
@@ -94,7 +84,6 @@ AiRelics:
   is_mineable: false
   id64: 128668548
   name: AI Relics
-  avg_price: 138613
   rare_goods: false
   corrosive: false
 
@@ -103,7 +92,6 @@ Antiquities:
   is_mineable: false
   id64: 128668551
   name: Antiquities
-  avg_price: 115511
   rare_goods: false
   corrosive: false
 
@@ -112,7 +100,6 @@ MilitaryIntelligence:
   is_mineable: false
   id64: 128668552
   name: Military Intelligence
-  avg_price: 55527
   rare_goods: false
   corrosive: false
 
@@ -121,7 +108,6 @@ SAP8CoreContainer:
   is_mineable: false
   id64: 128671443
   name: SAP 8 Core Container
-  avg_price: 59196
   rare_goods: false
   corrosive: false
 
@@ -130,7 +116,6 @@ TrinketsOfFortune:
   is_mineable: false
   id64: 128671444
   name: Trinkets Of Fortune
-  avg_price: 1428
   rare_goods: false
   corrosive: false
 
@@ -139,7 +124,6 @@ WreckageComponents:
   is_mineable: false
   id64: 128672123
   name: Wreckage Components
-  avg_price: 394
   rare_goods: false
   corrosive: false
 
@@ -148,7 +132,6 @@ EncriptedDataStorage:
   is_mineable: false
   id64: 128672124
   name: Encrypted Data Storage
-  avg_price: 806
   rare_goods: false
   corrosive: false
 
@@ -157,7 +140,6 @@ OccupiedCryoPod:
   is_mineable: false
   id64: 128672125
   name: Occupied Cryo Pod
-  avg_price: 4474
   rare_goods: false
   corrosive: false
 
@@ -166,7 +148,6 @@ PersonalEffects:
   is_mineable: false
   id64: 128672126
   name: Personal Effects
-  avg_price: 379
   rare_goods: false
   corrosive: false
 
@@ -175,7 +156,6 @@ ComercialSamples:
   is_mineable: false
   id64: 128672127
   name: Commercial Samples
-  avg_price: 361
   rare_goods: false
   corrosive: false
 
@@ -184,7 +164,6 @@ TacticalData:
   is_mineable: false
   id64: 128672128
   name: Tactical Data
-  avg_price: 457
   rare_goods: false
   corrosive: false
 
@@ -193,7 +172,6 @@ AssaultPlans:
   is_mineable: false
   id64: 128672129
   name: Assault Plans
-  avg_price: 446
   rare_goods: false
   corrosive: false
 
@@ -202,7 +180,6 @@ EncryptedCorrespondence:
   is_mineable: false
   id64: 128672130
   name: Encrypted Correspondence
-  avg_price: 372
   rare_goods: false
   corrosive: false
 
@@ -211,7 +188,6 @@ DiplomaticBag:
   is_mineable: false
   id64: 128672131
   name: Diplomatic Bag
-  avg_price: 572
   rare_goods: false
   corrosive: false
 
@@ -220,7 +196,6 @@ ScientificResearch:
   is_mineable: false
   id64: 128672132
   name: Scientific Research
-  avg_price: 635
   rare_goods: false
   corrosive: false
 
@@ -229,7 +204,6 @@ ScientificSamples:
   is_mineable: false
   id64: 128672133
   name: Scientific Samples
-  avg_price: 772
   rare_goods: false
   corrosive: false
 
@@ -238,7 +212,6 @@ PoliticalPrisoner:
   is_mineable: false
   id64: 128672134
   name: Political Prisoner
-  avg_price: 5132
   rare_goods: false
   corrosive: false
 
@@ -247,7 +220,6 @@ Hostage:
   is_mineable: false
   id64: 128672135
   name: Hostage
-  avg_price: 2427
   rare_goods: false
   corrosive: false
 
@@ -256,7 +228,6 @@ LargeExplorationDataCash:
   is_mineable: false
   id64: 128672136
   name: Large Survey Data Cache
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -265,7 +236,6 @@ SmallExplorationDataCash:
   is_mineable: false
   id64: 128672137
   name: Small Survey Data Cache
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -274,7 +244,6 @@ AntiqueJewellery:
   is_mineable: false
   id64: 128672159
   name: Antique Jewellery
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -283,7 +252,6 @@ PreciousGems:
   is_mineable: false
   id64: 128672160
   name: Precious Gems
-  avg_price: 109641
   rare_goods: false
   corrosive: false
 
@@ -292,7 +260,6 @@ EarthRelics:
   is_mineable: false
   id64: 128672161
   name: Earth Relics
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -301,7 +268,6 @@ GeneBank:
   is_mineable: false
   id64: 128672162
   name: Gene Bank
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -310,7 +276,6 @@ TimeCapsule:
   is_mineable: false
   id64: 128672163
   name: Time Capsule
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -319,7 +284,6 @@ GeologicalSamples:
   is_mineable: false
   id64: 128672315
   name: Geological Samples
-  avg_price: 446
   rare_goods: false
   corrosive: false
 
@@ -328,7 +292,6 @@ UnstableDataCore:
   is_mineable: false
   id64: 128672810
   name: Unstable Data Core
-  avg_price: 2427
   rare_goods: false
   corrosive: false
 
@@ -337,7 +300,6 @@ DamagedEscapePod:
   is_mineable: false
   id64: 128672811
   name: Damaged Escape Pod
-  avg_price: 11912
   rare_goods: false
   corrosive: false
 
@@ -346,7 +308,6 @@ UnknownArtifact2:
   is_mineable: false
   id64: 128673876
   name: Unknown Artifact2
-  avg_price: 411003
   rare_goods: false
   corrosive: true
 
@@ -355,7 +316,6 @@ DataCore:
   is_mineable: false
   id64: 128682049
   name: Data Core
-  avg_price: 2872
   rare_goods: false
   corrosive: false
 
@@ -364,7 +324,6 @@ GalacticTravelGuide:
   is_mineable: false
   id64: 128682050
   name: Galactic Travel Guide
-  avg_price: 332
   rare_goods: false
   corrosive: false
 
@@ -373,7 +332,6 @@ MysteriousIdol:
   is_mineable: false
   id64: 128682051
   name: Mysterious Idol
-  avg_price: 15196
   rare_goods: false
   corrosive: false
 
@@ -382,7 +340,6 @@ ProhibitedResearchMaterials:
   is_mineable: false
   id64: 128682052
   name: Prohibited Research Materials
-  avg_price: 46607
   rare_goods: false
   corrosive: false
 
@@ -391,7 +348,6 @@ AntimatterContainmentUnit:
   is_mineable: false
   id64: 128682053
   name: Antimatter Containment Unit
-  avg_price: 26608
   rare_goods: false
   corrosive: false
 
@@ -400,7 +356,6 @@ SpacePioneerRelics:
   is_mineable: false
   id64: 128682054
   name: Space Pioneer Relics
-  avg_price: 7342
   rare_goods: false
   corrosive: false
 
@@ -409,7 +364,6 @@ FossilRemnants:
   is_mineable: false
   id64: 128682055
   name: Fossil Remnants
-  avg_price: 9927
   rare_goods: false
   corrosive: false
 
@@ -418,7 +372,6 @@ AncientRelic:
   is_mineable: false
   id64: 128732183
   name: Ancient Relic
-  avg_price: 24962
   rare_goods: false
   corrosive: false
 
@@ -427,7 +380,6 @@ AncientOrb:
   is_mineable: false
   id64: 128732184
   name: Ancient Orb
-  avg_price: 17415
   rare_goods: false
   corrosive: false
 
@@ -436,7 +388,6 @@ AncientCasket:
   is_mineable: false
   id64: 128732185
   name: Ancient Casket
-  avg_price: 16294
   rare_goods: false
   corrosive: false
 
@@ -445,7 +396,6 @@ AncientTablet:
   is_mineable: false
   id64: 128732186
   name: Ancient Tablet
-  avg_price: 17415
   rare_goods: false
   corrosive: false
 
@@ -454,7 +404,6 @@ AncientUrn:
   is_mineable: false
   id64: 128732187
   name: Ancient Urn
-  avg_price: 14907
   rare_goods: false
   corrosive: false
 
@@ -463,7 +412,6 @@ AncientTotem:
   is_mineable: false
   id64: 128732188
   name: Ancient Totem
-  avg_price: 20437
   rare_goods: false
   corrosive: false
 
@@ -472,7 +420,6 @@ UnknownResin:
   is_mineable: false
   id64: 128737287
   name: Unknown Resin
-  avg_price: 18652
   rare_goods: false
   corrosive: true
 
@@ -481,7 +428,6 @@ UnknownBiologicalMatter:
   is_mineable: false
   id64: 128737288
   name: Unknown Biological Matter
-  avg_price: 25479
   rare_goods: false
   corrosive: true
 
@@ -490,7 +436,6 @@ UnknownTechnologySamples:
   is_mineable: false
   id64: 128737289
   name: Unknown Technology Samples
-  avg_price: 22551
   rare_goods: false
   corrosive: true
 
@@ -499,7 +444,6 @@ UnknownArtifact3:
   is_mineable: false
   id64: 128740752
   name: Unknown Artifact3
-  avg_price: 31350
   rare_goods: false
   corrosive: true
 
@@ -508,7 +452,6 @@ ThargoidHeart:
   is_mineable: false
   id64: 128793127
   name: Thargoid Heart
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -517,7 +460,6 @@ ThargoidTissueSampleType1:
   is_mineable: false
   id64: 128793128
   name: Thargoid Tissue Sample Type 1
-  avg_price: 14081
   rare_goods: false
   corrosive: true
 
@@ -526,7 +468,6 @@ ThargoidTissueSampleType2:
   is_mineable: false
   id64: 128793129
   name: Thargoid Tissue Sample Type 2
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -535,7 +476,6 @@ ThargoidTissueSampleType3:
   is_mineable: false
   id64: 128793130
   name: Thargoid Tissue Sample Type 3
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -544,7 +484,6 @@ ThargoidScoutTissueSample:
   is_mineable: false
   id64: 128824468
   name: Thargoid Scout Tissue Sample
-  avg_price: 15215
   rare_goods: false
   corrosive: true
 
@@ -553,7 +492,6 @@ AncientKey:
   is_mineable: false
   id64: 128888499
   name: Ancient Key
-  avg_price: 29931
   rare_goods: false
   corrosive: false
 
@@ -562,7 +500,6 @@ ThargoidTissueSampleType4:
   is_mineable: false
   id64: 128902652
   name: Thargoid Tissue Sample Type 4
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -571,7 +508,6 @@ M_TissueSample_Fluid:
   is_mineable: false
   id64: 128922517
   name: M_TissueSample_Fluid
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -580,7 +516,6 @@ M_TissueSample_Soft:
   is_mineable: false
   id64: 128922518
   name: M_TissueSample_Soft
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -589,7 +524,6 @@ M_TissueSample_Nerves:
   is_mineable: false
   id64: 128922519
   name: M_TissueSample_Nerves
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -598,7 +532,6 @@ S_TissueSample_Cells:
   is_mineable: false
   id64: 128922520
   name: S_TissueSample_Cells
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -607,7 +540,6 @@ S_TissueSample_Surface:
   is_mineable: false
   id64: 128922521
   name: S_TissueSample_Surface
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -616,7 +548,6 @@ S_TissueSample_Core:
   is_mineable: false
   id64: 128922522
   name: S_TissueSample_Core
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -625,7 +556,6 @@ P_ParticulateSample:
   is_mineable: false
   id64: 128922523
   name: P_ParticulateSample
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -634,7 +564,6 @@ S9_TissueSample_Shell:
   is_mineable: false
   id64: 128922781
   name: S9_TissueSample_Shell
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -643,7 +572,6 @@ M3_TissueSample_Membrane:
   is_mineable: false
   id64: 128922782
   name: M3_TissueSample_Membrane
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -652,7 +580,6 @@ M3_TissueSample_Mycelium:
   is_mineable: false
   id64: 128922783
   name: M3_TissueSample_Mycelium
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -661,7 +588,6 @@ M3_TissueSample_Spores:
   is_mineable: false
   id64: 128922784
   name: M3_TissueSample_Spores
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -670,7 +596,6 @@ S6_TissueSample_Mesoglea:
   is_mineable: false
   id64: 128922785
   name: S6_TissueSample_Mesoglea
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -679,7 +604,6 @@ S6_TissueSample_Cells:
   is_mineable: false
   id64: 128922786
   name: S6_TissueSample_Cells
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -688,7 +612,6 @@ S6_TissueSample_Coenosarc:
   is_mineable: false
   id64: 128922787
   name: S6_TissueSample_Coenosarc
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -697,7 +620,6 @@ AncientRelicTG:
   is_mineable: false
   id64: 129015433
   name: Ancient Relic TG
-  avg_price: 4798
   rare_goods: false
   corrosive: false
 
@@ -706,7 +628,6 @@ ThargoidTissueSampleType5:
   is_mineable: false
   id64: 129019258
   name: Thargoid Tissue Sample Type 5
-  avg_price: 98368
   rare_goods: false
   corrosive: true
 
@@ -715,7 +636,6 @@ ThargoidGeneratorTissueSample:
   is_mineable: false
   id64: 129019259
   name: Thargoid Generator Tissue Sample
-  avg_price: 67680
   rare_goods: false
   corrosive: true
 
@@ -724,7 +644,6 @@ UnocuppiedEscapePod:
   is_mineable: false
   id64: 129022087
   name: Unoccuppied Escape Pod
-  avg_price: 3900
   rare_goods: false
   corrosive: false
 
@@ -733,7 +652,6 @@ UnknownMineral:
   is_mineable: false
   id64: 129022408
   name: Unknown Mineral
-  avg_price: 31986
   rare_goods: false
   corrosive: true
 
@@ -742,7 +660,6 @@ UnknownRefinedMineral:
   is_mineable: false
   id64: 129022409
   name: Unknown Refined Mineral
-  avg_price: 158421
   rare_goods: false
   corrosive: true
 
@@ -752,7 +669,6 @@ ThargoidTissueSampleType6:
   is_mineable: false
   id64: 129022395
   name: Thargoid Tissue Sample Type 6
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -761,7 +677,6 @@ ThargoidTissueSampleType7:
   is_mineable: false
   id64: 129022396
   name: Thargoid Tissue Sample Type 7
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -770,7 +685,6 @@ ThargoidTissueSampleType9a:
   is_mineable: false
   id64: 129022398
   name: Thargoid Tissue Sample Type 9a
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -779,7 +693,6 @@ ThargoidTissueSampleType9b:
   is_mineable: false
   id64: 129022399
   name: Thargoid Tissue Sample Type 9b
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -788,7 +701,6 @@ ThargoidTissueSampleType9c:
   is_mineable: false
   id64: 129022400
   name: Thargoid Tissue Sample Type 9c
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -797,7 +709,6 @@ ThargoidTissueSampleType10a:
   is_mineable: false
   id64: 129022402
   name: Thargoid Tissue Sample Type 10a
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -806,7 +717,6 @@ ThargoidTissueSampleType10b:
   is_mineable: false
   id64: 129022403
   name: Thargoid Tissue Sample Type 10b
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -815,7 +725,6 @@ ThargoidTissueSampleType10c:
   is_mineable: false
   id64: 129022404
   name: Thargoid Tissue Sample Type 10c
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -824,7 +733,6 @@ UnknownSack:
   is_mineable: false
   id64: 129022405
   name: Unknown Sack
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -833,7 +741,6 @@ ThargoidPod:
   is_mineable: false
   id64: 129022406
   name: Thargoid Pod
-  avg_price: 0
   rare_goods: false
   corrosive: false
 
@@ -842,7 +749,6 @@ CoralSap:
   is_mineable: false
   id64: 129022407
   name: Coral Sap
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -851,7 +757,6 @@ ThargoidTitanDriveComponent:
   is_mineable: false
   id64: 129030459
   name: Thargoid Titan Drive Component
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -860,7 +765,6 @@ ThargoidCystSpecimen:
   is_mineable: false
   id64: 129030460
   name: Thargoid Cyst Specimen
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -869,7 +773,6 @@ ThargoidBoneFragments:
   is_mineable: false
   id64: 129030461
   name: Thargoid Bone Fragments
-  avg_price: 0
   rare_goods: false
   corrosive: true
 
@@ -878,6 +781,5 @@ ThargoidOrganSample:
   is_mineable: false
   id64: 129030462
   name: Thargoid Organ Sample
-  avg_price: 0
   rare_goods: false
   corrosive: true

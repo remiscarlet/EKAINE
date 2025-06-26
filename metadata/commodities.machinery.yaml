@@ -4,7 +4,6 @@ PowerGenerators:
   is_mineable: false
   id64: 128049217
   name: Power Generators
-  avg_price: 458
   rare_goods: false
   corrosive: false
 
@@ -13,7 +12,6 @@ WaterPurifiers:
   is_mineable: false
   id64: 128049218
   name: Water Purifiers
-  avg_price: 258
   rare_goods: false
   corrosive: false
 
@@ -22,7 +20,6 @@ HeliostaticFurnaces:
   is_mineable: false
   id64: 128049220
   name: Heliostatic Furnaces
-  avg_price: 236
   rare_goods: false
   corrosive: false
 
@@ -31,7 +28,6 @@ MineralExtractors:
   is_mineable: false
   id64: 128049221
   name: Mineral Extractors
-  avg_price: 443
   rare_goods: false
   corrosive: false
 
@@ -40,7 +36,6 @@ CropHarvesters:
   is_mineable: false
   id64: 128049222
   name: Crop Harvesters
-  avg_price: 2021
   rare_goods: false
   corrosive: false
 
@@ -49,7 +44,6 @@ MarineSupplies:
   is_mineable: false
   id64: 128049223
   name: Marine Supplies
-  avg_price: 3916
   rare_goods: false
   corrosive: false
 
@@ -58,7 +52,6 @@ AtmosphericExtractors:
   is_mineable: false
   id64: 128064028
   name: Atmospheric Extractors
-  avg_price: 357
   rare_goods: false
   corrosive: false
 
@@ -67,7 +60,6 @@ VolkhabBeeDrones:
   is_mineable: false
   id64: 128667044
   name: Volkhab Bee Drones
-  avg_price: 10198
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ WulpaHyperboreSystems:
   is_mineable: false
   id64: 128667067
   name: Wulpa Hyperbore Systems
-  avg_price: 8726
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ NonEuclidianExotanks:
   is_mineable: false
   id64: 128667687
   name: Non Euclidian Exotanks
-  avg_price: 8526
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ GiantVerrix:
   is_mineable: false
   id64: 128667703
   name: Giant Verrix
-  avg_price: 12496
   rare_goods: true
   corrosive: false
 
@@ -103,7 +92,6 @@ GeologicalEquipment:
   is_mineable: false
   id64: 128672307
   name: Geological Equipment
-  avg_price: 1661
   rare_goods: false
   corrosive: false
 
@@ -112,7 +100,6 @@ ThermalCoolingUnits:
   is_mineable: false
   id64: 128672308
   name: Thermal Cooling Units
-  avg_price: 256
   rare_goods: false
   corrosive: false
 
@@ -121,7 +108,6 @@ BuildingFabricators:
   is_mineable: false
   id64: 128672309
   name: Building Fabricators
-  avg_price: 980
   rare_goods: false
   corrosive: false
 
@@ -130,7 +116,6 @@ SkimerComponents:
   is_mineable: false
   id64: 128672313
   name: Skimer Components
-  avg_price: 859
   rare_goods: false
   corrosive: false
 
@@ -139,7 +124,6 @@ ArticulationMotors:
   is_mineable: false
   id64: 128673859
   name: Articulation Motors
-  avg_price: 4997
   rare_goods: false
   corrosive: false
 
@@ -148,7 +132,6 @@ HNShockMount:
   is_mineable: false
   id64: 128673860
   name: HNShock Mount
-  avg_price: 406
   rare_goods: false
   corrosive: false
 
@@ -157,7 +140,6 @@ EmergencyPowerCells:
   is_mineable: false
   id64: 128673861
   name: Emergency Power Cells
-  avg_price: 1011
   rare_goods: false
   corrosive: false
 
@@ -166,7 +148,6 @@ PowerConverter:
   is_mineable: false
   id64: 128673862
   name: Power Converter
-  avg_price: 246
   rare_goods: false
   corrosive: false
 
@@ -175,7 +156,6 @@ PowerGridAssembly:
   is_mineable: false
   id64: 128673863
   name: Power Grid Assembly
-  avg_price: 1684
   rare_goods: false
   corrosive: false
 
@@ -184,7 +164,6 @@ PowerTransferConduits:
   is_mineable: false
   id64: 128673864
   name: Power Transfer Conduits
-  avg_price: 857
   rare_goods: false
   corrosive: false
 
@@ -193,7 +172,6 @@ RadiationBaffle:
   is_mineable: false
   id64: 128673865
   name: Radiation Baffle
-  avg_price: 383
   rare_goods: false
   corrosive: false
 
@@ -202,7 +180,6 @@ ExhaustManifold:
   is_mineable: false
   id64: 128673866
   name: Exhaust Manifold
-  avg_price: 479
   rare_goods: false
   corrosive: false
 
@@ -211,7 +188,6 @@ ReinforcedMountingPlate:
   is_mineable: false
   id64: 128673867
   name: Reinforced Mounting Plate
-  avg_price: 1074
   rare_goods: false
   corrosive: false
 
@@ -220,7 +196,6 @@ HeatsinkInterlink:
   is_mineable: false
   id64: 128673868
   name: Heatsink Interlink
-  avg_price: 729
   rare_goods: false
   corrosive: false
 
@@ -229,7 +204,6 @@ MagneticEmitterCoil:
   is_mineable: false
   id64: 128673869
   name: Magnetic Emitter Coil
-  avg_price: 199
   rare_goods: false
   corrosive: false
 
@@ -238,6 +212,5 @@ ModularTerminals:
   is_mineable: false
   id64: 128673870
   name: Modular Terminals
-  avg_price: 695
   rare_goods: false
   corrosive: false

@@ -4,7 +4,6 @@ EraninPearlWhisky:
   is_mineable: false
   id64: 128666746
   name: Eranin Pearl Whisky
-  avg_price: 9040
   rare_goods: true
   corrosive: false
 
@@ -13,7 +12,6 @@ LavianBrandy:
   is_mineable: false
   id64: 128666747
   name: Lavian Brandy
-  avg_price: 10365
   rare_goods: true
   corrosive: false
 
@@ -22,7 +20,6 @@ LyraeWeed:
   is_mineable: false
   id64: 128667028
   name: Lyrae Weed
-  avg_price: 8937
   rare_goods: true
   corrosive: false
 
@@ -31,7 +28,6 @@ OnionHead:
   is_mineable: false
   id64: 128667029
   name: Onion Head
-  avg_price: 8437
   rare_goods: true
   corrosive: false
 
@@ -40,7 +36,6 @@ TarachTorSpice:
   is_mineable: false
   id64: 128667030
   name: Tarach Tor Spice
-  avg_price: 8642
   rare_goods: true
   corrosive: false
 
@@ -49,7 +44,6 @@ Wolf1301Fesh:
   is_mineable: false
   id64: 128667031
   name: Wolf1301Fesh
-  avg_price: 8399
   rare_goods: true
   corrosive: false
 
@@ -58,7 +52,6 @@ KonggaAle:
   is_mineable: false
   id64: 128667034
   name: Kongga Ale
-  avg_price: 8310
   rare_goods: true
   corrosive: false
 
@@ -67,7 +60,6 @@ WuthieloKuFroth:
   is_mineable: false
   id64: 128667035
   name: Wuthielo Ku Froth
-  avg_price: 8194
   rare_goods: true
   corrosive: false
 
@@ -76,7 +68,6 @@ BastSnakeGin:
   is_mineable: false
   id64: 128667065
   name: Bast Snake Gin
-  avg_price: 8659
   rare_goods: true
   corrosive: false
 
@@ -85,7 +76,6 @@ ThrutisCream:
   is_mineable: false
   id64: 128667066
   name: Thrutis Cream
-  avg_price: 8550
   rare_goods: true
   corrosive: false
 
@@ -94,7 +84,6 @@ KamitraCigars:
   is_mineable: false
   id64: 128667081
   name: Kamitra Cigars
-  avg_price: 12282
   rare_goods: true
   corrosive: false
 
@@ -103,7 +92,6 @@ RusaniOldSmokey:
   is_mineable: false
   id64: 128667082
   name: Rusani Old Smokey
-  avg_price: 11994
   rare_goods: true
   corrosive: false
 
@@ -112,7 +100,6 @@ YasoKondiLeaf:
   is_mineable: false
   id64: 128667083
   name: Yaso Kondi Leaf
-  avg_price: 12171
   rare_goods: true
   corrosive: false
 
@@ -121,7 +108,6 @@ ChateauDeAegaeon:
   is_mineable: false
   id64: 128667084
   name: Chateau De Aegaeon
-  avg_price: 8791
   rare_goods: true
   corrosive: false
 
@@ -130,7 +116,6 @@ SaxonWine:
   is_mineable: false
   id64: 128667671
   name: Saxon Wine
-  avg_price: 8983
   rare_goods: true
   corrosive: false
 
@@ -139,7 +124,6 @@ CentauriMegaGin:
   is_mineable: false
   id64: 128667672
   name: Centauri Mega Gin
-  avg_price: 10217
   rare_goods: true
   corrosive: false
 
@@ -148,7 +132,6 @@ MotronaExperienceJelly:
   is_mineable: false
   id64: 128667676
   name: Motrona Experience Jelly
-  avg_price: 13129
   rare_goods: true
   corrosive: false
 
@@ -157,7 +140,6 @@ GeawenDanceDust:
   is_mineable: false
   id64: 128667677
   name: Geawen Dance Dust
-  avg_price: 8618
   rare_goods: true
   corrosive: false
 
@@ -166,7 +148,6 @@ GerasianGueuzeBeer:
   is_mineable: false
   id64: 128667678
   name: Gerasian Gueuze Beer
-  avg_price: 8215
   rare_goods: true
   corrosive: false
 
@@ -175,7 +156,6 @@ BurnhamBileDistillate:
   is_mineable: false
   id64: 128667681
   name: Burnham Bile Distillate
-  avg_price: 8466
   rare_goods: true
   corrosive: false
 
@@ -184,7 +164,6 @@ PavonisEarGrubs:
   is_mineable: false
   id64: 128667701
   name: Pavonis Ear Grubs
-  avg_price: 8364
   rare_goods: true
   corrosive: false
 
@@ -193,7 +172,6 @@ IndiBourbon:
   is_mineable: false
   id64: 128667704
   name: Indi Bourbon
-  avg_price: 8806
   rare_goods: true
   corrosive: false
 
@@ -202,7 +180,6 @@ LeestianEvilJuice:
   is_mineable: false
   id64: 128667715
   name: Leestian Evil Juice
-  avg_price: 8220
   rare_goods: true
   corrosive: false
 
@@ -211,7 +188,6 @@ BlueMilk:
   is_mineable: false
   id64: 128667716
   name: Blue Milk
-  avg_price: 10805
   rare_goods: true
   corrosive: false
 
@@ -220,7 +196,6 @@ TransgenicOnionHead:
   is_mineable: false
   id64: 128667760
   name: Transgenic Onion Head
-  avg_price: 8472
   rare_goods: true
   corrosive: false
 
@@ -229,7 +204,6 @@ OnionHeadA:
   is_mineable: false
   id64: 128672812
   name: Onionhead Alpha Strain
-  avg_price: 8437
   rare_goods: true
   corrosive: false
 
@@ -238,7 +212,6 @@ OnionHeadB:
   is_mineable: false
   id64: 128673069
   name: Onionhead Beta Strain
-  avg_price: 8437
   rare_goods: true
   corrosive: false
 
@@ -247,7 +220,6 @@ AnimalEffigies:
   is_mineable: false
   id64: 128727921
   name: Animal Effigies
-  avg_price: 8399
   rare_goods: true
   corrosive: false
 
@@ -256,7 +228,6 @@ HarmaSilverSeaRum:
   is_mineable: false
   id64: 128793113
   name: Harma Silver SeaRum
-  avg_price: 9762
   rare_goods: true
   corrosive: false
 
@@ -265,6 +236,5 @@ ApaVietii:
   is_mineable: false
   id64: 128958679
   name: Apa Vietii
-  avg_price: 10362
   rare_goods: true
   corrosive: false
