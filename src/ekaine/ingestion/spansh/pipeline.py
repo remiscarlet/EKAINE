@@ -1,5 +1,6 @@
 import logging  # noqa: F401
 from datetime import datetime, timedelta, timezone
+from itertools import chain
 from pathlib import Path
 from pprint import pformat
 from typing import Any, Callable
@@ -47,6 +48,8 @@ from ekaine.postgresql.utils import upsert_all
 
 logger = get_logger(__name__)
 
+EPOCH_ZERO = datetime.fromtimestamp(0)
+
 
 def insert_layer1(partitioner: "SpanshDataLayerPartitioner", input_systems: list[SystemSpansh]) -> None:
     logger.info(f"Layer 1: Factions ({partitioner.total_running_str_fn()})")
@@ -65,6 +68,7 @@ def insert_layer1(partitioner: "SpanshDataLayerPartitioner", input_systems: list
             faction_dicts[controlling.name] = FactionsDB.to_dict_from_spansh(controlling)
 
     faction_objects = upsert_all(partitioner.session, FactionsDB, list(faction_dicts.values()))
+
     for faction_obj in faction_objects:
         spansh_faction = all_factions.get(faction_obj.name)
         if spansh_faction is None:
@@ -75,7 +79,7 @@ def insert_layer1(partitioner: "SpanshDataLayerPartitioner", input_systems: list
 def insert_layer2(partitioner: "SpanshDataLayerPartitioner", input_systems: list[SystemSpansh]) -> None:
     logger.info(f"Layer 2: Systems ({partitioner.total_running_str_fn()})")
 
-    systems = []
+    systems_dict_set: dict[int, dict[str, Any]] = {}
     system_by_key: dict[int, SystemSpansh] = {}
 
     for system in input_systems:
@@ -83,9 +87,18 @@ def insert_layer2(partitioner: "SpanshDataLayerPartitioner", input_systems: list
         controlling_id = (
             partitioner.get_spansh_entity_id(system.controlling_faction) if system.controlling_faction else None
         )
-        systems.append(SystemsDB.to_dict_from_spansh(system, controlling_id))
+        system_dict = SystemsDB.to_dict_from_spansh(system, controlling_id)
+        cache_key = system.to_cache_key()
 
-    system_objects = upsert_all(partitioner.session, SystemsDB, systems)
+        if cache_key not in systems_dict_set:
+            systems_dict_set[cache_key] = system_dict
+        else:
+            other_system = systems_dict_set[cache_key]
+            if system_dict.get("date", EPOCH_ZERO) > other_system.get("date", EPOCH_ZERO):
+                # If the system we're looking at has data newer than the existing one, replace
+                systems_dict_set[cache_key] = system_dict
+
+    system_objects = upsert_all(partitioner.session, SystemsDB, list(systems_dict_set.values()))
 
     for system_obj in system_objects:
         spansh_system = system_by_key.get(system_obj.to_cache_key())
@@ -98,29 +111,28 @@ def insert_layer3(partitioner: "SpanshDataLayerPartitioner", input_systems: list
     logger.info(f"Layer 3: FactionPresences and Bodies ({partitioner.total_running_str_fn()})")
 
     # --- FactionPresences ---
-    presence_rows = []
+    presence_dicts_set: dict[int, dict[str, Any]] = {}
     for system in input_systems:
         system_id = partitioner.get_spansh_entity_id(system)
         for faction in system.factions or []:
             faction_id = partitioner.get_spansh_entity_id(faction)
-            presence_rows.append(FactionPresencesDB.to_dict_from_spansh(faction, system_id, faction_id))
+            presence_dict = FactionPresencesDB.to_dict_from_spansh(faction, system_id, faction_id)
+            presence_dicts_set[faction.to_cache_key()] = presence_dict
 
-    upsert_all(partitioner.session, FactionPresencesDB, presence_rows)
+    upsert_all(partitioner.session, FactionPresencesDB, list(presence_dicts_set.values()))
 
     # --- Bodies ---
-    body_rows = []
+    body_dicts_set: dict[int, dict[str, Any]] = {}
     spansh_body_by_key: dict[int, BodySpansh] = {}
     for system in input_systems:
         system_id = partitioner.get_spansh_entity_id(system)
         for body in system.bodies or []:
-            spansh_body_by_key[body.to_cache_key(system_id)] = body
-            body_rows.append(BodiesDB.to_dict_from_spansh(body, system_id))
+            cache_key = body.to_cache_key(system_id)
+            spansh_body_by_key[cache_key] = body
+            body_dict = BodiesDB.to_dict_from_spansh(body, system_id)
+            body_dicts_set[cache_key] = body_dict
 
-    body_objects = upsert_all(
-        partitioner.session,
-        BodiesDB,
-        body_rows,
-    )
+    body_objects = upsert_all(partitioner.session, BodiesDB, list(body_dicts_set.values()))
 
     for body_obj in body_objects:
         spansh_body = spansh_body_by_key.get(body_obj.to_cache_key())
@@ -133,7 +145,7 @@ def insert_layer4(partitioner: "SpanshDataLayerPartitioner", input_systems: list
     logger.info(f"Layer 4: Stations, Signals, Rings ({partitioner.total_running_str_fn()})")
 
     # --- Stations ---
-    rows_by_key: dict[int, dict[str, Any]] = {}
+    station_dicts_set: dict[int, dict[str, Any]] = {}
     stations_by_key: dict[int, StationSpansh] = {}
 
     for system in input_systems:
@@ -141,9 +153,9 @@ def insert_layer4(partitioner: "SpanshDataLayerPartitioner", input_systems: list
 
         for station in system.stations or []:
             cache_key = station.to_cache_key(system_id)
-            row = StationsDB.to_dict_from_spansh(station, system_id, "system")
+            station_dict = StationsDB.to_dict_from_spansh(station, system_id, "system")
 
-            rows_by_key[cache_key] = row
+            station_dicts_set[cache_key] = station_dict
             stations_by_key[cache_key] = station
 
         for body in system.bodies or []:
@@ -151,39 +163,44 @@ def insert_layer4(partitioner: "SpanshDataLayerPartitioner", input_systems: list
 
             for station in body.stations or []:
                 cache_key = station.to_cache_key(body_id)
-                row = StationsDB.to_dict_from_spansh(station, body_id, "body")
+                station_dict = StationsDB.to_dict_from_spansh(station, body_id, "body")
 
-                rows_by_key[cache_key] = row
+                station_dicts_set[cache_key] = station_dict
                 stations_by_key[cache_key] = station
 
-    station_objects = upsert_all(partitioner.session, StationsDB, list(rows_by_key.values()))
+    station_objects = upsert_all(partitioner.session, StationsDB, list(station_dicts_set.values()))
 
     for station_obj in station_objects:
         partitioner.cache_spansh_entity_id_by_key(station_obj.to_cache_key(), station_obj.id)
 
     # --- Signals ---
-    signal_rows = []
+    signal_dicts_set: dict[int, list[dict[str, Any]]] = {}
+
     for system in input_systems:
         system_id = partitioner.get_spansh_entity_id(system)
         for body in system.bodies or []:
             if body.signals:
-                body_id = partitioner.get_spansh_entity_id_by_key(body.to_cache_key(system_id))
-                signal_rows.extend(SignalsDB.to_dicts_from_spansh(body.signals, body_id))
+                cache_key = body.to_cache_key(system_id)
+                body_id = partitioner.get_spansh_entity_id_by_key(cache_key)
+                signal_dicts = SignalsDB.to_dicts_from_spansh(body.signals, body_id)
+                signal_dicts_set[cache_key] = signal_dicts
 
-    upsert_all(partitioner.session, SignalsDB, signal_rows)
+    upsert_all(partitioner.session, SignalsDB, list(chain(*signal_dicts_set.values())))
 
     # --- Rings ---
-    ring_rows = []
+    ring_dicts_set: dict[int, dict[str, Any]] = {}
     rings_by_key: dict[int, AsteroidsSpansh] = {}
     for system in input_systems:
         system_id = partitioner.get_spansh_entity_id(system)
         for body in system.bodies or []:
             body_id = partitioner.get_spansh_entity_id_by_key(body.to_cache_key(system_id))
             for ring in body.rings or []:
-                ring_rows.append(RingsDB.to_dict_from_spansh(ring, body_id))
-                rings_by_key[ring.to_cache_key(body_id)] = ring
+                cache_key = ring.to_cache_key(body_id)
+                ring_dict = RingsDB.to_dict_from_spansh(ring, body_id)
+                ring_dicts_set[cache_key] = ring_dict
+                rings_by_key[cache_key] = ring
 
-    ring_objects = upsert_all(partitioner.session, RingsDB, ring_rows)
+    ring_objects = upsert_all(partitioner.session, RingsDB, list(ring_dicts_set.values()))
 
     for ring_obj in ring_objects:
         spansh_ring = rings_by_key[ring_obj.to_cache_key()]
@@ -199,7 +216,7 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
 
     # --- Market ---
 
-    commodities: dict[int, dict[str, Any]] = {}
+    commodity_dicts_set: dict[int, dict[str, Any]] = {}
 
     now = datetime.now(timezone.utc)
     max_data_age = timedelta(days=partitioner.max_market_data_age_days)
@@ -216,8 +233,10 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
         station_id = partitioner.get_spansh_entity_id_by_key(station.to_cache_key(owner_id))
 
         for commodity in station.market.commodities or []:
-            commodities[commodity.to_cache_key(station_id, commodity.symbol)] = MarketCommoditiesDB.to_dict_from_spansh(
-                commodity, station_id, commodity.symbol, station.market.update_time
+            commodity_dicts_set[commodity.to_cache_key(station_id, commodity.symbol)] = (
+                MarketCommoditiesDB.to_dict_from_spansh(
+                    commodity, station_id, commodity.symbol, station.market.update_time
+                )
             )
 
     for system in input_systems:
@@ -232,12 +251,12 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
     upsert_all(
         partitioner.session,
         MarketCommoditiesDB,
-        list(commodities.values()),
+        list(commodity_dicts_set.values()),
     )
 
     # --- Outfitting ---
 
-    modules: list[dict[str, Any]] = []
+    module_dicts_set: dict[int, dict[str, Any]] = {}
 
     def extract_modules(owner_id: int, station: StationSpansh) -> None:
         if station.outfitting is None:
@@ -257,10 +276,10 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
             for station in body.stations:
                 extract_modules(body_id, station)
 
-    upsert_all(partitioner.session, OutfittingShipModulesDB, modules)
+    upsert_all(partitioner.session, OutfittingShipModulesDB, list(module_dicts_set.values()))
 
     # --- Shipyard ---
-    ships: list[dict[str, Any]] = []
+    ship_dicts_set: dict[int, dict[str, Any]] = {}
 
     def extract_ships(owner_id: int, station: StationSpansh) -> None:
         if station.outfitting is None:
@@ -279,10 +298,10 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
             for station in body.stations:
                 extract_ships(body_id, station)
 
-    upsert_all(partitioner.session, ShipyardShipsDB, ships)
+    upsert_all(partitioner.session, ShipyardShipsDB, list(ship_dicts_set.values()))
 
     # --- Hotspots ---
-    hotspots = []
+    hotspot_dicts_set: dict[int, list[dict[str, Any]]] = {}
     for system in input_systems:
         system_id = partitioner.get_spansh_entity_id(system)
         for body in system.bodies or []:
@@ -294,9 +313,11 @@ def insert_layer5(partitioner: "SpanshDataLayerPartitioner", input_systems: list
             for ring in body.rings:
                 if ring.signals is None:
                     continue
-                ring_id = partitioner.get_spansh_entity_id_by_key(ring.to_cache_key(body_id))
-                hotspots.extend(HotspotsDB.to_dicts_from_spansh(ring.signals, ring_id))
-    upsert_all(partitioner.session, HotspotsDB, hotspots)
+                cache_key = ring.to_cache_key(body_id)
+                ring_id = partitioner.get_spansh_entity_id_by_key(cache_key)
+                hotspot_dicts = HotspotsDB.to_dicts_from_spansh(ring.signals, ring_id)
+                hotspot_dicts_set[cache_key] = hotspot_dicts
+    upsert_all(partitioner.session, HotspotsDB, list(chain(*hotspot_dicts_set.values())))
 
 
 type MetadataDB = CommoditiesDB | ShipsDB | ShipModulesDB
