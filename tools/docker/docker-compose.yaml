@@ -24,6 +24,7 @@ x-app: &ekaine_app
   networks: [ekaine_net]
   volumes:
     - ../../tools/:/app/tools
+    - ../../data/:/app/data
     - ../../src/:/app/src
     - ../../Makefile:/app/Makefile
     - ../../logs:/app/logs
@@ -168,6 +169,20 @@ services:
     - "cli"
     - "ingestion"
     - "eddn-listener"
+
+  adhoc-toolbox:
+    container_name: ekaine_adhoc
+    <<: *ekaine_app
+    environment:
+      <<: *ekaine_envvars
+      CONTAINER_NAME: ekaine_adhoc
+    depends_on:
+      postgres:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+    entrypoint: ["/bin/bash"]
+    command: ["-l"]
 
 volumes:
   pg-data-hostfs:

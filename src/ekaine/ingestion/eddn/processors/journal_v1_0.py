@@ -292,6 +292,29 @@ def process_model(session: Session, model: journal_v1_0.Model) -> None:
         'SystemAddress': 4206484296394,
         'Taxi': False,
         'event': 'Docked', 'horizons': True, 'odyssey': True, 'timestamp': '2025-05-22T00:52:11Z'}}
+        ------
+        'DistFromStarLS': 263.984648,
+        'LandingPads': {'Large': 5, 'Medium': 12, 'Small': 6},
+        'MarketID': 4252975619,
+        'Multicrew': False,
+        'StarPos': [-272.40625, 0.9375, -194.3125],
+        'StarSystem': 'Col 285 Sector JO-O b7-6',
+        'StationEconomies': [
+            {'Name': '$economy_Refinery;', 'Proportion': 1.4}, {'Name': '$economy_Industrial;', 'Proportion': 1.4},
+            {'Name': '$economy_Military;', 'Proportion': 0.05}
+        ],
+        'StationEconomy': '$economy_Refinery;',
+        'StationFaction': {'FactionState': 'Expansion', 'Name': 'Selous Syndicate'},
+        'StationGovernment': '$government_Corporate;',
+        'StationName': 'Wordsworth Enterprise',
+        'StationServices': [
+            'dock', 'autodock', 'commodities', 'contacts', 'missions', 'outfitting', 'crewlounge', 'rearm', 'refuel',
+            'repair', 'shipyard', 'engineer', 'missionsgenerated', 'flightcontroller', 'stationoperations',
+            'powerplay', 'searchrescue', 'stationMenu', 'shop', 'livery', 'socialspace', 'registeringcolonisation'
+        ],
+        'StationType': 'Coriolis',
+        'SystemAddress': 13861335934297,
+        'Taxi': False, 'event': 'Docked', 'horizons': True, 'odyssey': True, 'timestamp': '2025-06-25T04:08:55Z'}}
     - FSDJump
         'Body': 'HIP 69230 A',
         'BodyID': 1,
