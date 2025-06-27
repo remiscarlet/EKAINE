@@ -11,6 +11,7 @@ from sqlalchemy import (
     ARRAY,
     BigInteger,
     Boolean,
+    Computed,
     DateTime,
     Float,
     ForeignKey,
@@ -342,7 +343,11 @@ class SignalsDB(BaseModelWithId):
 class RingsDB(BaseModelWithId):
     unique_columns = ("body_id", "name")
     __tablename__ = "rings"
-    __table_args__ = (UniqueConstraint(*unique_columns, name="_ring_on_body_uc"), {"schema": "core"})
+    __table_args__ = (
+        UniqueConstraint(*unique_columns, name="_ring_on_body_uc"),
+        Index("ix_rings_ring_geom", "ring_geom", postgresql_using="gist"),
+        {"schema": "core"},
+    )
 
     id64: Mapped[int] = mapped_column(BigInteger, nullable=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
@@ -356,6 +361,47 @@ class RingsDB(BaseModelWithId):
     outer_radius: Mapped[Optional[float]] = mapped_column(Float)
 
     hotspots: Mapped[list["HotspotsDB"]] = relationship(back_populates="ring")
+
+    ring_geom: Mapped[Any] = mapped_column(
+        Geometry("POLYGON", srid=0),
+        Computed(
+            """
+            ST_Difference(
+                ST_Buffer(ST_MakePoint(0,0), outer_radius),
+                ST_Buffer(ST_MakePoint(0,0), inner_radius)
+            )
+            """,
+            persisted=True,
+        ),
+        nullable=False,
+    )
+
+    ring_area: Mapped[float] = mapped_column(
+        Float,
+        Computed(
+            """
+            ST_Area(ST_Difference(
+                ST_Buffer( ST_MakePoint(0,0), outer_radius ),
+                ST_Buffer( ST_MakePoint(0,0), inner_radius )
+            ))""",
+            persisted=True,
+        ),
+        nullable=False,
+    )
+
+    surface_density: Mapped[float] = mapped_column(
+        Float,
+        Computed(
+            """
+            mass / NULLIF(ST_Area(ST_Difference(
+                ST_Buffer( ST_MakePoint(0,0), outer_radius ),
+                ST_Buffer( ST_MakePoint(0,0), inner_radius )
+            )),0)
+            """,
+            persisted=True,
+        ),
+        nullable=False,
+    )
 
     def to_cache_key_tuple(self) -> Tuple[Any, ...]:
         # String classname to work around circular imports from body_spansh.py
@@ -1405,7 +1451,16 @@ class FactionPresencesDB(BaseModelWithId):
 class SystemsDB(BaseModelWithId):
     unique_columns = ("name",)
     __tablename__ = "systems"
-    __table_args__ = {"schema": "core"}
+
+    __table_args__ = (
+        Index(
+            "ix_systems_coords_3d",
+            "coords",
+            postgresql_using="gist",
+            postgresql_ops={"coords": "gist_geometry_ops_nd"},
+        ),
+        {"schema": "core"},
+    )
 
     name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
 
