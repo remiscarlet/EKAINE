@@ -7,10 +7,16 @@ select
     b.name as body_name,
     r.id as ring_id,
     r.name as ring_name,
+    r.mass as ring_mass,
+    r.outer_radius as ring_outer_radius,
+    r.inner_radius as ring_inner_radius,
     r.type as ring_type,
     b.reserve_level as body_reserve_level,
-    hs.commodity_sym as commodity,
-    hs.count
+    hs.commodity_sym as hotspot_commodity_sym,
+    hs.count as hotspot_count,
+    b.mean_anomaly_updated_at as body_mean_anomaly_updated_at,
+    b.distance_to_arrival_updated_at as body_distance_to_arrival_updated_at,
+    hs.updated_at as hotspot_updated_at
 from core.hotspots as hs
 inner join core.rings as r
     on hs.ring_id = r.id
@@ -26,4 +32,4 @@ create index on derived.hotspot_ring_view (body_id);
 create index on derived.hotspot_ring_view (ring_id);
 create index on derived.hotspot_ring_view (ring_type);
 create index on derived.hotspot_ring_view (body_reserve_level);
-create index on derived.hotspot_ring_view (commodity);
+create index on derived.hotspot_ring_view (hotspot_commodity_sym);

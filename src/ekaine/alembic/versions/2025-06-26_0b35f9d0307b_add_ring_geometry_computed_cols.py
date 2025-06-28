@@ -30,6 +30,7 @@ def upgrade() -> None:
         postgresql_using="gist",
         postgresql_ops={"coords": "gist_geometry_ops_nd"},
         schema="core",
+        if_not_exists=True,
     )
     # 1) ring_geom: a STORED generated column
     op.add_column(
@@ -97,6 +98,7 @@ def upgrade() -> None:
         unique=False,
         postgresql_using="gist",
         schema="core",
+        if_not_exists=True,
     )
 
 

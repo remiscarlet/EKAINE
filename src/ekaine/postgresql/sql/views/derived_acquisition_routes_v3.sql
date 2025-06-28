@@ -115,8 +115,8 @@ acquisition_routes_with_hotspots as (
         aar.distance,
         hrv.ring_name,
         hrv.ring_type,
-        hrv.commodity,
-        hrv.count
+        hrv.hotspot_commodity_sym,
+        hrv.hotspot_count
     from all_acquisition_routes as aar
     inner join
         derived.hotspot_ring_view as hrv
@@ -139,7 +139,7 @@ select
     arh.target_updated_at,
     arh.ring_name,
     arh.ring_type,
-    arh.count,
+    arh.hotspot_count,
     scv.commodity_sym,
     scv.station_name,
     scv.sell_price,
@@ -148,9 +148,9 @@ select
 from acquisition_routes_with_hotspots as arh
 inner join
     derived.station_commodities_view as scv
-    on arh.target_name = scv.system_name
+    on arh.target_id = scv.system_id
 where
-    arh.commodity = scv.commodity_sym;
+    arh.hotspot_commodity_sym = scv.commodity_sym;
 
 
 -- Create an index directly in the SQL,
