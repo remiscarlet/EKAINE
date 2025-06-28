@@ -142,7 +142,7 @@ def process_ring_entities(session: Session, model: journal_v1_0.Model) -> None:
         return None
 
     try:
-        upsert_all(session, RingsDB, ring_dicts)
+        upsert_all(session, RingsDB, ring_dicts, list(RingsDB.generated_columns))
     except Exception:
         logger.warning(traceback.format_exc())
         logger.warning(pformat(ring_dicts))

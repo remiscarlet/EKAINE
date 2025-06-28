@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel
 
 
-# From: sql/views/derived_resolved_stations_view_v1.sql
+# From: sql/views/derived_resolved_stations_view_v?.sql
 class ResolvedStationResult(BaseModel):
     id: int
     id64: int | None

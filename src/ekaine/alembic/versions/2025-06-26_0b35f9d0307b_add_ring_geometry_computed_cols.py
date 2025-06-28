@@ -107,7 +107,7 @@ def downgrade() -> None:
     op.drop_column("rings", "ring_area", schema="core")
     op.drop_column("rings", "ring_geom", schema="core")
 
-    op.drop_index("ix_systems_coords_3d", table_name="core.systems", schema="core", if_exists=True)
+    op.drop_index("ix_systems_coords_3d", table_name="systems", schema="core", if_exists=True)
     op.create_index(
         "idx_systems_coords",
         "systems",

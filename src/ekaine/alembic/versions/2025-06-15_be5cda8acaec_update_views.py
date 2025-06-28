@@ -31,7 +31,7 @@ def upgrade() -> None:
 
     with open(views_sql_dir / "archives" / "derived_station_commodities_view_v2.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
 

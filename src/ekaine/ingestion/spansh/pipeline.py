@@ -200,7 +200,9 @@ def insert_layer4(partitioner: "SpanshDataLayerPartitioner", input_systems: list
                 ring_dicts_set[cache_key] = ring_dict
                 rings_by_key[cache_key] = ring
 
-    ring_objects = upsert_all(partitioner.session, RingsDB, list(ring_dicts_set.values()))
+    ring_objects = upsert_all(
+        partitioner.session, RingsDB, list(ring_dicts_set.values()), list(RingsDB.generated_columns)
+    )
 
     for ring_obj in ring_objects:
         spansh_ring = rings_by_key[ring_obj.to_cache_key()]

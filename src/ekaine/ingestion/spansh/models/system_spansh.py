@@ -73,14 +73,14 @@ class SystemSpansh(BaseSpanshModel):
     id64: int
     name: str
 
-    allegiance: str
     coords: CoordinatesSpansh
     date: datetime
     _validate_date = BaseSpanshModel.flexible_datetime_validator("date")
 
-    controlling_faction: ControllingFactionSpansh | None
+    controlling_faction: ControllingFactionSpansh | None = None
     government: str | None = None
     population: int | None = None
+    allegiance: str | None = None
     primary_economy: str | None = None
     secondary_economy: str | None = None
     security: str | None = None

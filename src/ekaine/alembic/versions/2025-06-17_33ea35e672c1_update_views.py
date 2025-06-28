@@ -33,7 +33,7 @@ def upgrade() -> None:
 
     with open(views_sql_dir / "archives" / "derived_hotspot_ring_view_v2.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())
 
 
@@ -44,5 +44,5 @@ def downgrade() -> None:
 
     with open(views_sql_dir / "archives" / "derived_hotspot_ring_view_v1.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_acquisition_routes_v2.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v2.sql") as f:
         op.execute(f.read())

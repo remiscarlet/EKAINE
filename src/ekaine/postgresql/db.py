@@ -342,6 +342,7 @@ class SignalsDB(BaseModelWithId):
 
 class RingsDB(BaseModelWithId):
     unique_columns = ("body_id", "name")
+    generated_columns = ("ring_geom", "ring_area", "surface_density")
     __tablename__ = "rings"
     __table_args__ = (
         UniqueConstraint(*unique_columns, name="_ring_on_body_uc"),
@@ -1452,15 +1453,34 @@ class SystemsDB(BaseModelWithId):
     unique_columns = ("name",)
     __tablename__ = "systems"
 
-    __table_args__ = (
-        Index(
-            "ix_systems_coords_3d",
-            "coords",
-            postgresql_using="gist",
-            postgresql_ops={"coords": "gist_geometry_ops_nd"},
-        ),
-        {"schema": "core"},
-    )
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls) -> tuple[Any, ...] | dict[str, Any]:
+        return (
+            Index(
+                "ix_core_systems_cp_p_state_date",
+                cls.controlling_power,
+                cls.power_state,
+                cls.date,
+            ),
+            Index(
+                "ix_core_systems_powers",
+                cls.powers,
+                postgresql_using="gin",
+            ),
+            Index(
+                "ix_core_systems_p_state_date",
+                cls.power_state,
+                cls.date,
+            ),
+            Index(
+                "ix_systems_coords_3d",
+                cls.coords,
+                postgresql_using="gist",
+                postgresql_ops={"coords": "gist_geometry_ops_nd"},
+            ),
+            {"schema": "core"},
+        )
 
     name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
 

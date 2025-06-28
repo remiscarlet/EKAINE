@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    with open(views_sql_dir / "derived_resolved_stations_view_v1.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_resolved_stations_view_v1.sql") as f:
         op.execute(f.read())
     with open(views_sql_dir / "archives" / "derived_station_commodities_view_v1.sql") as f:
         op.execute(f.read())
