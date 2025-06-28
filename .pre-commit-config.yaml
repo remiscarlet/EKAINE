@@ -32,11 +32,17 @@ repos:
     hooks:
       - id: sqlfluff-lint
         name: SQLFluff Lint
-        args: ["--dialect", "postgres"]
+        entry: >
+          sqlfluff lint
+          --config=.sqlfluff
+          --dialect=postgres
         files: \.sql$
       - id: sqlfluff-fix
         name: SQLFluff Auto-Fix
-        args: ["--dialect", "postgres"]
+        entry: >
+          sqlfluff fix
+          --config=.sqlfluff
+          --dialect=postgres
         files: \.sql$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

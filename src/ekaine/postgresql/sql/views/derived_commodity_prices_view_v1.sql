@@ -12,4 +12,8 @@ group by c.symbol;
 
 -- Create an index directly in the SQL,
 -- since we don't have a SA2.0 class table definition to define the index on.
-create unique index on derived.commodity_prices_view (symbol);
+create unique index
+if not exists commodity_prices_view_symbol_idx
+on derived.commodity_prices_view (
+    symbol
+);

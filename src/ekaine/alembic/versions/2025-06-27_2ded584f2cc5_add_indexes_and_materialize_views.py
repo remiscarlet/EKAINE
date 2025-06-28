@@ -66,17 +66,17 @@ def upgrade() -> None:
     op.execute("drop view if exists derived.station_commodities_view")
     op.execute("drop view if exists derived.resolved_stations_view")
 
-    with open(views_sql_dir / "derived_resolved_stations_view_v2.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_resolved_stations_view_v2.sql") as f:
         op.execute(f.read())
     with open(views_sql_dir / "derived_station_commodities_view_v3.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_hotspot_ring_view_v4.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_hotspot_ring_view_v4.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_acquisition_routes_v3.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v3.sql") as f:
         op.execute(f.read())
 
     # New views
-    with open(views_sql_dir / "derived_average_ring_metadata_view_v1.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_average_ring_metadata_view_v1.sql") as f:
         op.execute(f.read())
 
     # Materialized view refresh cron

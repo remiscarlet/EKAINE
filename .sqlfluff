@@ -1,0 +1,51 @@
+[sqlfluff]
+# Core settings
+dialect = postgres
+sql_file_exts = .sql
+max_line_length = 100
+exclude_rules =
+format = sql
+
+# Capitalisation rules
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.identifiers]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.literals]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.types]
+capitalisation_policy = lower
+
+# Layout rules
+[sqlfluff:rules:layout.commas]
+comma_style = trailing
+
+[sqlfluff:rules:layout.indent]
+indent_unit = space
+tab_space_size = 4
+
+[sqlfluff:rules:layout.long_lines]
+max_line_length = 100
+ignore_comment_clauses = true
+ignore_comment_lines = true
+
+# Aliasing rules
+[sqlfluff:rules:aliasing.table]
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.column]
+aliasing = explicit
+
+# Ambiguous column count
+[sqlfluff:rules:ambiguous.column_count]
+enabled = true
+
+# Qualification rules
+[sqlfluff:rules:references.qualification]
+require_explicit = true
