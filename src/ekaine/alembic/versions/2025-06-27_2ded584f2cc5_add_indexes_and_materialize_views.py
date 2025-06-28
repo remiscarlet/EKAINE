@@ -75,6 +75,10 @@ def upgrade() -> None:
     with open(views_sql_dir / "derived_acquisition_routes_v3.sql") as f:
         op.execute(f.read())
 
+    # New views
+    with open(views_sql_dir / "derived_average_ring_metadata_view_v1.sql") as f:
+        op.execute(f.read())
+
     # Materialized view refresh cron
     every = 10  # minutes
     op.execute(
@@ -90,10 +94,17 @@ def upgrade() -> None:
         f"'4-59/{every} * * * *', $$REFRESH MATERIALIZED VIEW CONCURRENTLY derived.resolved_stations_view;$$);"
     )
 
+    # Once a day at midnight
+    op.execute(
+        "SELECT cron.schedule('refresh_derived_average_ring_metadata_view', "
+        "'0 0 * * *', $$REFRESH MATERIALIZED VIEW CONCURRENTLY derived.average_ring_metadata_view;$$);"
+    )
+
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Drop crons
+    op.execute("SELECT cron.unschedule('refresh_derived_average_ring_metadata_view')")
     op.execute("SELECT cron.unschedule('refresh_derived_resolved_stations_view')")
     op.execute("SELECT cron.unschedule('refresh_derived_hotspot_ring_view')")
     op.execute("SELECT cron.unschedule('refresh_derived_acquisition_routes')")
