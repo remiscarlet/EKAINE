@@ -8,12 +8,11 @@
     "$defs": {
         "Commodity": {
             "type": "object",
-            "required": ["category", "is_mineable", "id64", "name", "avg_price", "rare_goods", "corrosive"],
+            "required": ["category", "is_mineable", "id64", "name", "rare_goods", "corrosive"],
             "properties": {
                 "name": { "type": ["string"] },
                 "category": { "$ref": "enums.schema.json#/$defs/CommodityCategory" },
                 "id64": { "type": ["number"]},
-                "avg_price": { "type": ["number"]},
                 "rare_goods": { "type": "boolean" },
                 "corrosive": { "type": "boolean" },
                 "is_mineable": { "type": "boolean" },

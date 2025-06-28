@@ -225,21 +225,24 @@ class RingsAdapter:
             select(RingsDB)
             .from_statement(
                 text(
-                    """select *
-                from derived.get_rings_in_system(:system_id)
-                where lower(name) like lower(:ring_name_partial)"""
+                    """select r.*
+                        from core.systems s
+                        join core.bodies b on s.id = b.system_id
+                        join core.rings r on b.id = r.body_id
+                        where s.id = :system_id
+                        and lower(r.name) like '%' || lower(:ring_name_partial) || '%';"""
                 )
             )
             .params(system_id=system.id, ring_name_partial=f"%{ring_name_substring}%")
         )
 
         logger.info(str(stmt))
-        bodies: list[RingsDB] = list(self.session.scalars(stmt).all())
+        rings: list[RingsDB] = list(self.session.scalars(stmt).all())
 
-        if not bodies:
+        if not rings:
             raise ValueError(f"No bodies found in system '{system.id}'")
 
-        return bodies
+        return rings
 
 
 class StationsAdapter:

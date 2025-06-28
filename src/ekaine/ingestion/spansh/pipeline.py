@@ -429,7 +429,6 @@ class SpanshDataLayerPartitioner:
                     {
                         "symbol": sym,
                         "name": name,
-                        "avg_price": values.get("avg_price"),
                         "rare_goods": values.get("rare_goods"),
                         "corrosive": values.get("corrosive"),
                         "category": category,

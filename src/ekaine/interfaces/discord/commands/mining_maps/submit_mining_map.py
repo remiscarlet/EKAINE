@@ -5,6 +5,7 @@ from typing import Any, Callable, cast
 from interactions import (
     AutocompleteContext,
     BaseContext,
+    Embed,
     OptionType,
     SlashContext,
     check,
@@ -14,7 +15,10 @@ from interactions import (
 from ekaine.common.logging import get_logger
 from ekaine.interfaces.discord import send_error_embed
 from ekaine.interfaces.discord.commands.mining_maps import cmd_group
+from ekaine.postgresql import SessionLocalEkaine
 from ekaine.postgresql.adapter import RingsAdapter, SystemsAdapter
+from ekaine.postgresql.db import MiningMapCommoditiesDB, MiningMapsDB
+from ekaine.postgresql.utils import upsert_all
 
 logger = get_logger(__name__)
 
@@ -84,19 +88,79 @@ async def submit_mining_map(
     ring_name: str,
     commodities_comma_list: str,
     mining_map_url: str,
-    map_name: str | None,
-    rock_count: int | None,
-    approximate_merits: int | None,
+    map_name: str | None = None,
+    rock_count: int | None = None,
+    approximate_merits: int | None = None,
 ) -> None:
     coalesced_map_name = map_name if map_name is not None else ring_name
-    commodities = list(map(lambda s: s.strip(), commodities_comma_list.split(",")))
-    await send_error_embed(
-        ctx,
-        (
-            f"Unimplemented! {system_name}-{ring_name}-{commodities}-{mining_map_url}"
-            f"-{coalesced_map_name}-{rock_count}-{approximate_merits}"
-        ),
+
+    try:
+        system = SystemsAdapter().get_system(system_name)
+    except ValueError:
+        msg = f"Could not find a system with name '{system_name}'!"
+        logger.warning(msg)
+        return await send_error_embed(ctx, msg)
+
+    try:
+        ring = RingsAdapter().get_ring(ring_name)
+    except ValueError:
+        msg = f"Could not find a ring with name '{ring_name}'!"
+        logger.warning(msg)
+        return await send_error_embed(ctx, msg)
+
+    try:
+        # Check if commodities list is valid before making any DB entries
+        map_commodities = MiningMapCommoditiesDB.parse_commodities_str(commodities_comma_list)
+    except ValueError as e:
+        msg = str(e)
+        logger.warning(msg)
+        return await send_error_embed(ctx, msg)
+
+    mining_map_dict = MiningMapsDB.to_dict_from_discord(
+        system,
+        ring,
+        coalesced_map_name,
+        mining_map_url,
+        rock_count,
+        approximate_merits,
     )
+
+    db_session = SessionLocalEkaine()
+    mining_map_objs = upsert_all(db_session, MiningMapsDB, [mining_map_dict])
+    if not mining_map_objs:
+        msg = "Didn't get back a MiningMapsDB object from upsert_all! Aborting."
+        logger.warning(msg)
+        return await send_error_embed(ctx, msg)
+    mining_map_obj = mining_map_objs[0]
+
+    mining_map_commodity_dicts = MiningMapCommoditiesDB.to_dicts_from_discord(mining_map_obj, commodities_comma_list)
+    mining_map_objs = upsert_all(db_session, MiningMapCommoditiesDB, mining_map_commodity_dicts)  # type: ignore
+    if not mining_map_objs:
+        msg = "Didn't get back any MiningMapCommoditiesDB objects from upsert_all! Aborting."
+        logger.warning(msg)
+        return await send_error_embed(ctx, msg)
+
+    description = f"""
+    System Name: `{system.name}`
+    Ring Name: `{ring.name}`
+    Map Name: `{coalesced_map_name}`
+    Rock Count: `{rock_count}`
+    Approximate Merits: `{approximate_merits}`
+    Commodities:
+    """
+    for commodity in map_commodities:
+        name, tonnage = commodity
+        if tonnage is not None:
+            description += f"- `{name}` ({tonnage}T)"
+        else:
+            description += f"- `{name}`"
+
+    embed = Embed(
+        title="Mining Map Successfully Submitted!",
+        description=description,
+        color=0x3498DB,
+    )
+    await ctx.send(embeds=[embed], ephemeral=True)
 
 
 @submit_mining_map.autocomplete("system_name")

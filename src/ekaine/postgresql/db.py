@@ -698,12 +698,33 @@ class MiningMapsDB(BaseModelWithId):
     body_id: Mapped[int] = mapped_column(ForeignKey("core.bodies.id"), nullable=False, index=True)
     ring_id: Mapped[int] = mapped_column(ForeignKey("core.rings.id"), nullable=False, index=True)
 
-    rock_count: Mapped[int] = mapped_column(SmallInteger)
-    map_url: Mapped[str] = mapped_column(Text)
-    approximate_merits_solo: Mapped[int] = mapped_column(Integer)  # Approx when _solo_. Wings will get multipliers.
+    rock_count: Mapped[int] = mapped_column(SmallInteger, nullable=True)
+    map_url: Mapped[str] = mapped_column(Text, nullable=False)
+    approximate_merits_solo: Mapped[int] = mapped_column(
+        Integer, nullable=True
+    )  # Approx when _solo_. Wings will get multipliers.
 
     def __repr__(self) -> str:
         return f"<MiningMapsDB(id={self.id}, name={self.name})>"
+
+    @staticmethod
+    def to_dict_from_discord(
+        system: "SystemsDB",
+        ring: RingsDB,
+        name: str,
+        map_url: str,
+        rock_count: int | None = None,
+        approximate_merits_solo: int | None = None,
+    ) -> dict[str, Any]:
+        return {
+            "system_id": system.id,
+            "body_id": ring.body_id,
+            "ring_id": ring.id,
+            "name": name,
+            "map_url": map_url,
+            "rock_count": rock_count,
+            "approximate_merits_solo": approximate_merits_solo,
+        }
 
 
 class MiningMapCommoditiesDB(BaseModelWithId):
@@ -715,13 +736,59 @@ class MiningMapCommoditiesDB(BaseModelWithId):
     commodity_sym: Mapped[str] = mapped_column(Text, ForeignKey("core.commodities.symbol"), nullable=False, index=True)
 
     # Optional but potentially useful approximate tonnage of commodity from map, SOLO
-    approximate_tonnage_solo: Mapped[int] = mapped_column(Integer)
+    approximate_tonnage_solo: Mapped[int] = mapped_column(Integer, nullable=True)
 
     def __repr__(self) -> str:
         return (
             f"<MiningMapCommodity(id={self.id}, map_id={self.mining_map_id}, "
             f"commodity={self.commodity_sym}, tons={self.approximate_tonnage_solo})>"
         )
+
+    commodity_w_tonnage_re = re.compile(r"(\w+):(\d+)[Tt]")
+
+    @staticmethod
+    def parse_commodities_str(commodities_str: str) -> list[tuple[str, int | None]]:
+        commodities = commodities_str.split(",")
+        tups: list[tuple[str, int | None]] = []
+        for commodity_str in commodities:
+            cleaned = commodity_str.strip()
+            match = MiningMapCommoditiesDB.commodity_w_tonnage_re.match(cleaned)
+
+            if match is None:
+                # No tonnage info - should just be commodity name
+                comm_sym = get_symbol_by_eddn_name(cleaned)
+                if comm_sym is None:
+                    raise ValueError(f"Did not know about commodity: '{cleaned}'!")
+                tups.append((comm_sym, None))
+            else:
+                # String had tonnage info - parse it out
+                logger.info(match)
+                sym_name = match.group(1)
+                comm_sym = get_symbol_by_eddn_name(sym_name)
+                if comm_sym is None:
+                    raise ValueError(f"Did not know about commodity: '{sym_name}'!")
+                tups.append((comm_sym, int(match.group(2))))
+
+        return tups
+
+    @staticmethod
+    def to_dicts_from_discord(
+        mining_map: MiningMapsDB,
+        commodities_str: str,
+    ) -> list[dict[str, Any]]:
+        commodity_tonnage_tuples = MiningMapCommoditiesDB.parse_commodities_str(commodities_str)
+
+        dicts = []
+        for tup in commodity_tonnage_tuples:
+            dicts.append(
+                {
+                    "mining_map_id": mining_map.id,
+                    "commodity_sym": tup[0],
+                    "approximate_tonnage_solo": tup[1],
+                }
+            )
+
+        return dicts
 
 
 class FarmableCoresDB(BaseModelWithId):

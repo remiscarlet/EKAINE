@@ -29,7 +29,7 @@ inner join core.systems as s
 -- since we don't have a SA2.0 class table definition to define the index on.
 drop index if exists derived.hotspot_ring_view_system_id_idx;
 create unique index if not exists hotspot_ring_view_system_id_idx on derived.hotspot_ring_view (
-    system_id
+    system_id, body_id, ring_id, hotspot_commodity_sym
 );
 create index if not exists hotspot_ring_view_body_id_idx on derived.hotspot_ring_view (
     body_id
