@@ -39,7 +39,7 @@ def upgrade() -> None:
         op.execute(f.read())
 
     # New views
-    with open(views_sql_dir / "derived_commodity_prices_view_v1.sql") as f:
+    with open(views_sql_dir / "m_derived_commodity_prices_view_v1.sql") as f:
         op.execute(f.read())
 
     # New function

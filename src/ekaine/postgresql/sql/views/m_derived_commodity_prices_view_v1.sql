@@ -1,3 +1,5 @@
+-- Rolling average prices for all commodities on a monthly window
+
 drop materialized view if exists derived.commodity_prices_view;
 create materialized view derived.commodity_prices_view as
 select

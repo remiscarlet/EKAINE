@@ -30,15 +30,15 @@ def upgrade() -> None:
     op.execute("drop materialized view if exists derived.resolved_stations_view")
     op.execute("drop materialized view if exists derived.average_ring_metadata_view")
 
-    with open(views_sql_dir / "derived_average_ring_metadata_view_v2.sql") as f:
+    with open(views_sql_dir / "m_derived_average_ring_metadata_view_v2.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_resolved_stations_view_v3.sql") as f:
+    with open(views_sql_dir / "m_derived_resolved_stations_view_v3.sql") as f:
         op.execute(f.read())
     with open(views_sql_dir / "derived_station_commodities_view_v3.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_hotspot_ring_view_v5.sql") as f:
+    with open(views_sql_dir / "m_derived_hotspot_ring_view_v5.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "derived_acquisition_routes_v4.sql") as f:
+    with open(views_sql_dir / "archives" / "derived_acquisition_routes_v4.sql") as f:
         op.execute(f.read())
 
 

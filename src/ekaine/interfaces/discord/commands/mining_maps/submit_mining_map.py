@@ -151,16 +151,16 @@ async def submit_mining_map(
     for commodity in map_commodities:
         name, tonnage = commodity
         if tonnage is not None:
-            description += f"- `{name}` ({tonnage}T)"
+            description += f"- `{name}` ({tonnage}T)\n"
         else:
-            description += f"- `{name}`"
+            description += f"- `{name}`\n"
 
     embed = Embed(
         title="Mining Map Successfully Submitted!",
         description=description,
         color=0x3498DB,
     )
-    await ctx.send(embeds=[embed], ephemeral=True)
+    await ctx.send(embeds=[embed])
 
 
 @submit_mining_map.autocomplete("system_name")
