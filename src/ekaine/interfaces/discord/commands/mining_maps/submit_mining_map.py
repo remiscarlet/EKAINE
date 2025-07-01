@@ -165,14 +165,14 @@ async def submit_mining_map(
 
 @submit_mining_map.autocomplete("system_name")
 async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
-    prefix_input = ctx.input_text  # can be empty/None
+    substring_input = ctx.input_text  # can be empty/None
 
     # Min 3 chars to start autocomplete
-    if len(prefix_input) < 3:
+    if len(substring_input) < 3:
         return await ctx.send(choices=[])
 
     try:
-        db_systems = SystemsAdapter().get_system_by_prefix(prefix_input)
+        db_systems = SystemsAdapter().get_system_by_substring(substring_input)
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
@@ -200,9 +200,9 @@ async def autocomplete_ring_name(ctx: AutocompleteContext) -> None:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
 
-    prefix_input = ctx.input_text  # can be empty/None
+    substring_input = ctx.input_text  # can be empty/None
     try:
-        db_rings = RingsAdapter().get_rings_by_system_and_substring(system, prefix_input)
+        db_rings = RingsAdapter().get_rings_by_system_and_substring(system, substring_input)
         logger.info(pformat(db_rings))
     except Exception:
         logger.warning(traceback.format_exc())

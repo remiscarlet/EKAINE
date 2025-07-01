@@ -177,12 +177,24 @@ class SystemsAdapter:
             raise ValueError(f"System '{system_name}' not found")
         return db_system
 
-    def get_system_by_prefix(self, system_prefix: str) -> list[SystemsDB]:
-        query = select(SystemsDB).where(SystemsDB.name.ilike(f"{system_prefix}%"))
-        logger.debug(str(query))
-        db_systems = self.session.scalars(query).all()
+    def get_system_by_substring(self, system_name_substring: str) -> list[SystemsDB]:
+        stmt = (
+            select(SystemsDB)
+            .from_statement(
+                text(
+                    """select s.*
+                        from core.systems s
+                        and lower(s.name) like '%' || lower(:system_name_substring) || '%';"""
+                )
+            )
+            .params(system_name_substring=system_name_substring)
+        )
+
+        logger.info(str(stmt))
+        db_systems: list[SystemsDB] = list(self.session.scalars(stmt).all())
+
         if not db_systems:
-            raise ValueError(f"Systems with prefix '{system_prefix}' not found")
+            raise ValueError(f"Systems with prefix '{system_name_substring}' not found")
         return list(db_systems)
 
 
@@ -205,6 +217,27 @@ class BodiesAdapter:
         db_bodies = self.session.scalars(query).all()
         if not db_bodies:
             raise ValueError(f"No bodies in system id '{system_id}' found")
+        return list(db_bodies)
+
+    def get_bodies_by_substring(self, body_name_substring: str) -> list[BodiesDB]:
+        stmt = (
+            select(BodiesDB)
+            .from_statement(
+                text(
+                    """select b.*
+                        from core.systems s
+                        join core.bodies b on s.id = b.system_id
+                        and lower(b.name) like '%' || lower(:body_name_substring) || '%';"""
+                )
+            )
+            .params(body_name_substring=body_name_substring)
+        )
+
+        logger.info(str(stmt))
+        db_bodies: list[BodiesDB] = list(self.session.scalars(stmt).all())
+
+        if not db_bodies:
+            raise ValueError(f"Bodies with prefix '{body_name_substring}' not found")
         return list(db_bodies)
 
 
@@ -230,10 +263,10 @@ class RingsAdapter:
                         join core.bodies b on s.id = b.system_id
                         join core.rings r on b.id = r.body_id
                         where s.id = :system_id
-                        and lower(r.name) like '%' || lower(:ring_name_partial) || '%';"""
+                        and lower(r.name) like '%' || lower(:ring_name_substring) || '%';"""
                 )
             )
-            .params(system_id=system.id, ring_name_partial=f"%{ring_name_substring}%")
+            .params(system_id=system.id, ring_name_substring=ring_name_substring)
         )
 
         logger.info(str(stmt))
@@ -274,6 +307,19 @@ class StationsAdapter:
             raise ValueError(f"Somehow got multiple stations with name '{station_name}' and system id '{system_id}'")
 
         return ResolvedStationResult(**rows[0])
+
+    def get_stations_by_substring(self, station_name_substring: str) -> list[ResolvedStationResult]:
+        stmt = text(
+            """select rsv.*
+            from derived.resolved_stations_view rsv
+            where lower(rsv.name) like '%' || lower(:station_name_substring) || '%';"""
+        )
+
+        logger.info(str(stmt))
+        result = self.session.execute(stmt, {"station_name_substring": station_name_substring})
+
+        rows: Sequence[RowMapping] = result.mappings().all()
+        return [ResolvedStationResult(**row) for row in rows]
 
 
 class FactionsAdapter:

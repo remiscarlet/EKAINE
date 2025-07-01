@@ -22,19 +22,23 @@ def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
 
     # Systems
-    op.execute("CREATE INDEX ix_core_systems_name_trgm " "ON core.systems USING GIN (lower(name) gin_trgm_ops)")
+    op.execute("CREATE INDEX ix_core_systems_name_trgm ON core.systems USING GIN (lower(name) gin_trgm_ops)")
 
     # Bodies
-    op.execute("CREATE INDEX ix_core_bodies_name_trgm " "ON core.bodies USING GIN (lower(name) gin_trgm_ops)")
+    op.execute("CREATE INDEX ix_core_bodies_name_trgm ON core.bodies USING GIN (lower(name) gin_trgm_ops)")
 
     # Rings
-    op.execute("CREATE INDEX ix_core_rings_name_trgm " "ON core.rings USING GIN (lower(name) gin_trgm_ops)")
+    op.execute("CREATE INDEX ix_core_rings_name_trgm ON core.rings USING GIN (lower(name) gin_trgm_ops)")
+
+    # Stations
+    op.execute("CREATE INDEX ix_core_stations_name_trgm ON core.stations USING GIN (lower(name) gin_trgm_ops)")
 
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("DROP INDEX IF EXISTS core.ix_core_systems_name_trgm")
-    op.execute("DROP INDEX IF EXISTS core.ix_core_bodies_name_trgm")
+    op.execute("DROP INDEX IF EXISTS core.ix_core_stations_name_trgm")
     op.execute("DROP INDEX IF EXISTS core.ix_core_rings_name_trgm")
+    op.execute("DROP INDEX IF EXISTS core.ix_core_bodies_name_trgm")
+    op.execute("DROP INDEX IF EXISTS core.ix_core_systems_name_trgm")
 
     op.execute("DROP EXTENSION IF EXISTS pg_trgm;")
