@@ -24,6 +24,7 @@ from sqlalchemy import (
     and_,
     literal,
     select,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import (
@@ -67,10 +68,15 @@ introduces circular dependencies on the imports because we each model name in th
 class BodiesDB(BaseModelWithId):
     unique_columns = ("system_id", "name", "body_id")
     __tablename__ = "bodies"
-    __table_args__ = (
-        UniqueConstraint(*unique_columns, name="_bodies_uc"),
-        {"schema": "core"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls) -> tuple[Any, ...] | dict[str, Any]:
+        return (
+            UniqueConstraint(*cls.unique_columns, name="_bodies_uc"),
+            Index("ix_core_bodies_name_trgm", text("lower(name) gin_trgm_ops"), postgresql_using="gin"),
+            {"schema": "core"},
+        )
 
     name: Mapped[str] = mapped_column(Text, nullable=False, index=True)
 
@@ -344,11 +350,16 @@ class RingsDB(BaseModelWithId):
     unique_columns = ("body_id", "name")
     generated_columns = ("ring_geom", "ring_area", "surface_density")
     __tablename__ = "rings"
-    __table_args__ = (
-        UniqueConstraint(*unique_columns, name="_ring_on_body_uc"),
-        Index("ix_rings_ring_geom", "ring_geom", postgresql_using="gist"),
-        {"schema": "core"},
-    )
+
+    @typing.no_type_check
+    @declared_attr
+    def __table_args__(cls) -> tuple[Any, ...] | dict[str, Any]:
+        return (
+            UniqueConstraint(*cls.unique_columns, name="_ring_on_body_uc"),
+            Index("ix_rings_ring_geom", cls.ring_geom, postgresql_using="gist"),
+            Index("ix_core_rings_name_trgm", text("lower(name) gin_trgm_ops"), postgresql_using="gin"),
+            {"schema": "core"},
+        )
 
     id64: Mapped[int] = mapped_column(BigInteger, nullable=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
@@ -1546,6 +1557,7 @@ class SystemsDB(BaseModelWithId):
                 postgresql_using="gist",
                 postgresql_ops={"coords": "gist_geometry_ops_nd"},
             ),
+            Index("ix_core_systems_name_trgm", text("lower(name) gin_trgm_ops"), postgresql_using="gin"),
             {"schema": "core"},
         )
 
