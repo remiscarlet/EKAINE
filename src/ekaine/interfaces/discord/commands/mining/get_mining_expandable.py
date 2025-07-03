@@ -3,7 +3,11 @@ from pprint import pformat
 from interactions import Embed, OptionType, SlashContext, slash_option
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import MineableDataDisplay, send_error_embed
+from ekaine.interfaces.discord import (
+    MineableDataDisplay,
+    ephemeral_option,
+    send_error_embed,
+)
 from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -19,8 +23,9 @@ logger = get_logger(__name__)
 @slash_option(
     name="system_name", description="Target system name to acquire", required=True, opt_type=OptionType.STRING
 )
-async def get_mining_expandable(ctx: SlashContext, system_name: str) -> None:
-    await ctx.defer(ephemeral=True)
+@ephemeral_option
+async def get_mining_expandable(ctx: SlashContext, system_name: str, ephemeral: bool = True) -> None:
+    await ctx.defer(ephemeral=ephemeral)
 
     try:
         system = SystemsAdapter().get_system(system_name)
@@ -72,4 +77,4 @@ async def get_mining_expandable(ctx: SlashContext, system_name: str) -> None:
         embeds.append(embed)
 
     embeds.sort(key=lambda e: e.title or "")
-    await ctx.send(embeds=embeds[:10], ephemeral=True)
+    await ctx.send(embeds=embeds[:10], ephemeral=ephemeral)

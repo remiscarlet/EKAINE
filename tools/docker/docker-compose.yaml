@@ -15,6 +15,7 @@ x-ekaine-envvars: &ekaine_envvars
   DISCORD_CLIENT_ID: "${DISCORD_CLIENT_ID}"
   DISCORD_CLIENT_SECRET: "${DISCORD_CLIENT_SECRET}"
   COOKIE_SECRET: "${COOKIE_SECRET}"
+  ENVIRONMENT_TYPE: "${ENVIRONMENT_TYPE}"
 
 x-app: &ekaine_app
   image: remiscarlet/ekaine

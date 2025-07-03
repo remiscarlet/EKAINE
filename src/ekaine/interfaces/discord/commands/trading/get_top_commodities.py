@@ -5,7 +5,7 @@ from interactions import Embed, OptionType, SlashContext, slash_option
 from tabulate import tabulate
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import send_error_embed
+from ekaine.interfaces.discord import ephemeral_option, send_error_embed
 from ekaine.interfaces.discord.commands.trading import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -35,16 +35,20 @@ logger = get_logger(__name__)
     required=False,
     opt_type=OptionType.INTEGER,
 )
+@ephemeral_option
 async def get_top_commodities(
-    ctx: SlashContext, system_name: str, number_commodities: int = 5, minimum_demand: int = 1
+    ctx: SlashContext,
+    system_name: str,
+    number_commodities: int = 5,
+    minimum_demand: int = 1,
+    ephemeral: bool = True,
 ) -> None:
-    await ctx.defer(ephemeral=True)
+    await ctx.defer(ephemeral=ephemeral)
 
     try:
         SystemsAdapter().get_system(system_name)
     except ValueError:
-        await send_error_embed(ctx, f"Could not find system '{system_name}'!")
-        return
+        return await send_error_embed(ctx, f"Could not find system '{system_name}'!")
 
     commodities = ApiCommandAdapter().get_top_commodities_in_system(
         system_name, number_commodities, minimum_demand, False
@@ -77,4 +81,4 @@ async def get_top_commodities(
         embeds.append(embed)
 
     embeds.sort(key=lambda e: e.title or "")
-    await ctx.send(embeds=embeds[:10], ephemeral=True)
+    await ctx.send(embeds=embeds[:10], ephemeral=ephemeral)

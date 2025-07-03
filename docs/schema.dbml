@@ -2,7 +2,6 @@ Table "core"."commodities" {
   "id64" int8
   "symbol" text [pk, not null]
   "name" text [not null]
-  "avg_price" int4
   "rare_goods" bool
   "corrosive" bool
   "category" text

@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from ekaine.common.logging import get_logger
 from ekaine.common.utils import get_time_since
-from ekaine.interfaces.discord import send_error_embed
+from ekaine.interfaces.discord import ephemeral_option, send_error_embed
 from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.interfaces.discord.utils import split_comma_delimited_string
 from ekaine.postgresql.adapter import (
@@ -63,6 +63,7 @@ logger = get_logger(__name__)
     required=False,
     opt_type=OptionType.STRING,
 )
+@ephemeral_option
 async def get_top_reinforcement_mining_routes(
     ctx: SlashContext,
     power_name: str = "Nakato Kaine",
@@ -73,8 +74,9 @@ async def get_top_reinforcement_mining_routes(
     min_demand: int = 10,
     num_results: int = 25,
     max_data_age_dur_str: str = "3d",
+    ephemeral: bool = True,
 ) -> None:
-    await ctx.defer(ephemeral=True)
+    await ctx.defer(ephemeral=ephemeral)
 
     mining_routes = ApiCommandAdapter().get_top_reinforcement_mining_routes(
         power_name,
@@ -151,4 +153,4 @@ async def get_top_reinforcement_mining_routes(
             embeds.append(embed)
 
     embeds.sort(key=lambda e: e.title or "")
-    await ctx.send(embeds=embeds[:10], ephemeral=True)
+    await ctx.send(embeds=embeds[:10], ephemeral=ephemeral)

@@ -113,5 +113,4 @@ section_whitelines = 1
 python_version = "3.12"
 strict = true
 namespace_packages = true
-mypy_path = "typings"
 exclude = "(archive|data|gen)/"

@@ -50,6 +50,7 @@ SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", None)
 REDIS_DSN = os.getenv("REDIS_DSN", None)
 SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
+ENVIRONMENT_TYPE = os.getenv("ENVIRONMENT_TYPE", None)
 
 # These should get overwritten by docker-compose.yaml environment configs.
 # Default values are used when running outside a docker context, ie make targets

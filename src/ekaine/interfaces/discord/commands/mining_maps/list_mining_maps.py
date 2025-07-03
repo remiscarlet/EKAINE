@@ -1,44 +1,28 @@
-from pprint import pformat
-from typing import Any, Callable
-
 from interactions import (
-    BaseContext,
     OptionType,
     SlashContext,
-    check,
     slash_option,
 )
 from interactions.ext.paginators import Paginator
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import send_error_embed
+from ekaine.interfaces.discord import ephemeral_option
 from ekaine.interfaces.discord.commands.mining_maps import (
     cmd_group,
+    ekaine_bot_superuser_check,
+    log_and_send_error_embed,
     mining_map_to_embed,
 )
 from ekaine.postgresql.adapter import MiningMapsAdapter
 
 logger = get_logger(__name__)
 
-allowlisted_discord_usernames = [
-    "remiscarlet",
-]
-
-
-def my_check() -> Callable[[Any], Any]:
-    async def predicate(ctx: BaseContext) -> bool:
-        logger.info(pformat(ctx))
-        logger.info(pformat(ctx.author))
-        return ctx.author.username in allowlisted_discord_usernames
-
-    return check(predicate)
-
 
 @cmd_group.subcommand(
     sub_cmd_name="list",
     sub_cmd_description="List known Mining Maps. Filters are additive. All options are case insensitive",
 )
-@my_check()
+@ekaine_bot_superuser_check()
 @slash_option(
     name="system_name_substring",
     description="Filter by mining map(s) in systems matching substring",
@@ -57,25 +41,20 @@ def my_check() -> Callable[[Any], Any]:
     required=False,
     opt_type=OptionType.STRING,
 )
-@slash_option(
-    name="page_number",
-    description="Pagination page number if there's more than one 'page' of results.",
-    required=False,
-    opt_type=OptionType.INTEGER,
-)
+@ephemeral_option
 async def list_mining_maps(
     ctx: SlashContext,
     system_name_substring: str | None = None,
     commodities_comma_list: str | None = None,
     map_name_substring: str | None = None,
-    page_number: int = 1,
+    ephemeral: bool = True,
 ) -> None:
-    mining_maps, _ = MiningMapsAdapter().get_mining_maps_by_filters(
-        system_name_substring, map_name_substring, commodities_comma_list, page_number, page_size=10
+    mining_maps = MiningMapsAdapter().get_mining_maps_by_filters(
+        system_name_substring, map_name_substring, commodities_comma_list
     )
 
     if not mining_maps:
-        return await send_error_embed(ctx, "Could not find any mining maps matching ALL of the supplied filters!")
+        return await log_and_send_error_embed(ctx, "Could not find any mining maps matching the supplied filters")
 
     embeds = []
     for mining_map in mining_maps:
@@ -91,4 +70,4 @@ async def list_mining_maps(
     paginator = Paginator.create_from_embeds(ctx.client, *embeds)
     paginator.show_select_menu = True
 
-    await paginator.send(ctx, ephemeral=True)
+    await paginator.send(ctx, ephemeral=ephemeral)

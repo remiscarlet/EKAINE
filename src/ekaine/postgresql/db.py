@@ -775,6 +775,12 @@ class MiningMapCommoditiesDB(BaseModelWithId):
         back_populates="commodities",
     )
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MiningMapCommoditiesDB):
+            raise ValueError("Tried comparing to something that isn't a MiningMapCommoditiesDB!")
+
+        return self.id == other.id
+
     def __repr__(self) -> str:
         return (
             f"<MiningMapCommodity(id={self.id}, map_id={self.mining_map_id}, "

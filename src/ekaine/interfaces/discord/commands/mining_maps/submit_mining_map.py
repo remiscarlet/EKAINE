@@ -1,20 +1,22 @@
 import traceback
 from pprint import pformat
-from typing import Any, Callable, cast
+from typing import cast
 
 from interactions import (
     AutocompleteContext,
-    BaseContext,
-    Embed,
     OptionType,
     SlashContext,
-    check,
     slash_option,
 )
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import send_error_embed
-from ekaine.interfaces.discord.commands.mining_maps import cmd_group
+from ekaine.interfaces.discord import ephemeral_option
+from ekaine.interfaces.discord.commands.mining_maps import (
+    cmd_group,
+    ekaine_bot_superuser_check,
+    log_and_send_error_embed,
+    mining_map_to_embed,
+)
 from ekaine.postgresql import SessionLocalEkaine
 from ekaine.postgresql.adapter import RingsAdapter, SystemsAdapter
 from ekaine.postgresql.db import MiningMapCommoditiesDB, MiningMapsDB
@@ -22,22 +24,9 @@ from ekaine.postgresql.utils import upsert_all
 
 logger = get_logger(__name__)
 
-allowlisted_discord_usernames = [
-    "remiscarlet",
-]
-
-
-def my_check() -> Callable[[Any], Any]:
-    async def predicate(ctx: BaseContext) -> bool:
-        logger.info(pformat(ctx))
-        logger.info(pformat(ctx.author))
-        return ctx.author.username in allowlisted_discord_usernames
-
-    return check(predicate)
-
 
 @cmd_group.subcommand(sub_cmd_name="submit", sub_cmd_description="Submit a new Mining map")
-@my_check()
+@ekaine_bot_superuser_check()
 @slash_option(
     name="system_name",
     description="System the mining map is located inside",
@@ -78,10 +67,11 @@ def my_check() -> Callable[[Any], Any]:
 )
 @slash_option(
     name="approximate_merits",
-    description="Length of mining map by number of rocks",
+    description="The approximate merits earned when the map is done solo",
     required=False,
     opt_type=OptionType.NUMBER,
 )
+@ephemeral_option
 async def submit_mining_map(
     ctx: SlashContext,
     system_name: str,
@@ -91,30 +81,24 @@ async def submit_mining_map(
     map_name: str | None = None,
     rock_count: int | None = None,
     approximate_merits: int | None = None,
+    ephemeral: bool = True,
 ) -> None:
     coalesced_map_name = map_name if map_name is not None else ring_name
 
     try:
         system = SystemsAdapter().get_system(system_name)
     except ValueError:
-        msg = f"Could not find a system with name '{system_name}'!"
-        logger.warning(msg)
-        return await send_error_embed(ctx, msg)
+        return await log_and_send_error_embed(ctx, f"Could not find a system with name '{system_name}'!")
 
     try:
         ring = RingsAdapter().get_ring(ring_name)
     except ValueError:
-        msg = f"Could not find a ring with name '{ring_name}'!"
-        logger.warning(msg)
-        return await send_error_embed(ctx, msg)
+        return await log_and_send_error_embed(ctx, f"Could not find a ring with name '{ring_name}'!")
 
     try:
-        # Check if commodities list is valid before making any DB entries
-        map_commodities = MiningMapCommoditiesDB.parse_commodities_str(commodities_comma_list)
+        MiningMapCommoditiesDB.parse_commodities_str(commodities_comma_list)
     except ValueError as e:
-        msg = str(e)
-        logger.warning(msg)
-        return await send_error_embed(ctx, msg)
+        return await log_and_send_error_embed(ctx, str(e))
 
     mining_map_dict = MiningMapsDB.to_dict_from_discord(
         system,
@@ -125,42 +109,24 @@ async def submit_mining_map(
         approximate_merits,
     )
 
-    db_session = SessionLocalEkaine()
-    mining_map_objs = upsert_all(db_session, MiningMapsDB, [mining_map_dict])
-    if not mining_map_objs:
-        msg = "Didn't get back a MiningMapsDB object from upsert_all! Aborting."
-        logger.warning(msg)
-        return await send_error_embed(ctx, msg)
-    mining_map_obj = mining_map_objs[0]
+    with SessionLocalEkaine() as session:
+        mining_maps = upsert_all(session, MiningMapsDB, [mining_map_dict])
+        if not mining_maps:
+            return await log_and_send_error_embed(
+                ctx, "Didn't get back a MiningMapsDB object from upsert_all! Aborting."
+            )
 
-    mining_map_commodity_dicts = MiningMapCommoditiesDB.to_dicts_from_discord(mining_map_obj, commodities_comma_list)
-    mining_map_objs = upsert_all(db_session, MiningMapCommoditiesDB, mining_map_commodity_dicts)  # type: ignore
-    if not mining_map_objs:
-        msg = "Didn't get back any MiningMapCommoditiesDB objects from upsert_all! Aborting."
-        logger.warning(msg)
-        return await send_error_embed(ctx, msg)
+        mining_map = mining_maps[0]
 
-    description = f"""
-    System Name: `{system.name}`
-    Ring Name: `{ring.name}`
-    Map Name: `{coalesced_map_name}`
-    Rock Count: `{rock_count}`
-    Approximate Merits: `{approximate_merits}`
-    Commodities:
-    """
-    for commodity in map_commodities:
-        name, tonnage = commodity
-        if tonnage is not None:
-            description += f"- `{name}` ({tonnage}T)\n"
-        else:
-            description += f"- `{name}`\n"
+        mining_map_commodity_dicts = MiningMapCommoditiesDB.to_dicts_from_discord(mining_map, commodities_comma_list)
+        mining_maps = upsert_all(session, MiningMapCommoditiesDB, mining_map_commodity_dicts)  # type: ignore
+        if not mining_maps:
+            return await log_and_send_error_embed(
+                ctx, "Didn't get back any MiningMapCommoditiesDB objects from upsert_all! Aborting."
+            )
 
-    embed = Embed(
-        title="Mining Map Successfully Submitted!",
-        description=description,
-        color=0x3498DB,
-    )
-    await ctx.send(embeds=[embed])
+        embed = mining_map_to_embed(mining_map)
+        await ctx.send(embeds=[embed], ephemeral=ephemeral)
 
 
 @submit_mining_map.autocomplete("system_name")
@@ -172,13 +138,13 @@ async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
         return await ctx.send(choices=[])
 
     try:
-        db_systems = SystemsAdapter().get_system_by_substring(substring_input)
+        systems = SystemsAdapter().get_system_by_substring(substring_input)
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
 
     choices: list[str] = []
-    for system in db_systems:
+    for system in systems:
         val = system.name
         if val:
             choices.append(val)
@@ -202,14 +168,14 @@ async def autocomplete_ring_name(ctx: AutocompleteContext) -> None:
 
     substring_input = ctx.input_text  # can be empty/None
     try:
-        db_rings = RingsAdapter().get_rings_by_system_and_substring(system, substring_input)
-        logger.info(pformat(db_rings))
+        rings = RingsAdapter().get_rings_by_system_and_substring(system, substring_input)
+        logger.info(pformat(rings))
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
 
     choices: list[str] = []
-    for ring in db_rings:
+    for ring in rings:
         val = ring.name
         if val:
             choices.append(val)

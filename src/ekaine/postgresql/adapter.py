@@ -1,6 +1,6 @@
-from typing import Sequence
+from typing import Any, Sequence
 
-from sqlalchemy import RowMapping, select, text
+from sqlalchemy import CursorResult, RowMapping, select, text, update
 from sqlalchemy.orm import Session, selectinload
 
 from ekaine.common.logging import get_logger
@@ -174,10 +174,10 @@ class SystemsAdapter:
     def get_system(self, system_name: str) -> SystemsDB:
         query = select(SystemsDB).where(SystemsDB.name == system_name)
         logger.debug(str(query))
-        db_system = self.session.scalars(query).first()
-        if not db_system:
+        system = self.session.scalars(query).first()
+        if not system:
             raise ValueError(f"System '{system_name}' not found")
-        return db_system
+        return system
 
     def get_system_by_substring(self, system_name_substring: str) -> list[SystemsDB]:
         # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
@@ -194,11 +194,11 @@ class SystemsAdapter:
         )
 
         logger.info(str(stmt))
-        db_systems: list[SystemsDB] = list(self.session.scalars(stmt).all())
+        systems: list[SystemsDB] = list(self.session.scalars(stmt).all())
 
-        if not db_systems:
+        if not systems:
             raise ValueError(f"Systems with prefix '{system_name_substring}' not found")
-        return list(db_systems)
+        return list(systems)
 
 
 class BodiesAdapter:
@@ -208,19 +208,19 @@ class BodiesAdapter:
     def get_body(self, body_name: str) -> BodiesDB:
         query = select(BodiesDB).where(BodiesDB.name == body_name)
         logger.debug(str(query))
-        db_body = self.session.scalars(query).first()
-        if not db_body:
+        body = self.session.scalars(query).first()
+        if not body:
             raise ValueError(f"Body '{body_name}' not found")
-        return db_body
+        return body
 
     def get_bodies_by_system_id(self, system_id: int) -> list[BodiesDB]:
         query = select(BodiesDB).where(BodiesDB.system_id == system_id)
         logger.debug(str(query))
         logger.debug(system_id)
-        db_bodies = self.session.scalars(query).all()
-        if not db_bodies:
+        bodies = self.session.scalars(query).all()
+        if not bodies:
             raise ValueError(f"No bodies in system id '{system_id}' found")
-        return list(db_bodies)
+        return list(bodies)
 
     def get_bodies_by_substring(self, body_name_substring: str) -> list[BodiesDB]:
         # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
@@ -238,11 +238,11 @@ class BodiesAdapter:
         )
 
         logger.info(str(stmt))
-        db_bodies: list[BodiesDB] = list(self.session.scalars(stmt).all())
+        bodies: list[BodiesDB] = list(self.session.scalars(stmt).all())
 
-        if not db_bodies:
+        if not bodies:
             raise ValueError(f"Bodies with prefix '{body_name_substring}' not found")
-        return list(db_bodies)
+        return list(bodies)
 
 
 class RingsAdapter:
@@ -252,10 +252,37 @@ class RingsAdapter:
     def get_ring(self, ring_name: str) -> RingsDB:
         query = select(RingsDB).where(RingsDB.name == ring_name)
         logger.debug(str(query))
-        db_ring = self.session.scalars(query).first()
-        if not db_ring:
+        ring = self.session.scalars(query).first()
+        if not ring:
             raise ValueError(f"Ring '{ring_name}' not found")
-        return db_ring
+        return ring
+
+    def get_ring_by_system_and_name(self, system: SystemsDB, ring_name: str) -> RingsDB:
+        # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
+        stmt = (
+            select(RingsDB)
+            .from_statement(
+                text(
+                    """select r.*
+                        from core.systems s
+                        join core.bodies b on s.id = b.system_id
+                        join core.rings r on b.id = r.body_id
+                        where s.id = :system_id
+                        and lower(r.name) like lower(:ring_name);"""
+                )
+            )
+            .params(system_id=system.id, ring_name=ring_name)
+        )
+
+        logger.info(str(stmt))
+        rings: list[RingsDB] = list(self.session.scalars(stmt).all())
+
+        if not rings:
+            raise ValueError(f"No rings found in system '{system.id}'")
+        elif len(rings) > 1:
+            raise ValueError("Supplied name returned multiple rings!")
+
+        return rings[0]
 
     def get_rings_by_system_and_substring(self, system: SystemsDB, ring_name_substring: str) -> list[RingsDB]:
         # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
@@ -263,7 +290,7 @@ class RingsAdapter:
             select(RingsDB)
             .from_statement(
                 text(
-                    """select r.*
+                    """select distinct on (r.name) r.*
                         from core.systems s
                         join core.bodies b on s.id = b.system_id
                         join core.rings r on b.id = r.body_id
@@ -278,7 +305,7 @@ class RingsAdapter:
         rings: list[RingsDB] = list(self.session.scalars(stmt).all())
 
         if not rings:
-            raise ValueError(f"No bodies found in system '{system.id}'")
+            raise ValueError(f"No rings found in system '{system.id}'")
 
         return rings
 
@@ -287,9 +314,18 @@ class MiningMapsAdapter:
     def __init__(self, session: Session | None = None) -> None:
         self.session = session or SessionLocalEkaine()
 
+    def update_mining_map(self, map_id: int, payload: dict[str, Any]) -> CursorResult[Any]:
+        stmt = update(MiningMapsDB).where(MiningMapsDB.id == map_id).values(**payload)
+        result = self.session.execute(stmt)
+
+        self.session.commit()
+
+        return result
+
     def get_mining_map(self, mining_map_name: str) -> MiningMapsDB:
         stmt = (
             select(MiningMapsDB)
+            .join(MiningMapCommoditiesDB)
             .options(
                 selectinload(MiningMapsDB.commodities),
                 selectinload(MiningMapsDB.system),
@@ -299,10 +335,10 @@ class MiningMapsAdapter:
             .where(MiningMapsDB.name == mining_map_name)
         )
         logger.debug(str(stmt))
-        db_map = self.session.scalars(stmt).first()
-        if not db_map:
+        mining_map = self.session.scalars(stmt).first()
+        if not mining_map:
             raise ValueError(f"Mining Map '{mining_map_name}' not found")
-        return db_map
+        return mining_map
 
     def get_all_mining_maps(self) -> list[MiningMapsDB]:
         stmt = select(MiningMapsDB).options(
@@ -312,17 +348,15 @@ class MiningMapsAdapter:
             selectinload(MiningMapsDB.ring),
         )
         logger.debug(str(stmt))
-        db_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
-        return db_maps
+        mining_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
+        return mining_maps
 
     def get_mining_maps_by_filters(
         self,
         system_name_substring: str | None = None,
         mining_map_substring: str | None = None,
         commodities_list_str: str | None = None,
-        page_number: int = 1,
-        page_size: int = 1,
-    ) -> tuple[list[MiningMapsDB], bool]:
+    ) -> list[MiningMapsDB]:
         """Get mining maps by a variety of filters and pagination options.
 
         If options are not provided, they are ignored/not applied to the filter.
@@ -331,14 +365,10 @@ class MiningMapsAdapter:
             system_name_substring (str | None, optional): System name substring to search by. Defaults to None.
             mining_map_substring (str | None, optional): Mining map name substring to search by. Defaults to None.
             commodities_list_str (str | None, optional): List of commodity names to search maps by. Defaults to None.
-            page_number (int, optional): Number of results per 'page'. Defaults to 10.
-            page_size (int, optional): Page number to return. Defaults to 1.
 
         Returns:
             tuple[list[MiningMapsDB], bool]: Second value indicates whether there are additional pages of results left.
         """
-        page_number = max(page_number, 1)  # Handle zero/negative page numbers.
-        page_offset = page_size * (page_number - 1)
 
         if commodities_list_str is None:
             commodities = None
@@ -373,8 +403,6 @@ class MiningMapsAdapter:
                             or mmc.commodity_sym = ANY(:map_commodities_list)
                         )
                         order by mm.name asc
-                        limit (:page_size + 1)
-                        offset :page_offset
                     ;"""
                 )
             )
@@ -382,21 +410,13 @@ class MiningMapsAdapter:
                 system_name_substring=system_name_substring,
                 mining_map_substring=mining_map_substring,
                 map_commodities_list=commodities,
-                page_size=page_size,
-                page_offset=page_offset,
             )
         )
 
         logger.info(str(stmt))
-        db_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
+        mining_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
 
-        if len(db_maps) == page_size + 1:
-            # We got "page size + 1" rows back, meaning there's at least one additional page.
-            return (db_maps[:page_size], True)
-        else:
-            # If we got less than page size OR exactly the page size (when we asked for page size + 1),
-            # we can safely conclude there are no more pages' worth of data.
-            return (db_maps, False)
+        return mining_maps
 
 
 class StationsAdapter:
@@ -449,10 +469,10 @@ class FactionsAdapter:
 
     def get_faction(self, faction_name: str) -> FactionsDB:
         query = select(FactionsDB).where(FactionsDB.name == faction_name)
-        db_faction = self.session.scalars(query).first()
-        if not db_faction:
+        faction = self.session.scalars(query).first()
+        if not faction:
             raise ValueError(f"Faction '{faction_name}' not found")
-        return db_faction
+        return faction
 
 
 class FactionPresencesAdapter:
@@ -463,7 +483,7 @@ class FactionPresencesAdapter:
         query = select(FactionPresencesDB).where(
             FactionPresencesDB.faction_id == faction_id, FactionPresencesDB.system_id == system_id
         )
-        db_presence = self.session.scalars(query).first()
-        if not db_presence:
+        faction_presence = self.session.scalars(query).first()
+        if not faction_presence:
             raise ValueError(f"Faction Presence for faction '{faction_id}' in system '{system_id}' not found")
-        return db_presence
+        return faction_presence

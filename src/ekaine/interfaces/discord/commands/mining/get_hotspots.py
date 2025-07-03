@@ -5,7 +5,7 @@ from pprint import pformat
 from interactions import Embed, OptionType, SlashContext, slash_option
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import send_error_embed
+from ekaine.interfaces.discord import ephemeral_option, send_error_embed
 from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -20,8 +20,9 @@ logger = get_logger(__name__)
 @slash_option(
     name="system_name", description="Target system name to acquire", required=True, opt_type=OptionType.STRING
 )
-async def get_hotspots(ctx: SlashContext, system_name: str) -> None:
-    await ctx.defer(ephemeral=True)
+@ephemeral_option
+async def get_hotspots(ctx: SlashContext, system_name: str, ephemeral: bool = True) -> None:
+    await ctx.defer(ephemeral=ephemeral)
 
     try:
         SystemsAdapter().get_system(system_name)
@@ -55,4 +56,4 @@ async def get_hotspots(ctx: SlashContext, system_name: str) -> None:
 
     embeds.sort(key=lambda e: e.title or "")
     for embeds_batch in batched(embeds, 10):
-        await ctx.send(embeds=list(embeds_batch), ephemeral=True)
+        await ctx.send(embeds=list(embeds_batch), ephemeral=ephemeral)
