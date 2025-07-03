@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from sqlalchemy import RowMapping, select, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from ekaine.common.logging import get_logger
 from ekaine.common.timer import Timer
@@ -11,6 +11,8 @@ from ekaine.postgresql.db import (
     BodiesDB,
     FactionPresencesDB,
     FactionsDB,
+    MiningMapCommoditiesDB,
+    MiningMapsDB,
     RingsDB,
     SystemsDB,
 )
@@ -178,13 +180,14 @@ class SystemsAdapter:
         return db_system
 
     def get_system_by_substring(self, system_name_substring: str) -> list[SystemsDB]:
+        # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
         stmt = (
             select(SystemsDB)
             .from_statement(
                 text(
                     """select s.*
                         from core.systems s
-                        and lower(s.name) like '%' || lower(:system_name_substring) || '%';"""
+                        where lower(s.name) like '%' || lower(:system_name_substring) || '%';"""
                 )
             )
             .params(system_name_substring=system_name_substring)
@@ -220,6 +223,7 @@ class BodiesAdapter:
         return list(db_bodies)
 
     def get_bodies_by_substring(self, body_name_substring: str) -> list[BodiesDB]:
+        # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
         stmt = (
             select(BodiesDB)
             .from_statement(
@@ -227,7 +231,7 @@ class BodiesAdapter:
                     """select b.*
                         from core.systems s
                         join core.bodies b on s.id = b.system_id
-                        and lower(b.name) like '%' || lower(:body_name_substring) || '%';"""
+                        where lower(b.name) like '%' || lower(:body_name_substring) || '%';"""
                 )
             )
             .params(body_name_substring=body_name_substring)
@@ -254,6 +258,7 @@ class RingsAdapter:
         return db_ring
 
     def get_rings_by_system_and_substring(self, system: SystemsDB, ring_name_substring: str) -> list[RingsDB]:
+        # Can't seem to lower() using sqlalchemy constructs. Indexing is reliant on lower()
         stmt = (
             select(RingsDB)
             .from_statement(
@@ -276,6 +281,122 @@ class RingsAdapter:
             raise ValueError(f"No bodies found in system '{system.id}'")
 
         return rings
+
+
+class MiningMapsAdapter:
+    def __init__(self, session: Session | None = None) -> None:
+        self.session = session or SessionLocalEkaine()
+
+    def get_mining_map(self, mining_map_name: str) -> MiningMapsDB:
+        stmt = (
+            select(MiningMapsDB)
+            .options(
+                selectinload(MiningMapsDB.commodities),
+                selectinload(MiningMapsDB.system),
+                selectinload(MiningMapsDB.body),
+                selectinload(MiningMapsDB.ring),
+            )
+            .where(MiningMapsDB.name == mining_map_name)
+        )
+        logger.debug(str(stmt))
+        db_map = self.session.scalars(stmt).first()
+        if not db_map:
+            raise ValueError(f"Mining Map '{mining_map_name}' not found")
+        return db_map
+
+    def get_all_mining_maps(self) -> list[MiningMapsDB]:
+        stmt = select(MiningMapsDB).options(
+            selectinload(MiningMapsDB.commodities),
+            selectinload(MiningMapsDB.system),
+            selectinload(MiningMapsDB.body),
+            selectinload(MiningMapsDB.ring),
+        )
+        logger.debug(str(stmt))
+        db_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
+        return db_maps
+
+    def get_mining_maps_by_filters(
+        self,
+        system_name_substring: str | None = None,
+        mining_map_substring: str | None = None,
+        commodities_list_str: str | None = None,
+        page_number: int = 1,
+        page_size: int = 1,
+    ) -> tuple[list[MiningMapsDB], bool]:
+        """Get mining maps by a variety of filters and pagination options.
+
+        If options are not provided, they are ignored/not applied to the filter.
+
+        Args:
+            system_name_substring (str | None, optional): System name substring to search by. Defaults to None.
+            mining_map_substring (str | None, optional): Mining map name substring to search by. Defaults to None.
+            commodities_list_str (str | None, optional): List of commodity names to search maps by. Defaults to None.
+            page_number (int, optional): Number of results per 'page'. Defaults to 10.
+            page_size (int, optional): Page number to return. Defaults to 1.
+
+        Returns:
+            tuple[list[MiningMapsDB], bool]: Second value indicates whether there are additional pages of results left.
+        """
+        page_number = max(page_number, 1)  # Handle zero/negative page numbers.
+        page_offset = page_size * (page_number - 1)
+
+        if commodities_list_str is None:
+            commodities = None
+        else:
+            commodities_and_tonnage = MiningMapCommoditiesDB.parse_commodities_str(commodities_list_str)
+            commodities = [tup[0] for tup in commodities_and_tonnage]
+
+        stmt = (
+            select(MiningMapsDB)
+            .options(
+                selectinload(MiningMapsDB.commodities),
+                selectinload(MiningMapsDB.system),
+                selectinload(MiningMapsDB.body),
+                selectinload(MiningMapsDB.ring),
+            )
+            .from_statement(
+                text(
+                    """select distinct on (mm.id, mm.name) mm.*
+                        from core.systems s
+                        join core.mining_maps mm on mm.system_id = s.id
+                        join core.mining_map_commodities mmc on mmc.mining_map_id = mm.id
+                        where (
+                            :mining_map_substring is null
+                            or lower(mm.name) like '%' || lower(:mining_map_substring) || '%'
+                        )
+                        and (
+                            :system_name_substring is null
+                            or lower(s.name) like '%' || lower(:system_name_substring) || '%'
+                        )
+                        and (
+                            :map_commodities_list IS NULL
+                            or mmc.commodity_sym = ANY(:map_commodities_list)
+                        )
+                        order by mm.name asc
+                        limit (:page_size + 1)
+                        offset :page_offset
+                    ;"""
+                )
+            )
+            .params(
+                system_name_substring=system_name_substring,
+                mining_map_substring=mining_map_substring,
+                map_commodities_list=commodities,
+                page_size=page_size,
+                page_offset=page_offset,
+            )
+        )
+
+        logger.info(str(stmt))
+        db_maps: list[MiningMapsDB] = list(self.session.scalars(stmt).all())
+
+        if len(db_maps) == page_size + 1:
+            # We got "page size + 1" rows back, meaning there's at least one additional page.
+            return (db_maps[:page_size], True)
+        else:
+            # If we got less than page size OR exactly the page size (when we asked for page size + 1),
+            # we can safely conclude there are no more pages' worth of data.
+            return (db_maps, False)
 
 
 class StationsAdapter:

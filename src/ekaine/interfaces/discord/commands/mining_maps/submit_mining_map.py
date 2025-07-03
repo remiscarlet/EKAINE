@@ -54,7 +54,7 @@ def my_check() -> Callable[[Any], Any]:
 )
 @slash_option(
     name="commodities_comma_list",
-    description="Comma separated list of commodities included in the map. Eg, 'Platinum,Osmium'",
+    description="Comma-separated list of commodities. Can optionally include tonnage. Eg, 'Platinum:100T,Osmium'",
     required=True,
     opt_type=OptionType.STRING,
 )

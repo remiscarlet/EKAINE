@@ -709,11 +709,32 @@ class MiningMapsDB(BaseModelWithId):
     body_id: Mapped[int] = mapped_column(ForeignKey("core.bodies.id"), nullable=False, index=True)
     ring_id: Mapped[int] = mapped_column(ForeignKey("core.rings.id"), nullable=False, index=True)
 
+    # one–way relationships back to their parent tables
+    system: Mapped["SystemsDB"] = relationship(
+        "SystemsDB",
+        lazy="selectin",
+    )
+    body: Mapped["BodiesDB"] = relationship(
+        "BodiesDB",
+        lazy="selectin",
+    )
+    ring: Mapped["RingsDB"] = relationship(
+        "RingsDB",
+        lazy="selectin",
+    )
+
     rock_count: Mapped[int] = mapped_column(SmallInteger, nullable=True)
     map_url: Mapped[str] = mapped_column(Text, nullable=False)
     approximate_merits_solo: Mapped[int] = mapped_column(
         Integer, nullable=True
     )  # Approx when _solo_. Wings will get multipliers.
+
+    commodities: Mapped[list["MiningMapCommoditiesDB"]] = relationship(
+        "MiningMapCommoditiesDB",
+        back_populates="mining_map",
+        cascade="all, delete-orphan",
+        lazy="selectin",  # selects in one extra query
+    )
 
     def __repr__(self) -> str:
         return f"<MiningMapsDB(id={self.id}, name={self.name})>"
@@ -749,6 +770,11 @@ class MiningMapCommoditiesDB(BaseModelWithId):
     # Optional but potentially useful approximate tonnage of commodity from map, SOLO
     approximate_tonnage_solo: Mapped[int] = mapped_column(Integer, nullable=True)
 
+    mining_map: Mapped[MiningMapsDB] = relationship(
+        "MiningMapsDB",
+        back_populates="commodities",
+    )
+
     def __repr__(self) -> str:
         return (
             f"<MiningMapCommodity(id={self.id}, map_id={self.mining_map_id}, "
@@ -759,6 +785,17 @@ class MiningMapCommoditiesDB(BaseModelWithId):
 
     @staticmethod
     def parse_commodities_str(commodities_str: str) -> list[tuple[str, int | None]]:
+        """Parses a commodities list string and parses out the commodity + optional tonnage information
+
+        Args:
+            commodities_str (str): String of format, eg 'Platinum:50T,Osmium'
+
+        Raises:
+            ValueError: If the parsed Commodity string is not a valid Commodity Symbol
+
+        Returns:
+            list[tuple[str, int | None]]: List of tuples where the second value in the tuple is tonnage, if provided.
+        """
         commodities = commodities_str.split(",")
         tups: list[tuple[str, int | None]] = []
         for commodity_str in commodities:
