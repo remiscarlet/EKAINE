@@ -127,6 +127,7 @@ nuke-db:
 	docker stop ekaine_db
 	docker rm ekaine_db
 
+# Cluster-wide Targets
 up:
 	mkdir -p tools/docker/step_ca/secrets
 	mkdir -p tools/docker/step_ca/certs
@@ -135,35 +136,70 @@ up:
 down:
 	docker compose -f tools/docker/docker-compose.yaml down
 
+logs:
+	docker compose -f tools/docker/docker-compose.yaml logs --follow
+
+restart: down up
+
+# Postgres Container Targets
 up-db:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d postgres
 
 down-db:
 	docker compose -f tools/docker/docker-compose.yaml stop postgres
 
+logs-db:
+	docker logs -f ekaine_db
+
+restart-db: down-db up-db
+
+# Grafana Container Targets
 up-grafana:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d grafana
 
 down-grafana:
 	docker compose -f tools/docker/docker-compose.yaml stop grafana
 
+logs-grafana:
+	docker logs -f ekaine_grafana
+
+restart-grafana: down-grafana up-grafana
+
+# Discord Container Targets
 up-discord:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d discord
 
 down-discord:
 	docker compose -f tools/docker/docker-compose.yaml stop discord
 
+logs-discord:
+	docker logs -f ekaine_discord
+
+restart-discord: down-discord up-discord
+
+# FastAPI Container Targets
 up-fastapi:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d fastapi
 
 down-fastapi:
 	docker compose -f tools/docker/docker-compose.yaml stop fastapi
 
+logs-fastapi:
+	docker logs -f ekaine_fastapi
+
+restart-fastapi: down-fastapi up-fastapi
+
+# EDDN Container Targets
 up-eddn:
 	docker compose -f tools/docker/docker-compose.yaml up --build -d eddn
 
 down-eddn:
 	docker compose -f tools/docker/docker-compose.yaml stop eddn
+
+logs-eddn:
+	docker logs -f ekaine_eddn
+
+restart-eddn: down-eddn up-eddn
 
 ## Alembic
 
