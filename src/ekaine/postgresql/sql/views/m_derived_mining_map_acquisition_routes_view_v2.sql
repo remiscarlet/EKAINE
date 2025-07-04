@@ -63,6 +63,9 @@ select distinct on (
     armm.commodity_sym,
     armm.approximate_tonnage_solo,
     scv.station_name,
+    scv.type,
+    scv.distance_to_arrival,
+    scv.has_large_pad,
     scv.controlling_faction_id,
     scv.sell_price,
     scv.demand,
@@ -71,17 +74,22 @@ from acquisition_routes_with_mining_maps as armm
 inner join lateral (
     select
         scv.station_name,
+        scv.type,
+        scv.distance_to_arrival,
         f.id as controlling_faction_id,
         scv.sell_price,
         scv.demand,
-        scv.updated_at
+        scv.updated_at,
+        coalesce(s.large_landing_pads > 0, false) as has_large_pad
     from derived.station_commodities_view as scv
     inner join core.stations as s on scv.station_id = s.id
     inner join core.factions as f on s.controlling_faction = f.name
     where
         scv.system_id = armm.target_id
         and scv.commodity_sym = armm.commodity_sym
-        and scv.type <> 'Drake-Class Carrier'
+        and scv.type not in (
+            'Planetary Construction Depot', 'Space Construction Depot', 'Drake-Class Carrier'
+        )
     order by scv.updated_at desc
 ) as scv on true;
 
