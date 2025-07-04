@@ -80,14 +80,14 @@ def mining_maps_diff_to_embed(old_mining_map: MiningMapsDB, new_mining_map: Mini
     if old_mining_map.ring.name == new_mining_map.ring.name:
         fields = [EmbedField("Ring Name", new_mining_map.ring.name, inline=True)]
     else:
-        val = "**DIFF:**\n" f"{old_mining_map.ring.name}\n" "->\n" f"{new_mining_map.ring.name}\n"
+        val = "**DIFF:**\n" f"{old_mining_map.ring.name} => {new_mining_map.ring.name}\n"
         fields = [EmbedField("Ring Name", val, inline=True)]
 
     # Rock Count
     if old_mining_map.rock_count == new_mining_map.rock_count and new_mining_map.rock_count is not None:
         fields.append(EmbedField("Ring Count", str(new_mining_map.rock_count), inline=True))
     elif new_mining_map.rock_count is not None:
-        val = "**DIFF:**\n" f"{old_mining_map.rock_count}\n" "->\n" f"{new_mining_map.rock_count}"
+        val = "**DIFF:**\n" f"{old_mining_map.rock_count} => {new_mining_map.rock_count}"
         fields.append(EmbedField("Rock Count", val, inline=True))
 
     # Approx Merits
@@ -97,12 +97,7 @@ def mining_maps_diff_to_embed(old_mining_map: MiningMapsDB, new_mining_map: Mini
     ):
         fields.append(EmbedField("Approximate Merits (Solo)", str(new_mining_map.approximate_merits_solo), inline=True))
     elif new_mining_map.approximate_merits_solo is not None:
-        val = (
-            "**DIFF:**\n"
-            f"{old_mining_map.approximate_merits_solo}\n"
-            "->\n"
-            f"{new_mining_map.approximate_merits_solo}"
-        )
+        val = "**DIFF:**\n" f"{old_mining_map.approximate_merits_solo} => {new_mining_map.approximate_merits_solo}"
         fields.append(EmbedField("Rock Count", val, inline=True))
 
     # Map Commodities
@@ -112,7 +107,7 @@ def mining_maps_diff_to_embed(old_mining_map: MiningMapsDB, new_mining_map: Mini
         val = (
             "**DIFF:**\n"
             f"{mining_map_commodities_to_embed_str(old_mining_map)}\n"
-            "->\n"
+            "=>\n"
             f"{mining_map_commodities_to_embed_str(new_mining_map)}"
         )
         fields.append(EmbedField("Commodities", val, inline=False))
@@ -120,7 +115,7 @@ def mining_maps_diff_to_embed(old_mining_map: MiningMapsDB, new_mining_map: Mini
     if old_mining_map.name == new_mining_map.name:
         title = new_mining_map.name
     else:
-        title = f"NAME CHANGE: {old_mining_map.name} -> {new_mining_map.name}"
+        title = f"NAME CHANGE: {old_mining_map.name} => {new_mining_map.name}"
 
     return Embed(
         title=title,

@@ -33,7 +33,7 @@ def upgrade() -> None:
         op.execute(f.read())
     with open(views_sql_dir / "m_derived_hotspot_acquisition_routes_view_v1.sql") as f:
         op.execute(f.read())
-    with open(views_sql_dir / "m_derived_mining_map_acquisition_routes_view_v1.sql") as f:
+    with open(views_sql_dir / "archives" / "m_derived_mining_map_acquisition_routes_view_v1.sql") as f:
         op.execute(f.read())
 
     op.execute("SELECT cron.unschedule('refresh_derived_average_ring_metadata_view')")
