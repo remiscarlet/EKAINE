@@ -49,9 +49,10 @@ async def list_mining_maps(
     map_name_substring: str | None = None,
     ephemeral: bool = True,
 ) -> None:
-    mining_maps = MiningMapsAdapter().get_mining_maps_by_filters(
-        system_name_substring, map_name_substring, commodities_comma_list
-    )
+    with MiningMapsAdapter() as adapter:
+        mining_maps = adapter.get_mining_maps_by_filters(
+            system_name_substring, map_name_substring, commodities_comma_list
+        )
 
     if not mining_maps:
         return await log_and_send_error_embed(ctx, "Could not find any mining maps matching the supplied filters")

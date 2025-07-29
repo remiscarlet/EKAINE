@@ -93,14 +93,16 @@ async def edit_mining_map(
 ) -> None:
     with SessionLocalEkaine() as session:
         try:
-            old_map = MiningMapsAdapter(session).get_mining_map(map_name_to_edit)
-            session.expunge(old_map)  # Don't autoupdate old_map's attributes when we update it in the DB later on.
+            with MiningMapsAdapter(session) as adapter:
+                old_map = adapter.get_mining_map(map_name_to_edit)
+                session.expunge(old_map)  # Don't autoupdate old_map's attributes when we update it in the DB later on.
         except ValueError:
             return await log_and_send_error_embed(ctx, f"No map named “{map_name_to_edit}”")
 
         if system_name:
             try:
-                system = SystemsAdapter(session).get_system(system_name)
+                with SystemsAdapter(session) as adapter:
+                    system = adapter.get_system(system_name)
             except ValueError:
                 return await log_and_send_error_embed(ctx, f"No system named “{system_name}”")
         else:
@@ -108,7 +110,8 @@ async def edit_mining_map(
 
         if ring_name:
             try:
-                ring = RingsAdapter(session).get_ring_by_system_and_name(system or old_map.system, ring_name)
+                with RingsAdapter(session) as adapter:
+                    ring = adapter.get_ring_by_system_and_name(system or old_map.system, ring_name)
             except ValueError:
                 return await log_and_send_error_embed(
                     ctx, f"No ring “{ring_name}” in {(system or old_map.system).name}"
@@ -128,12 +131,15 @@ async def edit_mining_map(
             old_map.approximate_merits_solo if approximate_merits is None else approximate_merits,
         )
 
-        result = MiningMapsAdapter(session).update_mining_map(old_map.id, payload)
-        if result.rowcount != 1:
-            return await log_and_send_error_embed(ctx, "Failed to update the mining map")
+        with MiningMapsAdapter(session) as adapter:
+            result = adapter.update_mining_map(old_map.id, payload)
+            if result.rowcount != 1:
+                return await log_and_send_error_embed(ctx, "Failed to update the mining map")
 
         # This explicit get loads the foreign key relationships as well
-        updated_map = MiningMapsAdapter(session).get_mining_map(map_name)
+        with MiningMapsAdapter(session) as adapter:
+            updated_map = adapter.get_mining_map(map_name)
+
         if commodities_comma_list:
             comm_payloads = MiningMapCommoditiesDB.to_dicts_from_discord(updated_map, commodities_comma_list)
             inserted = upsert_all(session, MiningMapCommoditiesDB, comm_payloads)
@@ -149,7 +155,8 @@ async def autocomplete_map_name_to_edit(ctx: AutocompleteContext) -> None:
     substring_input = ctx.input_text
 
     try:
-        mining_maps = MiningMapsAdapter().get_mining_maps_by_filters(mining_map_substring=substring_input)
+        with MiningMapsAdapter() as adapter:
+            mining_maps = adapter.get_mining_maps_by_filters(mining_map_substring=substring_input)
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
@@ -175,7 +182,8 @@ async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
         return await ctx.send(choices=[])
 
     try:
-        systems = SystemsAdapter().get_system_by_substring(substring_input)
+        with SystemsAdapter() as adapter:
+            systems = adapter.get_system_by_substring(substring_input)
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
@@ -198,20 +206,23 @@ async def autocomplete_ring_name(ctx: AutocompleteContext) -> None:
 
     if not system_name and map_to_edit:
         try:
-            existing_mining_map = MiningMapsAdapter().get_mining_map(map_to_edit)
+            with MiningMapsAdapter() as adapter:
+                existing_mining_map = adapter.get_mining_map(map_to_edit)
             system = existing_mining_map.system
         except ValueError:
             return await ctx.send(choices=[])
     elif system_name:
         try:
-            system = SystemsAdapter().get_system(cast(str, system_name))
+            with SystemsAdapter() as adapter:
+                system = adapter.get_system(cast(str, system_name))
         except Exception:
             logger.warning(traceback.format_exc())
             return await ctx.send(choices=[])
 
     substring_input = ctx.input_text  # can be empty/None
     try:
-        rings = RingsAdapter().get_rings_by_system_and_substring(system, substring_input)
+        with RingsAdapter() as adapter:
+            rings = adapter.get_rings_by_system_and_substring(system, substring_input)
         logger.info(pformat(rings))
     except Exception:
         logger.warning(traceback.format_exc())

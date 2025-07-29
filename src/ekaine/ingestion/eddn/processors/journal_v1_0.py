@@ -38,7 +38,8 @@ def model_to_faction_name_to_id_mapping(model: journal_v1_0.Model) -> dict[str, 
         if faction_name is None:
             logger.warning(f"Encountered Faction object with no Name! '{pformat(faction)}'")
             continue
-        faction_obj = FactionsAdapter().get_faction(faction_name)
+        with FactionsAdapter() as adapter:
+            faction_obj = adapter.get_faction(faction_name)
         if faction_obj is not None:
             mapping[faction_name] = faction_obj.id
 

@@ -78,16 +78,17 @@ async def get_top_reinforcement_mining_routes(
 ) -> None:
     await ctx.defer(ephemeral=ephemeral)
 
-    mining_routes = ApiCommandAdapter().get_top_reinforcement_mining_routes(
-        power_name,
-        split_comma_delimited_string(power_states),
-        split_comma_delimited_string(commodity_names),
-        split_comma_delimited_string(ignored_ring_types),
-        min_sell_price,
-        min_demand,
-        num_results,
-        max_data_age_dur_str,
-    )
+    with ApiCommandAdapter() as adapter:
+        mining_routes = adapter.get_top_reinforcement_mining_routes(
+            power_name,
+            split_comma_delimited_string(power_states),
+            split_comma_delimited_string(commodity_names),
+            split_comma_delimited_string(ignored_ring_types),
+            min_sell_price,
+            min_demand,
+            num_results,
+            max_data_age_dur_str,
+        )
 
     if not mining_routes:
         await send_error_embed(ctx, "Uh oh, the provided arguments didn't find any valid results!")

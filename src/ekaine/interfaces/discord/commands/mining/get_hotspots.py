@@ -30,7 +30,8 @@ async def get_hotspots(ctx: SlashContext, system_name: str, ephemeral: bool = Tr
         await send_error_embed(ctx, f"Could not find system '{system_name}'!")
         return
 
-    hotspots = ApiCommandAdapter().get_hotspots_in_system(system_name)
+    with ApiCommandAdapter() as adapter:
+        hotspots = adapter.get_hotspots_in_system(system_name)
 
     results_by_commodity: dict[str, list[HotspotResult]] = defaultdict(lambda: list())
     for hotspot in hotspots:
@@ -43,7 +44,7 @@ async def get_hotspots(ctx: SlashContext, system_name: str, ephemeral: bool = Tr
     for commodity_name in sorted(results_by_commodity.keys()):
         hotspots = results_by_commodity[commodity_name]
 
-        ring_names = list(map(lambda hs: f"=> {hs.ring_name} (x{hs.count}) ({hs.ring_type})", hotspots))
+        ring_names = list(map(lambda hs: f"=> {hs.ring_name} (x{hs.hotspot_count}) ({hs.ring_type})", hotspots))
         hotspots_str = "**Mine In**:\n"
         hotspots_str += "\n".join(ring_names)
         embed = Embed(

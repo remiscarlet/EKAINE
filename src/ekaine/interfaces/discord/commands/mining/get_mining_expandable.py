@@ -28,7 +28,8 @@ async def get_mining_expandable(ctx: SlashContext, system_name: str, ephemeral: 
     await ctx.defer(ephemeral=ephemeral)
 
     try:
-        system = SystemsAdapter().get_system(system_name)
+        with SystemsAdapter() as adapter:
+            system = adapter.get_system(system_name)
     except ValueError:
         await send_error_embed(ctx, f"Could not find system '{system_name}'!")
         return
@@ -43,7 +44,8 @@ async def get_mining_expandable(ctx: SlashContext, system_name: str, ephemeral: 
         )
         return
 
-    routes = ApiCommandAdapter().get_mining_expandable_systems_in_range(system_name)
+    with ApiCommandAdapter() as adapter:
+        routes = adapter.get_mining_expandable_systems_in_range(system_name)
 
     mineable_data: dict[str, MineableDataDisplay] = {}
     for route in routes:

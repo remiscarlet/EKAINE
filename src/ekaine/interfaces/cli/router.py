@@ -39,7 +39,7 @@ def print_hotspot_results(system_name: str, hotspots: list[HotspotResult]) -> No
         return
 
     headers = ["Ring", "Ring Type", "Commodity", "Count"]
-    table = [[h.ring_name, h.ring_type, h.commodity_sym, h.count] for h in hotspots]
+    table = [[h.ring_name, h.ring_type, h.commodity_sym, h.hotspot_count] for h in hotspots]
     logger.info(tabulate(table, headers))
 
 
@@ -72,8 +72,9 @@ def run_download_spansh(args: Namespace) -> None:
 
 
 def run_get_world(args: Namespace) -> None:
-    system = SystemsAdapter().get_system(args.name)
-    print(pformat(system))
+    with SystemsAdapter() as adapter:
+        system = adapter.get_system(args.name)
+        print(pformat(system))
 
 
 # API CLI
@@ -81,7 +82,8 @@ def run_get_world(args: Namespace) -> None:
 
 def run_get_acquirable_systems_in_range(args: Namespace) -> None:
     timer = Timer("Get Acquirable Systems In Range")
-    systems = ApiCommandAdapter().get_acquirable_systems_from_origin(args.system_name)
+    with ApiCommandAdapter() as adapter:
+        systems = adapter.get_acquirable_systems_from_origin(args.system_name)
 
     logger.info("")
     logger.info("====== CURRENT SYSTEM (ACQUIRING) ======")
@@ -106,7 +108,8 @@ def run_get_acquirable_systems_in_range(args: Namespace) -> None:
 
 def run_get_expandable_systems_in_range(args: Namespace) -> None:
     timer = Timer("Get Expandable Systems In Range")
-    systems = ApiCommandAdapter().get_expandable_systems_in_range(args.system_name)
+    with ApiCommandAdapter() as adapter:
+        systems = adapter.get_expandable_systems_in_range(args.system_name)
 
     logger.info("")
     logger.info("====== CURRENT UNOCCUPIED SYSTEM ======")
@@ -131,21 +134,24 @@ def run_get_expandable_systems_in_range(args: Namespace) -> None:
 
 def run_get_hotspots_by_commodities(args: Namespace) -> None:
     timer = Timer("Get Hotspots In System By Commodities")
-    hotspots = ApiCommandAdapter().get_hotspots_in_system_by_commodities(args.system_name, args.commodities_filter)
+    with ApiCommandAdapter() as adapter:
+        hotspots = adapter.get_hotspots_in_system_by_commodities(args.system_name, args.commodities_filter)
     print_hotspot_results(args.system_name, hotspots)
     timer.end()
 
 
 def run_get_hotspots(args: Namespace) -> None:
     timer = Timer("Get Hotspots In System")
-    hotspots = ApiCommandAdapter().get_hotspots_in_system(args.system_name)
-    print_hotspot_results(args.system_name, hotspots)
-    timer.end()
+    with ApiCommandAdapter() as adapter:
+        hotspots = adapter.get_hotspots_in_system(args.system_name)
+        print_hotspot_results(args.system_name, hotspots)
+        timer.end()
 
 
 def run_get_mining_expandable_systems_in_range(args: Namespace) -> None:
     timer = Timer("Get Mining Expandable Systems In Range")
-    routes = ApiCommandAdapter().get_mining_expandable_systems_in_range(args.system_name)
+    with ApiCommandAdapter() as adapter:
+        routes = adapter.get_mining_expandable_systems_in_range(args.system_name)
 
     logger.info("")
     logger.info("====== DETAILS ======")
@@ -163,7 +169,8 @@ def run_get_mining_expandable_systems_in_range(args: Namespace) -> None:
 
 def run_get_systems_with_power(args: Namespace) -> None:
     timer = Timer("Get Systems With Power")
-    systems = ApiCommandAdapter().get_systems_with_power(args.power_name, args.power_states)
+    with ApiCommandAdapter() as adapter:
+        systems = adapter.get_systems_with_power(args.power_name, args.power_states)
 
     logger.info("")
     logger.info("====== DETAILS ======")
@@ -188,11 +195,12 @@ def run_get_systems_with_power(args: Namespace) -> None:
 
 
 def run_get_top_commodities(args: Namespace) -> None:
-    adapter = ApiCommandAdapter()
     timer = Timer("Get Top Commodities In System")
-    commodities = adapter.get_top_commodities_in_system(
-        args.system_name, args.comms_per_station, args.min_supplydemand, args.is_buying
-    )
+
+    with ApiCommandAdapter() as adapter:
+        commodities = adapter.get_top_commodities_in_system(
+            args.system_name, args.comms_per_station, args.min_supplydemand, args.is_buying
+        )
 
     logger.info("")
     logger.info("====== SYSTEM ======")

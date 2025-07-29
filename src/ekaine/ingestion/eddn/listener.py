@@ -59,9 +59,12 @@ processor_mapping: dict[type[Any], Callable[[Session, Any], None]] = {
 def approachsettlement_v1_0_model_to_controlling_faction_id(model: approachsettlement_v1_0.Model) -> int | None:
     faction_id = None
     controlling_faction = getattr(model.message, "SystemFaction", None)
-    if controlling_faction is not None:
-        faction_name = controlling_faction.get("Name")
-        faction = FactionsAdapter().get_faction(faction_name)
+    if controlling_faction is None:
+        return None
+
+    faction_name = controlling_faction.get("Name")
+    with FactionsAdapter() as adapter:
+        faction = adapter.get_faction(faction_name)
         if faction is not None:
             faction_id = faction.id
 
@@ -109,10 +112,11 @@ def run_listener(session: Session) -> None:
         if issubclass(obj_type, BaseModel) and obj_type in processor_mapping:
             try:
                 event = d.get("message", {}).get("event")
-                if "eRingClass" in raw_json.decode("utf8"):
-                    logger.trace("\n")
-                    logger.trace("RING RING RING RING")
-                    logger.trace(d)
+                if "InnerRad" in raw_json.decode("utf8"):
+                    logger.info("\n")
+                    logger.info("RING RING RING")
+                    logger.info(obj.message.event.value)
+                    logger.info(d)
                 if event not in ["Scan", "FSDJump", "Docked"]:
                     logger.trace("\n")
                     logger.trace(d)

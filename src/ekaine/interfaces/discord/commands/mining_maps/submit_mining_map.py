@@ -86,12 +86,14 @@ async def submit_mining_map(
     coalesced_map_name = map_name if map_name is not None else ring_name
 
     try:
-        system = SystemsAdapter().get_system(system_name)
+        with SystemsAdapter() as adapter:
+            system = adapter.get_system(system_name)
     except ValueError:
         return await log_and_send_error_embed(ctx, f"Could not find a system with name '{system_name}'!")
 
     try:
-        ring = RingsAdapter().get_ring(ring_name)
+        with RingsAdapter() as adapter:
+            ring = adapter.get_ring(ring_name)
     except ValueError:
         return await log_and_send_error_embed(ctx, f"Could not find a ring with name '{ring_name}'!")
 
@@ -138,7 +140,8 @@ async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
         return await ctx.send(choices=[])
 
     try:
-        systems = SystemsAdapter().get_system_by_substring(substring_input)
+        with SystemsAdapter() as adapter:
+            systems = adapter.get_system_by_substring(substring_input)
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
@@ -161,14 +164,16 @@ async def autocomplete_ring_name(ctx: AutocompleteContext) -> None:
         return await ctx.send(choices=[])
 
     try:
-        system = SystemsAdapter().get_system(cast(str, system_name))
+        with SystemsAdapter() as adapter:
+            system = adapter.get_system(cast(str, system_name))
     except Exception:
         logger.warning(traceback.format_exc())
         return await ctx.send(choices=[])
 
     substring_input = ctx.input_text  # can be empty/None
     try:
-        rings = RingsAdapter().get_rings_by_system_and_substring(system, substring_input)
+        with RingsAdapter() as adapter:
+            rings = adapter.get_rings_by_system_and_substring(system, substring_input)
         logger.info(pformat(rings))
     except Exception:
         logger.warning(traceback.format_exc())

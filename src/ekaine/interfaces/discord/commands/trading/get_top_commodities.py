@@ -50,9 +50,8 @@ async def get_top_commodities(
     except ValueError:
         return await send_error_embed(ctx, f"Could not find system '{system_name}'!")
 
-    commodities = ApiCommandAdapter().get_top_commodities_in_system(
-        system_name, number_commodities, minimum_demand, False
-    )
+    with ApiCommandAdapter() as adapter:
+        commodities = adapter.get_top_commodities_in_system(system_name, number_commodities, minimum_demand, False)
 
     commodities_by_station: dict[str, list[TopCommodityResult]] = defaultdict(lambda: list())
     for commodity in commodities:

@@ -32,13 +32,15 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
     # MarketCommoditiesDB
 
     try:
-        system = SystemsAdapter().get_system(system_name)
+        with SystemsAdapter() as adapter:
+            system = adapter.get_system(system_name)
     except ValueError as e:
         logger.warning(f"Encountered system name that we don't know about! '{system_name}' - {str(e)}")
         return
 
     try:
-        station = StationsAdapter().get_station(station_name, system.id)
+        with StationsAdapter(session) as adapter:
+            station = adapter.get_station(station_name, system.id)
     except ValueError as e:
         logger.warning(
             "Encountered station name that we don't know about! "
@@ -64,9 +66,8 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         return
 
     try:
-        system_controlling_faction = FactionPresencesAdapter().get_faction_presence(
-            system.controlling_faction_id, system.id
-        )
+        with FactionPresencesAdapter(session) as adapter:
+            system_controlling_faction = adapter.get_faction_presence(system.controlling_faction_id, system.id)
     except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know its FactionPresence about! "
@@ -83,7 +84,8 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         return
 
     try:
-        station_faction = FactionsAdapter().get_faction(station.controlling_faction)
+        with FactionsAdapter(session) as adapter:
+            station_faction = adapter.get_faction(station.controlling_faction)
     except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know about! "
@@ -93,7 +95,8 @@ def process_model(session: Session, model: commodity_v3_0.Model) -> None:
         return
 
     try:
-        station_controlling_faction = FactionPresencesAdapter().get_faction_presence(station_faction.id, system.id)
+        with FactionPresencesAdapter(session) as adapter:
+            station_controlling_faction = adapter.get_faction_presence(station_faction.id, system.id)
     except ValueError as e:
         logger.warning(
             "Encountered a faction we didn't know its FactionPresence about! "

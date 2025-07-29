@@ -1,4 +1,5 @@
-from typing import Any, Sequence
+from types import TracebackType
+from typing import Any, Self, Sequence, Type
 
 from sqlalchemy import CursorResult, RowMapping, select, text, update
 from sqlalchemy.orm import Session, selectinload
@@ -28,10 +29,24 @@ from ekaine.postgresql.types import (
 logger = get_logger(__name__)
 
 
-class ApiCommandAdapter:
-    def __init__(self) -> None:
-        self.session = SessionLocalEkaine()
+class BaseAdapter:
+    def __init__(self, session: Session | None = None) -> None:
+        self.session = session or SessionLocalEkaine()
 
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        if exc_type:
+            self.session.rollback()
+
+
+class ApiCommandAdapter(BaseAdapter):
     def get_acquirable_systems_from_origin(self, system_name: str) -> list[SystemResult]:
         stmt = text("SELECT * FROM api.get_acquirable_systems_from_origin(:system_name)")
 
@@ -167,10 +182,7 @@ class ApiCommandAdapter:
         return [TopCommodityResult(**row) for row in rows]
 
 
-class SystemsAdapter:
-    def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocalEkaine()
-
+class SystemsAdapter(BaseAdapter):
     def get_system(self, system_name: str) -> SystemsDB:
         query = select(SystemsDB).where(SystemsDB.name == system_name)
         logger.debug(str(query))
@@ -201,10 +213,7 @@ class SystemsAdapter:
         return list(systems)
 
 
-class BodiesAdapter:
-    def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocalEkaine()
-
+class BodiesAdapter(BaseAdapter):
     def get_body(self, body_name: str) -> BodiesDB:
         query = select(BodiesDB).where(BodiesDB.name == body_name)
         logger.debug(str(query))
@@ -245,10 +254,7 @@ class BodiesAdapter:
         return list(bodies)
 
 
-class RingsAdapter:
-    def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocalEkaine()
-
+class RingsAdapter(BaseAdapter):
     def get_ring(self, ring_name: str) -> RingsDB:
         query = select(RingsDB).where(RingsDB.name == ring_name)
         logger.debug(str(query))
@@ -310,10 +316,7 @@ class RingsAdapter:
         return rings
 
 
-class MiningMapsAdapter:
-    def __init__(self, session: Session | None = None) -> None:
-        self.session = session or SessionLocalEkaine()
-
+class MiningMapsAdapter(BaseAdapter):
     def update_mining_map(self, map_id: int, payload: dict[str, Any]) -> CursorResult[Any]:
         stmt = update(MiningMapsDB).where(MiningMapsDB.id == map_id).values(**payload)
         result = self.session.execute(stmt)
@@ -419,10 +422,7 @@ class MiningMapsAdapter:
         return mining_maps
 
 
-class StationsAdapter:
-    def __init__(self) -> None:
-        self.session = SessionLocalEkaine()
-
+class StationsAdapter(BaseAdapter):
     def get_station(self, station_name: str, system_id: int) -> ResolvedStationResult:
         stmt = text(
             """select *
@@ -463,10 +463,7 @@ class StationsAdapter:
         return [ResolvedStationResult(**row) for row in rows]
 
 
-class FactionsAdapter:
-    def __init__(self) -> None:
-        self.session = SessionLocalEkaine()
-
+class FactionsAdapter(BaseAdapter):
     def get_faction(self, faction_name: str) -> FactionsDB:
         query = select(FactionsDB).where(FactionsDB.name == faction_name)
         faction = self.session.scalars(query).first()
@@ -475,10 +472,7 @@ class FactionsAdapter:
         return faction
 
 
-class FactionPresencesAdapter:
-    def __init__(self) -> None:
-        self.session = SessionLocalEkaine()
-
+class FactionPresencesAdapter(BaseAdapter):
     def get_faction_presence(self, faction_id: int, system_id: int) -> FactionPresencesDB:
         query = select(FactionPresencesDB).where(
             FactionPresencesDB.faction_id == faction_id, FactionPresencesDB.system_id == system_id
