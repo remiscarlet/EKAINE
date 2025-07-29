@@ -81,7 +81,7 @@ class MineableDataDisplay:
         self.sell_stations = set()
 
     def add_route(self, route: MiningAcquisitionResult) -> None:
-        if route.commodity != self.name:
+        if route.commodity_sym != self.name:
             raise ValueError(f"Tried adding invalid route for MineableDataDisplay '{self.name}'")
 
         self.mineable_rings.add(route.ring_name)

@@ -42,8 +42,8 @@ class HotspotResult(BaseModel):
     body_name: str
     ring_name: str
     ring_type: str
-    commodity: str
-    count: int
+    commodity_sym: str
+    hotspot_count: int
 
 
 # From: sql/functions/api_get_top_commodities_in_system_v1.sql
@@ -52,7 +52,7 @@ class TopCommodityResult(BaseModel):
     station_name: str
     station_type: str
     distance_to_arrival: float
-    commodity: str
+    commodity_sym: str
     sell_price: int
     demand: int
     buy_price: int
@@ -103,7 +103,7 @@ class SystemResult(BaseModel):
 class MiningAcquisitionResult(BaseModel):
     expanding_system: str
     ring_name: str
-    commodity: str
+    commodity_sym: str
     unoccupied_system: str
     station_name: str
     sell_price: int
@@ -117,7 +117,7 @@ class MiningReinforcementResult(BaseModel):
     body_name: str
     ring_name: str
     ring_type: str
-    commodity: str
+    commodity_sym: str
     count: int
     power_state: str
     station_name: str

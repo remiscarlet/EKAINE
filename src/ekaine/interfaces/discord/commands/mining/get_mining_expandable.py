@@ -47,7 +47,7 @@ async def get_mining_expandable(ctx: SlashContext, system_name: str, ephemeral: 
 
     mineable_data: dict[str, MineableDataDisplay] = {}
     for route in routes:
-        name = route.commodity
+        name = route.commodity_sym
         if name not in mineable_data:
             mineable_data[name] = MineableDataDisplay(name)
         mineable_data[name].add_route(route)

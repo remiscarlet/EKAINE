@@ -16,7 +16,7 @@ with acquisition_routes_with_hotspots as (
         parv.distance,
         hrv.ring_name,
         hrv.ring_type,
-        hrv.hotspot_commodity_sym,
+        hrv.commodity_sym,
         hrv.hotspot_count
     from derived.potential_acquisition_routes_view as parv
     inner join
@@ -34,12 +34,12 @@ with acquisition_routes_with_hotspots as (
         parv.distance,
         hrv.ring_name,
         hrv.ring_type,
-        hrv.hotspot_commodity_sym,
+        hrv.commodity_sym,
         hrv.hotspot_count
 )
 
 select distinct on (
-    arh.vector_id, arh.target_id, arh.ring_name, arh.hotspot_commodity_sym, scv.station_name
+    arh.vector_id, arh.target_id, arh.ring_name, arh.commodity_sym, scv.station_name
 )
     arh.vector_name,
     arh.vector_id,
@@ -56,11 +56,13 @@ select distinct on (
     arh.ring_name,
     arh.ring_type,
     arh.hotspot_count,
-    arh.hotspot_commodity_sym,
+    arh.commodity_sym,
     scv.station_name,
     scv.type,
+    scv.station_primary_economy,
     scv.distance_to_arrival,
     scv.has_large_pad,
+    scv.controlling_faction_name,
     scv.controlling_faction_id,
     scv.sell_price,
     scv.demand,
@@ -70,7 +72,9 @@ inner join lateral (
     select
         scv.station_name,
         scv.type,
+        s.primary_economy as station_primary_economy,
         scv.distance_to_arrival,
+        f.name as controlling_faction_name,
         f.id as controlling_faction_id,
         scv.sell_price,
         scv.demand,
@@ -81,7 +85,7 @@ inner join lateral (
     inner join core.factions as f on s.controlling_faction = f.name
     where
         scv.system_id = arh.target_id
-        and scv.commodity_sym = arh.hotspot_commodity_sym
+        and scv.commodity_sym = arh.commodity_sym
         and scv.type not in (
             'Planetary Construction Depot', 'Space Construction Depot', 'Drake-Class Carrier'
         )
@@ -91,7 +95,7 @@ inner join lateral (
 -- Create an index directly in the SQL,
 -- since we don't have a SA2.0 class table definition to define the index on.
 create unique index hotspot_ar_view_uidx on derived.hotspot_acquisition_routes_view (
-    vector_id, target_id, ring_name, hotspot_commodity_sym, station_name
+    vector_id, target_id, ring_name, commodity_sym, station_name
 );
 create index if not exists hotspot_ar_view_vector_id_idx
 on derived.hotspot_acquisition_routes_view (
@@ -131,7 +135,7 @@ on derived.hotspot_acquisition_routes_view (
 );
 create index if not exists hotspot_ar_view_commodity_sym_idx
 on derived.hotspot_acquisition_routes_view (
-    hotspot_commodity_sym
+    commodity_sym
 );
 create index if not exists hotspot_ar_view_station_name_idx
 on derived.hotspot_acquisition_routes_view (

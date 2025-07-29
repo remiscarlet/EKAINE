@@ -34,7 +34,7 @@ async def get_hotspots(ctx: SlashContext, system_name: str, ephemeral: bool = Tr
 
     results_by_commodity: dict[str, list[HotspotResult]] = defaultdict(lambda: list())
     for hotspot in hotspots:
-        name = hotspot.commodity
+        name = hotspot.commodity_sym
         results_by_commodity[name].append(hotspot)
 
     logger.info(pformat(results_by_commodity))

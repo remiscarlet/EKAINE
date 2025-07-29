@@ -51,17 +51,17 @@ def upgrade() -> None:
         op.execute(f.read())
     with open(functions_sql_dir / "api_get_expandable_systems_in_range_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "api_get_hotspots_in_system_by_commodities_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "api_get_hotspots_in_system_by_commodities_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "api_get_hotspots_in_system_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "api_get_hotspots_in_system_v1.sql") as f:
         op.execute(f.read())
     with open(functions_sql_dir / "api_get_systems_with_power_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "api_get_top_commodities_in_system_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "api_get_top_commodities_in_system_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "api_get_mining_expandable_systems_in_range_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "api_get_mining_expandable_systems_in_range_v1.sql") as f:
         op.execute(f.read())
-    with open(functions_sql_dir / "api_get_top_reinforcement_mining_routes_v1.sql") as f:
+    with open(functions_sql_dir / "archives" / "api_get_top_reinforcement_mining_routes_v1.sql") as f:
         op.execute(f.read())
 
 

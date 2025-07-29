@@ -39,7 +39,7 @@ def print_hotspot_results(system_name: str, hotspots: list[HotspotResult]) -> No
         return
 
     headers = ["Ring", "Ring Type", "Commodity", "Count"]
-    table = [[h.ring_name, h.ring_type, h.commodity, h.count] for h in hotspots]
+    table = [[h.ring_name, h.ring_type, h.commodity_sym, h.count] for h in hotspots]
     logger.info(tabulate(table, headers))
 
 
@@ -153,7 +153,9 @@ def run_get_mining_expandable_systems_in_range(args: Namespace) -> None:
 
     logger.info("====== MINING ACQUISITION ROUTES ======")
     headers = ["Mine", "In", "Sell In", "At", "For", "Demand"]
-    table = [[r.commodity, r.ring_name, r.unoccupied_system, r.station_name, r.sell_price, r.demand] for r in routes]
+    table = [
+        [r.commodity_sym, r.ring_name, r.unoccupied_system, r.station_name, r.sell_price, r.demand] for r in routes
+    ]
     logger.info(tabulate(table, headers))
 
     timer.end()
@@ -203,7 +205,7 @@ def run_get_top_commodities(args: Namespace) -> None:
         [
             c.station_name,
             f"{c.distance_to_arrival:.2f} LS",
-            c.commodity,
+            c.commodity_sym,
             f"{c.sell_price} CR",
             c.demand,
             f"{c.buy_price} CR",

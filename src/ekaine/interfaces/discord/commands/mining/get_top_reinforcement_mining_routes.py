@@ -109,7 +109,7 @@ async def get_top_reinforcement_mining_routes(
         routes_by_commodity: dict[str, list[MiningReinforcementResult]] = defaultdict(lambda: list())
         for route in routes:
             rings.add(f"{route.ring_name} ({route.ring_type})")
-            commodity = route.commodity
+            commodity = route.commodity_sym
             routes_by_commodity[commodity].append(route)
 
         for commodity in sorted(routes_by_commodity.keys()):

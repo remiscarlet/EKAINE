@@ -66,7 +66,9 @@ async def get_top_commodities(
     for station_name in sorted(commodities_by_station.keys()):
         commodities = commodities_by_station[station_name]
 
-        commodity_rows = list(map(lambda c: (c.commodity, f"{c.sell_price:3,} CR / {c.demand:3,} Dem"), commodities))
+        commodity_rows = list(
+            map(lambda c: (c.commodity_sym, f"{c.sell_price:3,} CR / {c.demand:3,} Dem"), commodities)
+        )
 
         logger.info(tabulate(commodity_rows, headers=table_headers))
         desc = tabulate(commodity_rows, headers=table_headers)
