@@ -3,10 +3,10 @@ from typing import Any, Callable, TypeVar
 
 from interactions import Embed, OptionType, SlashCommand, SlashContext, slash_option
 
-from ekaine.common.constants import ENVIRONMENT_TYPE
+from ekaine.common.constants import IS_PROD
 from ekaine.postgresql.types import MiningAcquisitionResult
 
-cmd_base_name = "ekaine" if ENVIRONMENT_TYPE == "production" else "ekaine-dev"
+cmd_base_name = "ekaine" if IS_PROD else "ekaine-dev"
 
 cmd_base = SlashCommand(name=cmd_base_name, description="EKAINE bot commands base")
 

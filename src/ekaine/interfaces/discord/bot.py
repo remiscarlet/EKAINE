@@ -6,19 +6,19 @@ from interactions import (
     listen,
 )
 
-from ekaine.common.constants import DEV_GUILD_ID, DISCORD_BOT_TOKEN
+from ekaine.common.constants import DEV_GUILD_ID, DISCORD_BOT_TOKEN, IS_PROD
 from ekaine.common.logging import configure_logger, get_logger
 from ekaine.interfaces.discord import cmd_base
 from ekaine.interfaces.discord.commands import *  # noqa: F401, F403
 
 logger = get_logger(__name__)
 
-bot = Client(intents=Intents.DEFAULT, debug_scope=DEV_GUILD_ID)
+if IS_PROD:
+    bot = Client(intents=Intents.DEFAULT)
+else:
+    # Only updates commands in the dev server
+    bot = Client(intents=Intents.DEFAULT, debug_scope=DEV_GUILD_ID)
 
-# @cmd_base.subcommand(sub_cmd_name="hello2", sub_cmd_description="foobar")
-# async def hello2(ctx: SlashContext) -> None:
-#     await send_error_embed(ctx, "Foobar!")
-#     return
 
 bot.add_interaction(cmd_base)
 
