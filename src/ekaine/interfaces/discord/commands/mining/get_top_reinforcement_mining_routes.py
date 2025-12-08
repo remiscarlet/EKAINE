@@ -6,7 +6,11 @@ from tabulate import tabulate
 
 from ekaine.common.logging import get_logger
 from ekaine.common.utils import get_time_since
-from ekaine.interfaces.discord import ephemeral_option, send_error_embed
+from ekaine.interfaces.discord import (
+    discord_handler_wrapper,
+    ephemeral_option,
+    send_error_embed,
+)
 from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.interfaces.discord.utils import split_comma_delimited_string
 from ekaine.postgresql.adapter import (
@@ -64,6 +68,7 @@ logger = get_logger(__name__)
     opt_type=OptionType.STRING,
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def get_top_reinforcement_mining_routes(
     ctx: SlashContext,
     power_name: str = "Nakato Kaine",

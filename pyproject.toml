@@ -6,7 +6,7 @@ authors = [
     {name = "remiscarlet",email = "remilia@scarl.et"}
 ]
 readme = "README.md"
-requires-python = "^3.12"
+requires-python = "^3.13"
 dependencies = [
     "dataclasses-json (==0.6.7)",
     "black (==25.1.0)",
@@ -110,7 +110,7 @@ line_length = 80
 section_whitelines = 1
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 namespace_packages = true
 exclude = "(archive|data|gen)/"

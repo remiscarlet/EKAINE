@@ -10,7 +10,7 @@ from interactions import (
 )
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import ephemeral_option
+from ekaine.interfaces.discord import discord_handler_wrapper, ephemeral_option
 from ekaine.interfaces.discord.commands.mining_maps import (
     cmd_group,
     ekaine_bot_superuser_check,
@@ -72,6 +72,7 @@ logger = get_logger(__name__)
     opt_type=OptionType.NUMBER,
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def submit_mining_map(
     ctx: SlashContext,
     system_name: str,
@@ -121,8 +122,8 @@ async def submit_mining_map(
         mining_map = mining_maps[0]
 
         mining_map_commodity_dicts = MiningMapCommoditiesDB.to_dicts_from_discord(mining_map, commodities_comma_list)
-        mining_maps = upsert_all(session, MiningMapCommoditiesDB, mining_map_commodity_dicts)  # type: ignore
-        if not mining_maps:
+        mining_map_commodities = upsert_all(session, MiningMapCommoditiesDB, mining_map_commodity_dicts)
+        if not mining_map_commodities:
             return await log_and_send_error_embed(
                 ctx, "Didn't get back any MiningMapCommoditiesDB objects from upsert_all! Aborting."
             )
@@ -132,6 +133,7 @@ async def submit_mining_map(
 
 
 @submit_mining_map.autocomplete("system_name")
+@discord_handler_wrapper(choices=[])
 async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
     substring_input = ctx.input_text  # can be empty/None
 
@@ -158,6 +160,7 @@ async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
 
 
 @submit_mining_map.autocomplete("ring_name")
+@discord_handler_wrapper(choices=[])
 async def autocomplete_ring_name(ctx: AutocompleteContext) -> None:
     system_name = ctx.kwargs.get("system_name")
     if not system_name:

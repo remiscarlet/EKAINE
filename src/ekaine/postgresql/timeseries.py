@@ -33,7 +33,7 @@ logger = get_logger(__name__)
 
 
 class SignalsTimeseriesMixin:
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
     system_id: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -144,7 +144,7 @@ class RawSignalsTimeseries(BaseModel, SignalsTimeseriesMixin):
 
 
 class FactionPresencesTimeseriesMixin:
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
     system_id: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -361,7 +361,7 @@ class ProcessedPowerConflictProgressTimeseries(BaseModel, PowerConflictProgressT
 
 
 class SystemsTimeseriesMixin:
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
     system_id: Mapped[int] = mapped_column(Integer, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
@@ -443,7 +443,7 @@ class RawSystemsTimeseries(BaseModel, SystemsTimeseriesMixin):
 
 
 class MarketCommodityFactionStateTimeseriesMixin:
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, autoincrement=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, index=True)
 
     system_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)

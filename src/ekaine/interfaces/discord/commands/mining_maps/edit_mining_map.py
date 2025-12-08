@@ -1,6 +1,6 @@
 import traceback
 from pprint import pformat
-from typing import cast
+from typing import Any, cast
 
 from interactions import (
     AutocompleteContext,
@@ -8,9 +8,10 @@ from interactions import (
     SlashContext,
     slash_option,
 )
+from sqlalchemy import CursorResult
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import ephemeral_option
+from ekaine.interfaces.discord import discord_handler_wrapper, ephemeral_option
 from ekaine.interfaces.discord.commands.mining_maps import (
     cmd_group,
     ekaine_bot_superuser_check,
@@ -79,6 +80,7 @@ logger = get_logger(__name__)
     opt_type=OptionType.NUMBER,
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def edit_mining_map(
     ctx: SlashContext,
     map_name_to_edit: str,
@@ -133,7 +135,7 @@ async def edit_mining_map(
 
         with MiningMapsAdapter(session) as adapter:
             result = adapter.update_mining_map(old_map.id, payload)
-            if result.rowcount != 1:
+            if cast(CursorResult[Any], result).rowcount != 1:
                 return await log_and_send_error_embed(ctx, "Failed to update the mining map")
 
         # This explicit get loads the foreign key relationships as well
@@ -151,6 +153,7 @@ async def edit_mining_map(
 
 
 @edit_mining_map.autocomplete("map_name_to_edit")
+@discord_handler_wrapper(choices=[])
 async def autocomplete_map_name_to_edit(ctx: AutocompleteContext) -> None:
     substring_input = ctx.input_text
 
@@ -174,6 +177,7 @@ async def autocomplete_map_name_to_edit(ctx: AutocompleteContext) -> None:
 
 
 @edit_mining_map.autocomplete("system_name")
+@discord_handler_wrapper(choices=[])
 async def autocomplete_system_name(ctx: AutocompleteContext) -> None:
     substring_input = ctx.input_text  # can be empty/None
 

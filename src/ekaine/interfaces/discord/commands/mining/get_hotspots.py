@@ -5,7 +5,11 @@ from pprint import pformat
 from interactions import Embed, OptionType, SlashContext, slash_option
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import ephemeral_option, send_error_embed
+from ekaine.interfaces.discord import (
+    discord_handler_wrapper,
+    ephemeral_option,
+    send_error_embed,
+)
 from ekaine.interfaces.discord.commands.mining import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -21,6 +25,7 @@ logger = get_logger(__name__)
     name="system_name", description="Target system name to acquire", required=True, opt_type=OptionType.STRING
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def get_hotspots(ctx: SlashContext, system_name: str, ephemeral: bool = True) -> None:
     await ctx.defer(ephemeral=ephemeral)
 

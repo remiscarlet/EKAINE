@@ -5,6 +5,7 @@ from interactions import Embed, OptionType, SlashContext, slash_option
 from ekaine.common.logging import get_logger
 from ekaine.interfaces.discord import (
     MineableDataDisplay,
+    discord_handler_wrapper,
     ephemeral_option,
     send_error_embed,
 )
@@ -24,6 +25,7 @@ logger = get_logger(__name__)
     name="system_name", description="Target system name to acquire", required=True, opt_type=OptionType.STRING
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def get_mining_expandable(ctx: SlashContext, system_name: str, ephemeral: bool = True) -> None:
     await ctx.defer(ephemeral=ephemeral)
 

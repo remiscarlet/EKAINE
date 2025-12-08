@@ -1,7 +1,7 @@
 from types import TracebackType
 from typing import Any, Self, Sequence, Type
 
-from sqlalchemy import CursorResult, RowMapping, select, text, update
+from sqlalchemy import CursorResult, Result, RowMapping, select, text, update
 from sqlalchemy.orm import Session, selectinload
 
 from ekaine.common.logging import get_logger
@@ -317,7 +317,7 @@ class RingsAdapter(BaseAdapter):
 
 
 class MiningMapsAdapter(BaseAdapter):
-    def update_mining_map(self, map_id: int, payload: dict[str, Any]) -> CursorResult[Any]:
+    def update_mining_map(self, map_id: int, payload: dict[str, Any]) -> Result[Any]:
         stmt = update(MiningMapsDB).where(MiningMapsDB.id == map_id).values(**payload)
         result = self.session.execute(stmt)
 

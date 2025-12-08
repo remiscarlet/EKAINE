@@ -48,7 +48,7 @@ DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", None)
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", None)
 SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", None)
-REDIS_DSN = os.getenv("REDIS_DSN", None)
+REDIS_DSN = os.getenv("REDIS_DSN", "redis://localhost:6379/0")
 SESSION_SECRET = os.getenv("COOKIE_SECRET", None)
 ENVIRONMENT_TYPE = os.getenv("ENVIRONMENT_TYPE", None)
 

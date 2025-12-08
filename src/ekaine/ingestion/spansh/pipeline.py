@@ -6,7 +6,7 @@ from pprint import pformat
 from typing import Any, Callable
 
 import aiofiles  # noqa: F401
-import ijson
+import ijson  # type: ignore
 import yaml
 
 from ekaine.common.constants import (

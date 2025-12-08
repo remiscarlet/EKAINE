@@ -1,10 +1,21 @@
+import traceback
 from collections import namedtuple
-from typing import Any, Callable, TypeVar
+from typing import Any, Awaitable, Callable, Concatenate, ParamSpec, TypeVar, Union
 
-from interactions import Embed, OptionType, SlashCommand, SlashContext, slash_option
+from interactions import (
+    AutocompleteContext,
+    Embed,
+    OptionType,
+    SlashCommand,
+    SlashContext,
+    slash_option,
+)
 
 from ekaine.common.constants import IS_PROD
+from ekaine.common.logging import get_logger
 from ekaine.postgresql.types import MiningAcquisitionResult
+
+logger = get_logger(__name__)
 
 cmd_base_name = "ekaine" if IS_PROD else "ekaine-dev"
 
@@ -47,7 +58,38 @@ SlashContext.send = _patched_send  # type: ignore
 SlashContext.defer = _patched_defer  # type: ignore
 
 
-T = TypeVar("T", bound=Callable[..., Any])
+P = ParamSpec("P")
+R = TypeVar("R")
+Ctx = TypeVar("Ctx", SlashContext, AutocompleteContext)
+
+
+def discord_handler_wrapper(
+    **error_kwargs: Any,
+) -> Callable[[Callable[Concatenate[Ctx, P], Awaitable[R]]], Callable[Concatenate[Ctx, P], Awaitable[Union[R, None]]]]:
+    """Gracefully catches any errors and returns error embeds if so.
+
+    The decorator accepts async callables whose first parameter is a context-like
+    object (ctx) followed by arbitrary other parameters (captured by ParamSpec P).
+    Using Concatenate[Ctx, P] preserves those parameter types for the type checker.
+    """
+
+    def decorator(
+        func: Callable[Concatenate[Ctx, P], Awaitable[R]],
+    ) -> Callable[Concatenate[Ctx, P], Awaitable[Union[R, None]]]:
+        async def wrapper(ctx: Ctx, /, *args: P.args, **kwargs: P.kwargs) -> R | None:
+            try:
+                return await func(ctx, *args, **kwargs)
+            except Exception:
+                logger.warning(traceback.format_exc())
+                if not error_kwargs:
+                    await send_error_embed(ctx, "Uncaught discord handler error!")
+                else:
+                    await ctx.send(**error_kwargs)
+                return None
+
+        return wrapper
+
+    return decorator
 
 
 def ephemeral_option(func: Any) -> Any:

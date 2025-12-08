@@ -8,7 +8,7 @@ CURRENT_GID=$(shell id -g)
 install:
 	poetry install
 
-setup: install install-models up alembic-upgrade
+setup: install install-models build up
 setup-container: install-models alembic-upgrade
 	mkdir -p app_logs
 	mkdir -p setup_logs
@@ -129,8 +129,8 @@ nuke-db:
 
 # Cluster-wide Targets
 up:
-	mkdir -p tools/docker/step_ca/secrets
-	mkdir -p tools/docker/step_ca/certs
+	mkdir -p tools/docker/ekaine_ca/secrets
+	mkdir -p tools/docker/ekaine_ca/certs
 	docker compose -f tools/docker/docker-compose.yaml up --build -d
 
 down:

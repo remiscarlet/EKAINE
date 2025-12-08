@@ -6,7 +6,7 @@ from interactions import (
 from interactions.ext.paginators import Paginator
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import ephemeral_option
+from ekaine.interfaces.discord import discord_handler_wrapper, ephemeral_option
 from ekaine.interfaces.discord.commands.mining_maps import (
     cmd_group,
     ekaine_bot_superuser_check,
@@ -42,6 +42,7 @@ logger = get_logger(__name__)
     opt_type=OptionType.STRING,
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def list_mining_maps(
     ctx: SlashContext,
     system_name_substring: str | None = None,
@@ -67,6 +68,7 @@ async def list_mining_maps(
                 inline=False,
             )
         embeds.append(embed)
+        raise ValueError("Boo")
 
     paginator = Paginator.create_from_embeds(ctx.client, *embeds)
     paginator.show_select_menu = True

@@ -1,6 +1,7 @@
 ---
 None: [None, FactionState_None_desc]
-Boom: [Boom, FactionState_Boom_desc, FactionState_boom_desc]  # We get the 'incorrect' lowercase 'boom' often enough.
+# We get the 'incorrect' lowercase 'boom' often enough.
+Boom: [Boom, FactionState_Boom_desc, FactionState_boom_desc]
 Bust: [Bust, FactionState_Bust_desc]
 Civil Liberty: [CivilLiberty, FactionState_CivilLiberty_desc]
 Civil Unrest: [CivilUnrest, FactionState_CivilUnrest_desc]

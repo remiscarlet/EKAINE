@@ -5,7 +5,11 @@ from interactions import Embed, OptionType, SlashContext, slash_option
 from tabulate import tabulate
 
 from ekaine.common.logging import get_logger
-from ekaine.interfaces.discord import ephemeral_option, send_error_embed
+from ekaine.interfaces.discord import (
+    discord_handler_wrapper,
+    ephemeral_option,
+    send_error_embed,
+)
 from ekaine.interfaces.discord.commands.trading import cmd_group
 from ekaine.postgresql.adapter import (
     ApiCommandAdapter,
@@ -36,6 +40,7 @@ logger = get_logger(__name__)
     opt_type=OptionType.INTEGER,
 )
 @ephemeral_option
+@discord_handler_wrapper()
 async def get_top_commodities(
     ctx: SlashContext,
     system_name: str,
