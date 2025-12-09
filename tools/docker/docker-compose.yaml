@@ -156,6 +156,7 @@ services:
   eddn:
     container_name: ekaine_eddn
     <<: *ekaine_app
+    restart: always
     environment:
       <<: *ekaine_envvars
       CONTAINER_NAME: ekaine_eddn

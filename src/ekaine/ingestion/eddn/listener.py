@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ekaine.common.logging import get_logger
+from ekaine.common.watchdog import WatchdogTimer
 from ekaine.ingestion.eddn import processors
 from ekaine.ingestion.eddn.schemas import get_schema_model_mapping
 from ekaine.postgresql import SessionLocalEkaine
@@ -86,43 +87,50 @@ def run_listener(session: Session) -> None:
 
     import_generated_models()
 
+    watchdog = WatchdogTimer(timeout_seconds=30.0, check_interval=10.0)
+    watchdog.start()
+
     print("Listening for messages...")
-    while True:
-        msg = sub.recv_multipart()
-        raw_json = zlib.decompress(msg[0])
-        d = json.loads(raw_json)
-        schema = d.get("$schemaRef")
-        if schema is None:
-            logger.warning("Could not find a valid $schemaRef field in decoded EDDN message!")
-            logger.warning(pformat(d))
-            continue
+    try:
+        while True:
+            msg = sub.recv_multipart()
+            raw_json = zlib.decompress(msg[0])
+            d = json.loads(raw_json)
+            schema = d.get("$schemaRef")
+            if schema is None:
+                logger.warning("Could not find a valid $schemaRef field in decoded EDDN message!")
+                logger.warning(pformat(d))
+                continue
 
-        try:
-            module = get_module_from_schema(schema)
-            obj = module.Model.model_validate(d)
-        except ValueError:
-            logger.error(traceback.format_exc())
-            logger.error(f"Got an unknown schema! '{schema}'")
-        except Exception:
-            logger.error(traceback.format_exc())
-            logger.error(pformat(d))
-            continue
-
-        obj_type = type(obj)
-        if issubclass(obj_type, BaseModel) and obj_type in processor_mapping:
             try:
-                event = d.get("message", {}).get("event")
-                if "InnerRad" in raw_json.decode("utf8"):
-                    logger.info("\n")
-                    logger.info("RING RING RING")
-                    logger.info(obj.message.event.value)
-                    logger.info(d)
-                if event not in ["Scan", "FSDJump", "Docked"]:
-                    logger.trace("\n")
-                    logger.trace(d)
-                processor_mapping[obj_type](session, obj)
+                module = get_module_from_schema(schema)
+                obj = module.Model.model_validate(d)
+            except ValueError:
+                logger.error(traceback.format_exc())
+                logger.error(f"Got an unknown schema! '{schema}'")
             except Exception:
                 logger.error(traceback.format_exc())
+                logger.error(pformat(d))
+                continue
+
+            obj_type = type(obj)
+            if issubclass(obj_type, BaseModel) and obj_type in processor_mapping:
+                try:
+                    event = d.get("message", {}).get("event")
+                    if "InnerRad" in raw_json.decode("utf8"):
+                        logger.info("\n")
+                        logger.info("RING RING RING")
+                        logger.info(obj.message.event.value)
+                        logger.info(d)
+                    if event not in ["Scan", "FSDJump", "Docked"]:
+                        logger.trace("\n")
+                        logger.trace(d)
+                    processor_mapping[obj_type](session, obj)
+                except Exception:
+                    logger.error(traceback.format_exc())
+            watchdog.heartbeat()
+    finally:
+        watchdog.stop()
 
 
 def main() -> None:
